@@ -52,6 +52,7 @@ Phase 5: Final Security Review
 |---------|-------------|
 | `/team` | Interactive mode — user participates in planning phase |
 | `/team-run` | Autonomous mode — full auto-execution |
+| `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
 
 ## Installation
 
@@ -117,6 +118,7 @@ Skills that agents reference during their workflow phases:
 | `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
 | `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
+| `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) |
 
 ## File Structure
 
@@ -132,7 +134,8 @@ Skills that agents reference during their workflow phases:
 │   └── team-tester.md          # Test verification
 ├── commands/
 │   ├── team.md                  # /team (interactive)
-│   └── team-run.md             # /team-run (autonomous)
+│   ├── team-run.md             # /team-run (autonomous)
+│   └── team-brainstorm.md      # /team-brainstorm (planning only)
 └── skills/
     ├── team-workflow/           # Core orchestration
     │   ├── SKILL.md
@@ -146,7 +149,8 @@ Skills that agents reference during their workflow phases:
     ├── debug/SKILL.md           # Phase 3-4: debugging
     ├── e2e-testing/SKILL.md     # Phase 4: E2E patterns
     ├── verification-loop/SKILL.md # Phase 4-5: quality gate
-    └── security-review/SKILL.md # Phase 5: security audit
+    ├── security-review/SKILL.md # Phase 5: security audit
+    └── plan-visualizer/SKILL.md # HTML plan diagram
 ```
 
 ## License

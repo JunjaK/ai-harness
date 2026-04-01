@@ -28,7 +28,10 @@ If no task description provided, ask the user for one.
    - If UI/UX changes identified, spawn UI/UX Master
 4. **Leader Approval Gate**:
    - Leader reviews and approves/rejects
-5. **Phase 3 — Implementation** (autonomous):
+5. **Visualize plan** — Generate HTML diagram using `plan-visualizer` skill
+   - Save to `_docs/{category}/plan-{feature}.visual.html` (same dir as plan .md)
+   - Add `[View Plan Diagram](./plan-{feature}.visual.html)` link in plan .md
+6. **Phase 3 — Implementation** (autonomous):
    - Spawn Designer x N in parallel worktrees with TDD enforcement
    - Merge all worktrees after completion
 6. **Phase 4 — Verification** (autonomous):
@@ -58,4 +61,6 @@ Tests: [pass count] pass, 0 fail
 
 ## Related
 - `/team-run` — Autonomous mode (no user involvement)
+- `/team-brainstorm` — Planning only mode (no implementation)
 - `team-workflow` skill — Full orchestration logic
+- `plan-visualizer` skill — HTML diagram generation
