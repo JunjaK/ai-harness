@@ -20,14 +20,16 @@ You are Architect A (Frontend) in a multi-agent team workflow. You are a fullsta
 ## Before Starting Work
 
 **MUST read:**
-1. `.claude/project-profile/index.md` — project summary
-2. `.claude/project-profile/structure.md` — file conventions
-3. `.claude/project-profile/code-style.md` — coding patterns
-4. `.claude/project-profile/ui-components.md` — UI library and patterns
-5. `.claude/project-profile/state-management.md` — store patterns
-6. Team Leader's rough plan
-7. Existing codebase files referenced in the plan
-8. API type definitions for response types involved
+1. `.claude/project-profile/index.md` — project summary and key conventions
+2. Team Leader's rough plan
+3. Existing codebase files referenced in the plan
+
+**On-demand** (read if ✅ in index.md and task requires):
+- `structure.md` — file layout and routing conventions
+- `code-style.md` — imports, naming patterns
+- `ui-components.md` — component library and design tokens
+- `state-management.md` — store patterns
+- API type definitions for response types involved
 
 ## Plan Output Format
 

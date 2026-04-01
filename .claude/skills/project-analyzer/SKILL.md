@@ -306,20 +306,35 @@ Compile a summary referencing all profile files:
 - **CI/CD**: [platform]
 
 ## Profile Files
-| File | Contents |
-|------|----------|
-| [stack.md](./stack.md) | Runtime, framework, dependencies, build commands |
-| [structure.md](./structure.md) | Directory layout, routing, naming conventions |
-| [code-style.md](./code-style.md) | Formatting, imports, naming patterns |
-| [api-layer.md](./api-layer.md) | API client, auth, error handling |
-| [state-management.md](./state-management.md) | Store patterns, reactivity rules |
-| [testing.md](./testing.md) | Test frameworks, commands, patterns |
-| [ui-components.md](./ui-components.md) | Component library, icons, design tokens |
-| [deployment.md](./deployment.md) | CI/CD, environments, build output |
+
+Relevance: REQUIRED (always read) > HIGH (read if related) > MEDIUM (optional) > SKIPPED (not applicable)
+
+| File | Relevance | Status | Contents |
+|------|-----------|--------|----------|
+| [stack.md](./stack.md) | REQUIRED | ✅/⏭️ | Runtime, framework, dependencies, build |
+| [structure.md](./structure.md) | REQUIRED | ✅/⏭️ | Directory layout, routing, naming |
+| [code-style.md](./code-style.md) | HIGH | ✅/⏭️ | Formatting, imports, naming patterns |
+| [api-layer.md](./api-layer.md) | HIGH | ✅/⏭️ | API client, auth, error handling |
+| [state-management.md](./state-management.md) | MEDIUM | ✅/⏭️ | Store patterns, reactivity rules |
+| [testing.md](./testing.md) | HIGH | ✅/⏭️ | Test frameworks, commands, patterns |
+| [ui-components.md](./ui-components.md) | MEDIUM | ✅/⏭️ | Component library, icons, tokens |
+| [deployment.md](./deployment.md) | MEDIUM | ✅/⏭️ | CI/CD, environments, build output |
 
 ## Key Conventions for Agents
-[Top 5-10 most important conventions that agents must follow,
- extracted from the detailed profile files above]
+[Top 5-10 most important conventions that agents MUST follow.
+ This section is the minimum context an agent needs to produce
+ correct code for this project. Extracted from detail files above.]
+
+1. [convention]
+2. [convention]
+...
+
+## Agent Loading Guide
+- **All agents**: Read this `index.md` (REQUIRED)
+- **Read additional files only when**:
+  - File relevance is REQUIRED or HIGH for your role
+  - Your task touches that domain
+  - File status is ✅ (not ⏭️ Skipped)
 ```
 
 ## Update Mode (`/team-init --update`)
@@ -348,11 +363,34 @@ When updating an existing profile:
    - Designer → `code-style.md` + `state-management.md` + `testing.md`
    - Tester → `testing.md` + `structure.md`
 
+### Important: Profile Files Are Best-Practice Defaults
+
+The 8 profile files (stack, structure, code-style, api-layer, state-management, testing, ui-components, deployment) represent a **best-practice template**. Not all projects will have all sections:
+
+- A pure frontend SPA may have no `deployment.md`
+- A utility library may skip `ui-components.md` and `state-management.md`
+- A backend-only project may skip `ui-components.md`
+
+During analysis, **only generate files that are relevant** to the project. Mark skipped files in `index.md`:
+
+```markdown
+## Profile Files
+| File | Relevance | Status |
+|------|-----------|--------|
+| stack.md | REQUIRED | ✅ Generated |
+| structure.md | REQUIRED | ✅ Generated |
+| code-style.md | HIGH | ✅ Generated |
+| api-layer.md | HIGH | ✅ Generated |
+| state-management.md | MEDIUM | ⏭️ Skipped (no state library detected) |
+| testing.md | HIGH | ✅ Generated |
+| ui-components.md | LOW | ⏭️ Skipped (backend-only project) |
+| deployment.md | MEDIUM | ✅ Generated |
+```
+
 ### Adaptation Rules
 Agents MUST:
-- Use the project's import patterns (alias paths, ordering)
-- Follow the project's naming conventions (files, variables, functions)
-- Use the project's API call patterns (not invent new ones)
-- Use the project's store patterns (not mix different approaches)
-- Use the project's test patterns (location, naming, mock style)
-- Use the project's UI component library (not introduce alternatives)
+- **Read `index.md` first** — this is the ONLY required file
+- Load additional profile files **on-demand** based on `index.md` relevance column
+- Skip files marked as "Skipped" — don't assume they should exist
+- Use the project's patterns (imports, naming, API calls, stores, tests, UI)
+- If a profile file doesn't exist, fall back to general best practices

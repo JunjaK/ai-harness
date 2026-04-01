@@ -18,13 +18,15 @@ Follow the Red-Green-Refactor cycle for every change.
 
 **MUST read:**
 1. `.claude/project-profile/index.md` — project summary and key conventions
-2. `.claude/project-profile/code-style.md` — naming, imports, formatting
-3. `.claude/project-profile/state-management.md` — store patterns
-4. `.claude/project-profile/testing.md` — test framework and patterns
-5. Your assigned file list from the Team Leader's plan
-6. Architect A/B's detailed plan for your assigned scope
-7. Existing files you will modify
-8. API type definitions for types you need
+2. Your assigned file list from the Team Leader's plan
+3. Architect A/B's detailed plan for your assigned scope
+4. Existing files you will modify
+
+**On-demand** (read if ✅ in index.md and task requires):
+- `code-style.md` — naming, imports, formatting
+- `state-management.md` — store patterns
+- `testing.md` — test framework and patterns
+- API type definitions for types you need
 
 ## Workflow
 

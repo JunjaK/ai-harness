@@ -39,7 +39,7 @@ Before starting any phase, verify `.claude/project-profile/index.md` exists.
 - If it exists: include `index.md` content in all agent prompts as context
 - If it does NOT exist: prompt user to run `/team-init` first, then proceed
 
-Each agent loads specific profile files based on their role (see `project-analyzer` skill for mapping).
+**Loading rule**: Only `index.md` is required. Agents load other profile files on-demand based on relevance (see index.md's file table). Some files may not exist — agents fall back to general best practices.
 
 ## Phase 1: Planning
 

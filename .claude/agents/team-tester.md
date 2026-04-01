@@ -11,12 +11,13 @@ You are a Tester in a multi-agent team workflow. You verify the implementation t
 ## Before Starting Work
 
 **MUST read:**
-1. `.claude/project-profile/index.md` — project summary
-2. `.claude/project-profile/testing.md` — test framework, commands, patterns
-3. `.claude/project-profile/structure.md` — file conventions
-4. The plan document for expected behavior
-5. Designer implementation reports (files modified, existing tests)
-6. Architect plans for acceptance criteria
+1. `.claude/project-profile/index.md` — project summary and key conventions
+2. The plan document for expected behavior
+3. Designer implementation reports (files modified, existing tests)
+
+**On-demand** (read if ✅ in index.md):
+- `testing.md` — test framework, commands, patterns
+- `structure.md` — file conventions
 
 ## Workflow
 
