@@ -103,6 +103,21 @@ Always update `_docs/index.md` when adding new plans. To customize the path, mod
 - `team-leader.md` (plan output section)
 - `SKILL.md` (Phase 1 Step 5, Phase 3/4/5 update steps)
 
+## Supporting Skills
+
+Skills that agents reference during their workflow phases:
+
+| Skill | Phase | Purpose |
+|-------|-------|---------|
+| `plan-review` | Phase 1 | Critical review of plans before implementation |
+| `api-design` | Phase 1 | REST API design patterns for Architect B |
+| `coding-standards` | Phase 3 | Universal code quality baseline for Designers |
+| `tdd-workflow` | Phase 3 | Red-Green-Refactor TDD cycle |
+| `debug` | Phase 3-4 | Structured debugging during escalation |
+| `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
+| `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
+| `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
+
 ## File Structure
 
 ```
@@ -119,11 +134,19 @@ Always update `_docs/index.md` when adding new plans. To customize the path, mod
 │   ├── team.md                  # /team (interactive)
 │   └── team-run.md             # /team-run (autonomous)
 └── skills/
-    └── team-workflow/
-        ├── SKILL.md             # Orchestration logic
-        └── resources/
-            ├── agents.md        # Role quick reference
-            └── escalation.md   # Escalation rules
+    ├── team-workflow/           # Core orchestration
+    │   ├── SKILL.md
+    │   └── resources/
+    │       ├── agents.md
+    │       └── escalation.md
+    ├── plan-review/SKILL.md     # Phase 1: plan critique
+    ├── api-design/SKILL.md      # Phase 1: API patterns
+    ├── coding-standards/SKILL.md # Phase 3: code quality
+    ├── tdd-workflow/SKILL.md    # Phase 3: TDD cycle
+    ├── debug/SKILL.md           # Phase 3-4: debugging
+    ├── e2e-testing/SKILL.md     # Phase 4: E2E patterns
+    ├── verification-loop/SKILL.md # Phase 4-5: quality gate
+    └── security-review/SKILL.md # Phase 5: security audit
 ```
 
 ## License
