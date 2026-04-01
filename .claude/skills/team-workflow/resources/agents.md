@@ -7,7 +7,7 @@
 | Architect B (BE) | `team-architect-be` | opus | Phase 1 (parallel with A) |
 | Architect C (Infra) | `team-architect-infra` | opus | Phase 1 (on-demand) + Phase 5 (always) |
 | UI/UX Master | `team-uiux-master` | sonnet | Phase 2 (conditional) |
-| Designer x N | `team-designer` | sonnet | Phase 3 (parallel, worktree isolated) |
+| Designer x N | `team-designer` | opus | Phase 3 (parallel, worktree isolated) |
 | Tester x N | `team-tester` | sonnet | Phase 4 (parallel) |
 
 ## Agent Invocation

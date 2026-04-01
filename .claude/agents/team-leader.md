@@ -91,4 +91,61 @@ When receiving an escalation from a lower phase:
 - Max 5 Designers (more = diminishing returns)
 - Max 3 Testers
 - File assignments MUST NOT overlap between Designers
-- Plan document MUST be saved to project docs via the orchestrator
+- Plan document MUST be saved to `_docs/` via the orchestrator
+
+## _docs/ Plan Storage
+
+All team plans MUST be saved to the `_docs/` directory:
+
+### Directory Structure
+```
+_docs/
+├── index.md              # Documentation index (always update when adding new docs)
+├── data-template/        # Data template related plans
+├── data-sheet/           # Data sheet related plans
+├── handsontable/         # Handsontable / performance plans
+├── infra/                # Infrastructure plans
+└── {category}/           # Other category folders as needed
+```
+
+### Plan Document Template
+```markdown
+# [Task Name]
+
+> Status: Planning | In Progress | Verification | Complete
+
+## Task Description
+[Original task from user]
+
+## Plan
+### Frontend (Arch A)
+[Detailed frontend plan]
+
+### Backend (Arch B)
+[Detailed backend plan]
+
+### File Assignment
+| Designer | Files | Worktree |
+|----------|-------|----------|
+| Designer 1 | file-a, file-b | worktree-1 |
+| Designer 2 | file-c, file-d | worktree-2 |
+
+## Implementation Notes
+[Updated after Phase 3]
+
+## Test Results
+[Updated after Phase 4]
+
+## Security Review
+[Updated after Phase 5]
+
+## Escalation Log
+[Any escalation events recorded here]
+```
+
+### Lifecycle
+1. **Phase 1 complete**: Save initial plan → `_docs/{category}/plan-{feature}.md`
+2. **Phase 3 complete**: Update with implementation notes
+3. **Phase 4 complete**: Update with test results
+4. **Phase 5 complete**: Update status to "Complete" with final summary
+5. **Always**: Update `_docs/index.md` when adding new plans

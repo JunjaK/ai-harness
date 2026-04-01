@@ -63,9 +63,20 @@ If Leader flagged infra/security concerns, spawn Architect C:
 Agent(prompt="[team-architect-infra.md content]\n\nPlan:\n[consolidated plan]\n\nReview for infra/security concerns.")
 ```
 
-### Step 5: Save Plan
+### Step 5: Save Plan to _docs/
 
-Write the consolidated plan to project docs directory.
+Write the consolidated plan to `_docs/{category}/plan-{feature}.md`.
+Update `_docs/index.md` with the new entry.
+
+```
+_docs/
+├── index.md              # Always update this
+├── {category}/
+│   └── plan-{feature}.md # Team plan document
+```
+
+The plan document follows the template defined in `team-leader.md` (Plan Document Template section).
+Status starts as "Planning" and progresses through "In Progress" → "Verification" → "Complete".
 
 ## Phase 2: UI/UX (Conditional)
 
@@ -112,9 +123,9 @@ Agent(
 3. Resolve any conflicts
 4. Commit merged result
 
-### Step 4: Update Docs
+### Step 4: Update _docs/
 
-Update the plan document with implementation notes.
+Update `_docs/{category}/plan-{feature}.md` with implementation notes. Set status to "In Progress".
 
 ## Phase 4: Verification
 
@@ -129,7 +140,7 @@ Agent(
 
 ### Step 2: Collect Results
 
-If all tests pass → proceed to Phase 5.
+If all tests pass → update `_docs/` plan with test results, set status to "Verification" → proceed to Phase 5.
 If failures → check escalation rules (resources/escalation.md).
 
 ## Phase 5: Final Security Review
@@ -143,7 +154,7 @@ Agent(
 )
 ```
 
-- SHIP → mark plan as Complete, report success
+- SHIP → update `_docs/` plan status to "Complete" with final summary, report success to user
 - Issues found → escalate per escalation rules
 
 ## Escalation Handling

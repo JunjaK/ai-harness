@@ -1,7 +1,7 @@
 ---
 name: team-designer
 description: "TDD-based code developer — implements features following Red-Green-Refactor cycle in isolated worktrees"
-model: sonnet
+model: opus
 ---
 
 # Role

@@ -15,7 +15,7 @@ This harness provides a structured team workflow where specialized AI agents col
 | Architect B (Backend) | `team-architect-be` | opus | Phase 1 (parallel with A) |
 | Architect C (Infra/Security) | `team-architect-infra` | opus | Phase 1 (on-demand) + Phase 5 (always) |
 | UI/UX Master | `team-uiux-master` | sonnet | Phase 2 (conditional) |
-| Designer x N | `team-designer` | sonnet | Phase 3 (parallel, worktree isolated) |
+| Designer x N | `team-designer` | opus | Phase 3 (parallel, worktree isolated) |
 | Tester x N | `team-tester` | sonnet | Phase 4 (parallel) |
 
 ### Workflow Phases
@@ -79,11 +79,29 @@ The agents are framework-agnostic by default. To specialize for your project:
 4. **team-designer.md** — Add your test framework and TDD patterns
 5. **team-tester.md** — Add your test runner commands and E2E setup
 
-### Plan Storage
+### Plan Storage (`_docs/`)
 
-By default, plans are saved to `_docs/`. Change this path in:
+Team plans are saved to the `_docs/` directory with the following structure:
+
+```
+_docs/
+├── index.md              # Documentation index (always updated)
+├── data-template/        # Category folder
+├── data-sheet/           # Category folder
+├── infra/                # Category folder
+└── {category}/           # Add folders as needed
+    └── plan-{feature}.md # Team plan document
+```
+
+**Plan lifecycle:**
+1. Phase 1 complete → save plan to `_docs/{category}/plan-{feature}.md` (status: Planning)
+2. Phase 3 complete → update with implementation notes (status: In Progress)
+3. Phase 4 complete → update with test results (status: Verification)
+4. Phase 5 complete → update with final summary (status: Complete)
+
+Always update `_docs/index.md` when adding new plans. To customize the path, modify:
 - `team-leader.md` (plan output section)
-- `SKILL.md` (Phase 1 Step 5, Phase 3/4 update steps)
+- `SKILL.md` (Phase 1 Step 5, Phase 3/4/5 update steps)
 
 ## File Structure
 
