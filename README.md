@@ -50,23 +50,29 @@ Phase 5: Final Security Review
 
 | Command | Description |
 |---------|-------------|
+| `/team-init` | Analyze project → generate profile (run first!) |
 | `/team` | Interactive mode — user participates in planning phase |
 | `/team-run` | Autonomous mode — full auto-execution |
 | `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
 
-## Installation
-
-Copy the `.claude/` directory into your project root:
+## Quick Start
 
 ```bash
-# Clone this repo
+# 1. Clone this repo
 git clone https://github.com/JunjaK/ai-harness.git
 
-# Copy .claude/ into your project
+# 2. Copy .claude/ and CLAUDE.md into your project
 cp -r ai-harness/.claude/ /path/to/your/project/
+cp ai-harness/CLAUDE.md /path/to/your/project/
+
+# 3. Run project analysis (in Claude Code)
+/team-init
+
+# 4. Start working
+/team "Add user authentication"
 ```
 
-Then customize the agent definitions to match your project's stack and conventions.
+`/team-init` scans your project and generates `.claude/project-profile/` — all agents automatically adapt to your stack and conventions.
 
 ## Customization
 
@@ -119,6 +125,7 @@ Skills that agents reference during their workflow phases:
 | `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
 | `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) |
+| `project-analyzer` | Setup | Project structure analysis → profile generation |
 
 ## File Structure
 
@@ -133,6 +140,7 @@ Skills that agents reference during their workflow phases:
 │   ├── team-designer.md        # TDD implementation
 │   └── team-tester.md          # Test verification
 ├── commands/
+│   ├── team-init.md             # /team-init (project analysis)
 │   ├── team.md                  # /team (interactive)
 │   ├── team-run.md             # /team-run (autonomous)
 │   └── team-brainstorm.md      # /team-brainstorm (planning only)
@@ -150,7 +158,8 @@ Skills that agents reference during their workflow phases:
     ├── e2e-testing/SKILL.md     # Phase 4: E2E patterns
     ├── verification-loop/SKILL.md # Phase 4-5: quality gate
     ├── security-review/SKILL.md # Phase 5: security audit
-    └── plan-visualizer/SKILL.md # HTML plan diagram
+    ├── plan-visualizer/SKILL.md # HTML plan diagram
+    └── project-analyzer/SKILL.md # Project analysis
 ```
 
 ## License

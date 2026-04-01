@@ -20,10 +20,12 @@ You are Architect B (Backend) in a multi-agent team workflow. You are a fullstac
 ## Before Starting Work
 
 **MUST read:**
-1. Team Leader's rough plan
-2. Database schema documentation (if available)
-3. Existing API type definitions
-4. Relevant project documentation
+1. `.claude/project-profile/index.md` — project summary
+2. `.claude/project-profile/api-layer.md` — API patterns and auth
+3. `.claude/project-profile/structure.md` — file conventions
+4. Team Leader's rough plan
+5. Database schema documentation (if available)
+6. Existing API type definitions
 
 ## Plan Output Format
 

@@ -33,11 +33,20 @@ graph TD
   ESC --> P1
 ```
 
+## Pre-Flight: Project Profile Check
+
+Before starting any phase, verify `.claude/project-profile/index.md` exists.
+- If it exists: include `index.md` content in all agent prompts as context
+- If it does NOT exist: prompt user to run `/team-init` first, then proceed
+
+Each agent loads specific profile files based on their role (see `project-analyzer` skill for mapping).
+
 ## Phase 1: Planning
 
 ### Step 1: Spawn Team Leader
 
 Read `.claude/agents/team-leader.md` and spawn with the task description.
+Include `.claude/project-profile/index.md` content in the prompt.
 
 For `/team` mode: Include instruction "Ask the user about ambiguous decisions."
 For `/team-run` mode: Include instruction "Make all decisions autonomously."

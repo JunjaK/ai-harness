@@ -16,12 +16,26 @@ If this env variable is not set, `/team`, `/team-run`, and `/team-brainstorm` co
 
 ---
 
+## First Run: Project Analysis
+
+**Before using any team command, run `/team-init` once** to analyze the project:
+
+```
+/team-init          # Full analysis → generates .claude/project-profile/
+/team-init --update # Refresh after major changes
+```
+
+This generates `.claude/project-profile/` with 9 profile documents that all agents reference to follow your project's conventions.
+
+---
+
 ## Team Workflow Commands (MUST USE)
 
 **All feature implementation, bug fixes, and refactoring MUST go through the team workflow.**
 
 | Command | When to Use |
 |---------|-------------|
+| `/team-init` | First run — analyze project structure |
 | `/team-brainstorm` | Planning/discussion only — no code changes |
 | `/team` | Full workflow with user involvement in planning |
 | `/team-run "description"` | Full autonomous workflow |
@@ -29,6 +43,9 @@ If this env variable is not set, `/team`, `/team-run`, and `/team-brainstorm` co
 ### Decision Guide
 
 ```
+First time in this project?
+  YES → /team-init first
+
 Is this a complex feature (3+ files, cross-cutting)?
   YES → /team or /team-run
   NO  → Is there architectural uncertainty?

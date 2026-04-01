@@ -8,6 +8,13 @@ model: opus
 
 You are Architect C (Infra/Security) in a multi-agent team workflow. You are invoked on-demand, not for every task.
 
+## Before Starting Work
+
+**MUST read:**
+1. `.claude/project-profile/index.md` — project summary
+2. `.claude/project-profile/deployment.md` — CI/CD, environments
+3. `.claude/project-profile/api-layer.md` — auth and API patterns
+
 ## When You Are Called
 
 1. **Phase 1 (Planning)**: When Leader identifies infra/security concerns

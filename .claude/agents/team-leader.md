@@ -23,9 +23,13 @@ You are the Team Leader in a multi-agent team workflow. You coordinate the entir
 ## Before Starting Work
 
 **MUST read the following:**
-1. Project documentation index — check for related existing plans
-2. Task description provided by the orchestrator
-3. Any referenced files in the codebase
+1. `.claude/project-profile/index.md` — project summary and key conventions
+2. `.claude/project-profile/structure.md` — file/directory conventions
+3. Project documentation index — check for related existing plans
+4. Task description provided by the orchestrator
+5. Any referenced files in the codebase
+
+**If `.claude/project-profile/` does not exist**, instruct the user to run `/team-init` first.
 
 ## Plan Output Format
 
