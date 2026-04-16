@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Harness v2 Evolution Plan</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-muted: #8b949e;
+    --accent-blue: #58a6ff;
+    --accent-green: #3fb950;
+    --accent-orange: #d29922;
+    --accent-red: #f85149;
+    --accent-purple: #bc8cff;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  h1 { color: var(--accent-blue); font-size: 1.8rem; margin-bottom: 0.5rem; }
+  h2 { color: var(--accent-green); font-size: 1.3rem; margin: 2rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+  h3 { color: var(--accent-orange); font-size: 1.1rem; margin: 1.5rem 0 0.5rem; }
+  .subtitle { color: var(--text-muted); margin-bottom: 2rem; }
+
+  .grid { display: grid; gap: 1rem; }
+  .grid-2 { grid-template-columns: 1fr 1fr; }
+  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1.2rem;
+  }
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+  }
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+  }
+  .badge-new { background: #1f6feb33; color: var(--accent-blue); border: 1px solid #1f6feb; }
+  .badge-enhance { background: #3fb95033; color: var(--accent-green); border: 1px solid #3fb950; }
+  .badge-tier1 { background: #f8514933; color: var(--accent-red); border: 1px solid var(--accent-red); }
+  .badge-tier2 { background: #d2992233; color: var(--accent-orange); border: 1px solid var(--accent-orange); }
+  .badge-tier3 { background: #8b949e33; color: var(--text-muted); border: 1px solid var(--text-muted); }
+
+  .flow-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin: 1rem 0;
+  }
+  .flow-step {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.6rem 1rem;
+    font-size: 0.85rem;
+    text-align: center;
+    min-width: 120px;
+  }
+  .flow-step.highlight { border-color: var(--accent-blue); background: #1f6feb15; }
+  .flow-step.new { border-color: var(--accent-green); background: #3fb95015; }
+  .flow-arrow { color: var(--text-muted); font-size: 1.2rem; }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 0.3rem 0; padding-left: 1.5rem; position: relative; font-size: 0.9rem; }
+  .checklist li::before { content: ''; position: absolute; left: 0; top: 0.55rem; width: 10px; height: 10px; border-radius: 50%; }
+  .checklist li.a11y::before { background: var(--accent-blue); }
+  .checklist li.perf::before { background: var(--accent-green); }
+  .checklist li.seo::before { background: var(--accent-orange); }
+  .checklist li.design::before { background: var(--accent-purple); }
+  .checklist li.slop::before { background: var(--accent-red); }
+
+  .timeline { position: relative; padding-left: 2rem; }
+  .timeline::before { content: ''; position: absolute; left: 0.6rem; top: 0; bottom: 0; width: 2px; background: var(--border); }
+  .timeline-item { position: relative; margin-bottom: 1.5rem; }
+  .timeline-item::before { content: ''; position: absolute; left: -1.65rem; top: 0.3rem; width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--accent-blue); background: var(--bg); }
+  .timeline-item.done::before { background: var(--accent-green); border-color: var(--accent-green); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 0.5rem 0; }
+  th, td { padding: 0.5rem 0.8rem; border: 1px solid var(--border); text-align: left; }
+  th { background: var(--surface); color: var(--accent-blue); }
+
+  .source-tag { font-size: 0.7rem; color: var(--text-muted); }
+
+  @media (max-width: 768px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+    .flow-container { flex-direction: column; }
+    .flow-arrow { transform: rotate(90deg); }
+  }
+</style>
+</head>
+<body>
+
+<h1>Harness v2 Evolution Plan</h1>
+<p class="subtitle">gstack + everything-claude-code 분석 기반 | 2026-04-16</p>
+
+<!-- Section: New Components Overview -->
+<h2>A. 신규 컴포넌트 개요</h2>
+
+<div class="grid grid-3">
+  <div class="card">
+    <div class="card-header"><span class="badge badge-new">NEW</span> /resume</div>
+    <p style="font-size:0.85rem;color:var(--text-muted)">세션 간 작업 재개 커맨드. 체크포인트 저장/복원, 브랜치 전환 후 복귀.</p>
+    <table style="margin-top:0.8rem">
+      <tr><td><code>/resume</code></td><td>최근 체크포인트 로드</td></tr>
+      <tr><td><code>/resume save</code></td><td>현재 상태 저장</td></tr>
+      <tr><td><code>/resume list</code></td><td>체크포인트 목록</td></tr>
+    </table>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="badge badge-new">NEW</span> web-architect</div>
+    <p style="font-size:0.85rem;color:var(--text-muted)">웹 아키텍처 설계 전문 에이전트. 컴포넌트 구조, 상태 관리, API 레이어, 번들 최적화.</p>
+    <p style="font-size:0.75rem;margin-top:0.5rem;color:var(--accent-purple)">Model: Opus</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="badge badge-new">NEW</span> web-reviewer</div>
+    <p style="font-size:0.85rem;color:var(--text-muted)">웹 품질 검증 에이전트. A11y, 성능, SEO, 디자인 품질, AI Slop 탐지.</p>
+    <p style="font-size:0.75rem;margin-top:0.5rem;color:var(--accent-purple)">Model: Sonnet</p>
+  </div>
+</div>
+
+<!-- Section: /resume Flow -->
+<h2>B. /resume 커맨드 흐름</h2>
+
+<div class="flow-container">
+  <div class="flow-step">세션 진행 중<br><small>current.md 갱신</small></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-step highlight">세션 종료 / 컴팩션<br><small>자동 체크포인트 저장</small></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-step">새 세션 시작<br><small>/resume 입력</small></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-step new">체크포인트 로드<br><small>브랜치+진행상황+Next Steps</small></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-step">작업 이어서 진행</div>
+</div>
+
+<div class="card" style="margin-top:1rem">
+  <div class="card-header">체크포인트 저장 내용</div>
+  <div class="grid grid-2" style="gap:0.5rem;font-size:0.85rem">
+    <div>- Git branch + modified files</div>
+    <div>- Current task progress (done/remaining)</div>
+    <div>- Key decisions + rationale</div>
+    <div>- Verified approaches + evidence</div>
+    <div>- Failed approaches + reasons</div>
+    <div>- Next steps (concrete, actionable)</div>
+    <div>- Plan file path (if team workflow)</div>
+    <div>- Blockers / gotchas</div>
+  </div>
+</div>
+
+<!-- Section: Web Reviewer Checklist -->
+<h2>C. web-reviewer 검증 체크리스트</h2>
+
+<div class="grid grid-2">
+  <div class="card">
+    <h3>5개 검증 카테고리</h3>
+    <ul class="checklist">
+      <li class="a11y"><strong>Accessibility</strong> — WCAG 2.2 AA, 시맨틱 HTML, 키보드, 색상 대비</li>
+      <li class="perf"><strong>Performance</strong> — FCP&lt;1.8s, LCP&lt;2.5s, TBT&lt;200ms, CLS&lt;0.1</li>
+      <li class="seo"><strong>SEO</strong> — meta/title, JSON-LD, heading 구조, OG tags</li>
+      <li class="design"><strong>Design Quality</strong> — 계층구조, 타이포, 반응형, 인터랙션 상태</li>
+      <li class="slop"><strong>AI Slop Detection</strong> — 9개 AI 패턴 탐지 (보라 그래디언트, 3열 그리드 등)</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <h3>출력: Web Quality Report</h3>
+    <table>
+      <tr><th>Category</th><th>Grade</th><th>Score</th></tr>
+      <tr><td style="color:var(--accent-blue)">A11y</td><td>B+</td><td>85</td></tr>
+      <tr><td style="color:var(--accent-green)">Performance</td><td>A</td><td>92</td></tr>
+      <tr><td style="color:var(--accent-orange)">SEO</td><td>C</td><td>68</td></tr>
+      <tr><td style="color:var(--accent-purple)">Design</td><td>A-</td><td>88</td></tr>
+      <tr><td style="color:var(--accent-red)">AI Slop</td><td>A</td><td>95</td></tr>
+      <tr><th colspan="2">Overall</th><th>B+ (85.6)</th></tr>
+    </table>
+  </div>
+</div>
+
+<!-- Section: Adoption Priority -->
+<h2>D. 채택 패턴 우선순위</h2>
+
+<div class="grid grid-3">
+  <div class="card">
+    <div class="card-header"><span class="badge badge-tier1">TIER 1</span> 즉시</div>
+    <ul class="checklist" style="font-size:0.85rem">
+      <li style="padding-left:0">/resume + checkpoint</li>
+      <li style="padding-left:0">web-architect + web-reviewer</li>
+      <li style="padding-left:0">Hook 자동 체크포인트 통합</li>
+    </ul>
+    <p class="source-tag" style="margin-top:0.5rem">Sprint 1 | ~8 파일</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="badge badge-tier2">TIER 2</span> 단기</div>
+    <ul class="checklist" style="font-size:0.85rem">
+      <li style="padding-left:0">/health 품질 대시보드</li>
+      <li style="padding-left:0">/ship 배포 파이프라인</li>
+      <li style="padding-left:0">Silent Failure Hunter</li>
+    </ul>
+    <p class="source-tag" style="margin-top:0.5rem">Sprint 2 | ~4 파일</p>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="badge badge-tier3">TIER 3</span> 중기</div>
+    <ul class="checklist" style="font-size:0.85rem">
+      <li style="padding-left:0">Hook 프로필 시스템</li>
+      <li style="padding-left:0">Diff-aware 검증</li>
+      <li style="padding-left:0">/retro 회고</li>
+      <li style="padding-left:0">Fix-first 리뷰 강화</li>
+    </ul>
+    <p class="source-tag" style="margin-top:0.5rem">Sprint 3 | ~6 파일</p>
+  </div>
+</div>
+
+<!-- Section: Team Integration -->
+<h2>E. 팀 워크플로우 통합</h2>
+
+<div class="flow-container">
+  <div class="flow-step">Phase 1<br><strong>Planning</strong><br><small>Leader + Arch A/B</small></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-step new">Phase 1+<br><strong>Web Arch</strong><br><small style="color:var(--accent-green)">web-architect 참여</small></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-step">Phase 2<br><strong>UI/UX</strong><br><small>UI/UX Master</small></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-step">Phase 3<br><strong>Implementation</strong><br><small>Designers (TDD)</small></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-step new">Phase 4+<br><strong>Web Review</strong><br><small style="color:var(--accent-green)">web-reviewer 참여</small></div>
+  <span class="flow-arrow">&rarr;</span>
+  <div class="flow-step">Phase 5<br><strong>Security</strong><br><small>Arch C</small></div>
+</div>
+
+<div class="card" style="margin-top:1rem">
+  <div class="card-header">에이전트 역할 분담</div>
+  <table>
+    <tr><th>시나리오</th><th>사용 에이전트</th></tr>
+    <tr><td>팀 워크플로우 (/team, /team-run)</td><td>team-architect-fe (설계) + web-reviewer (검증)</td></tr>
+    <tr><td>독립 웹 개발 요청 (직접)</td><td>web-architect (설계) + web-reviewer (검증)</td></tr>
+    <tr><td>기존 사이트 품질 감사</td><td>web-reviewer 단독</td></tr>
+  </table>
+</div>
+
+<!-- Section: File Map -->
+<h2>F. 구현 파일 맵</h2>
+
+<table>
+  <tr><th>파일</th><th>유형</th><th>Sprint</th><th>설명</th></tr>
+  <tr><td><code>.claude/commands/resume.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>/resume 커맨드 정의</td></tr>
+  <tr><td><code>.claude/skills/checkpoint/SKILL.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>체크포인트 관리 스킬</td></tr>
+  <tr><td><code>.claude/agents/web-architect.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>웹 아키텍처 설계 에이전트</td></tr>
+  <tr><td><code>.claude/agents/web-reviewer.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>웹 품질 검증 에이전트</td></tr>
+  <tr><td><code>.claude/hooks/session-stop.sh</code></td><td style="color:var(--accent-blue)">MODIFY</td><td>1</td><td>자동 체크포인트 저장 추가</td></tr>
+  <tr><td><code>.claude/hooks/pre-compact.sh</code></td><td style="color:var(--accent-blue)">MODIFY</td><td>1</td><td>자동 체크포인트 저장 추가</td></tr>
+  <tr><td><code>CLAUDE.md</code></td><td style="color:var(--accent-blue)">MODIFY</td><td>1</td><td>새 컴포넌트 문서화</td></tr>
+  <tr><td><code>_docs/index.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>플랜 인덱스</td></tr>
+</table>
+
+<p style="margin-top:2rem;color:var(--text-muted);font-size:0.8rem;text-align:center">
+  Generated by AI Harness Plan Visualizer | 2026-04-16
+</p>
+
+</body>
+</html>

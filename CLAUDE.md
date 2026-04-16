@@ -39,10 +39,14 @@ This generates `.claude/project-profile/` with 9 profile documents that all agen
 | `/team-brainstorm` | Planning/discussion only — no code changes |
 | `/team` | Full workflow with user involvement in planning |
 | `/team-run "description"` | Full autonomous workflow |
+| `/resume` | Resume interrupted work from checkpoint |
 
 ### Decision Guide
 
 ```
+Resuming previous work?
+  YES → /resume (loads latest checkpoint)
+
 First time in this project?
   YES → /team-init first
 
@@ -85,6 +89,8 @@ All agents are defined in `.claude/agents/` and invoked by the team-workflow ski
 | team-uiux-master | opus | UI/UX design intelligence |
 | team-designer | opus | TDD implementation (Red-Green-Refactor) |
 | team-tester | sonnet | Unit + E2E test verification |
+| **web-architect** | **opus** | **Web architecture design (components, state, API, perf)** |
+| **web-reviewer** | **sonnet** | **Web quality audit (A11y, CWV, SEO, design, AI Slop)** |
 
 ---
 
@@ -158,8 +164,9 @@ Model routing and context efficiency settings are active via `settings.json`:
 
 | Hook | Event | Script | Purpose |
 |------|-------|--------|---------|
-| Session Stop | `Stop` | `.claude/hooks/session-stop.sh` | Archives session state on end |
-| Pre-Compact | `Notification` | `.claude/hooks/pre-compact.sh` | Reminds to save state before compaction |
+| Session Stop | `Stop` | `.claude/hooks/session-stop.sh` | Auto-checkpoint + archive session state |
+| Pre-Compact | `Notification` | `.claude/hooks/pre-compact.sh` | Auto-checkpoint + remind to save state |
+| Post-Edit Warn | `PostToolUse` | `.claude/hooks/post-edit-warn.sh` | Detect console.log, debugger, TODO markers |
 
 ### Session State Files
 
@@ -282,3 +289,4 @@ See skill: `subagent-orchestration` for full protocol.
 | **continuous-learning** | **All** | **Pattern extraction, session state, skill evolution** |
 | **parallelization** | **Phase 3+** | **Worktree management, cascade method, scaling** |
 | **subagent-orchestration** | **All** | **Iterative retrieval, context briefing, phase pipeline** |
+| **checkpoint** | **All** | **Save/restore work state across sessions (/resume)** |
