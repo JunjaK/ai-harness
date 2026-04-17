@@ -2,7 +2,7 @@
 
 Full checklists for the 5 categories. Load on demand when reviewing.
 
-## Category 1: Accessibility (Weight 25%, 16 items)
+## Category 1: Accessibility (Weight 10%, 16 items)
 
 ### Semantic HTML
 - [ ] Single `<h1>` per page, sequential h2–h6
@@ -32,7 +32,7 @@ Full checklists for the 5 categories. Load on demand when reviewing.
 
 ---
 
-## Category 2: Performance (Weight 25%, 16 items)
+## Category 2: Performance (Weight 30%, 16 items)
 
 ### Core Web Vitals (measured values REQUIRED)
 - [ ] FCP < 1.8s — measured: ___ s
@@ -60,7 +60,7 @@ Full checklists for the 5 categories. Load on demand when reviewing.
 
 ---
 
-## Category 3: SEO (Weight 15%, 12 items)
+## Category 3: SEO (Weight 10%, 12 items)
 
 ### Meta & Structured Data
 - [ ] Unique `<title>` (50–60 chars)
@@ -82,7 +82,7 @@ Full checklists for the 5 categories. Load on demand when reviewing.
 
 ---
 
-## Category 4: Design Quality (Weight 20%, 18 items)
+## Category 4: Design Quality (Weight 25%, 18 items)
 
 ### Visual Hierarchy
 - [ ] Clear focal point per page/section
@@ -112,7 +112,7 @@ Full checklists for the 5 categories. Load on demand when reviewing.
 
 ---
 
-## Category 5: AI Slop Detection (Weight 15%)
+## Category 5: AI Slop Detection (Weight 25%)
 
 Flag each pattern detected:
 
@@ -137,7 +137,7 @@ Flag each pattern detected:
 ## Overall Score Formula
 
 ```
-Overall = (A11y × 0.25) + (Performance × 0.25) + (SEO × 0.15) + (Design × 0.20) + (AISlop × 0.15)
+Overall = (A11y × 0.10) + (Performance × 0.30) + (SEO × 0.10) + (Design × 0.25) + (AISlop × 0.25)
 
 Grade mapping:
   90+      → A

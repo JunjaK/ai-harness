@@ -50,11 +50,13 @@ Delegate audit + critique to impeccable; use our checklists for the remaining ca
 
 | Category | Weight | Items | Reference |
 |----------|--------|-------|-----------|
-| Accessibility | 25% | 16 | `checklists.md` §1 |
-| Performance | 25% | 16 | `checklists.md` §2 |
-| SEO | 15% | 12 | `checklists.md` §3 |
-| Design Quality | 20% | 18 | `checklists.md` §4 |
-| AI Slop Detection | 15% | 9 | `checklists.md` §5 |
+| Accessibility | 10% | 16 | `checklists.md` §1 |
+| Performance | 30% | 16 | `checklists.md` §2 |
+| SEO | 10% | 12 | `checklists.md` §3 |
+| Design Quality | 25% | 18 | `checklists.md` §4 |
+| AI Slop Detection | 25% | 9 | `checklists.md` §5 |
+
+**Weighting rationale**: Performance and AI Slop carry the highest weight because they are the most common quality drift under AI-assisted development. A11y and SEO are important but are typically caught by linters and framework defaults, so the weight is lower. Design Quality sits between — subjective but measurable.
 
 Per-category score = (PASS count / applicable count) × 100, except AI Slop which uses inverted scoring (see `checklists.md`).
 
