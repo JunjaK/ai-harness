@@ -307,6 +307,21 @@ These built-ins are the canonical tools for their domain. The harness does NOT w
 | `/cost`, `/context` | Token usage + context grid | Check before deciding to compact. |
 | `/rewind` | Roll back conversation or code | Use when an agent's output is structurally wrong and targeted editing will not recover. |
 
+### UI/UX delegation to `impeccable` plugin
+
+UI/UX quality is delegated to the `impeccable` plugin (installed). The harness does NOT reimplement its design guidance.
+
+| Harness agent | Impeccable skills used |
+|---------------|-----------------------|
+| `team-uiux-master` | `shape`, `impeccable` (craft/extract), `critique`, `audit`, `typeset`/`layout`/`colorize`/`animate`/`adapt`/`clarify`/`optimize`, `bolder`/`quieter`/`distill`/`delight`/`polish`/`overdrive` |
+| `web-architect` | `shape` (when planning visual elements) |
+| `web-reviewer` | `audit` (a11y + perf + theming + responsive), `critique` (UX), `polish` (final pass) |
+
+Harness-specific supplements that are NOT in impeccable:
+- AI Slop Detection (9 patterns) — in `web-reviewer-resources/checklists.md`
+- Harness output format + team-workflow Phase integration
+- Pre-delivery checklist tuned for Opus 4.7 literal evaluation
+
 ### Built-in skills we rely on (do NOT duplicate)
 
 | Built-in skill | Use for | Our equivalent or complement |
