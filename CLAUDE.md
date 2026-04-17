@@ -219,14 +219,13 @@ All Opus agents default to `xhigh` effort. Sonnet agents use their model's defau
 |-------|-------|---------|
 | team-workflow | Core | 5-phase orchestration |
 | plan-review | Phase 1 | Adversarial plan evaluation |
-| api-design | Phase 1 | REST API patterns |
 | plan-visualizer | Phase 1+ | HTML plan diagram |
-| coding-standards | Phase 3 | Code quality baseline |
-| tdd-workflow | Phase 3 | Red-Green-Refactor cycle |
-| debug | Phase 3-4 | Structured debugging |
+| coding-standards | Phase 3 | Code quality baseline (strict TS) |
+| tdd-workflow | Phase 3 | Red-Green-Refactor cycle (Vitest 4.x) |
+| debug | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | e2e-testing | Phase 4 | Playwright E2E |
 | verification-loop | Phase 4-5 | 6-phase quality gate + checkpoints + pass@k |
-| security-review | Phase 5 | OWASP checklist |
+| security-review | Phase 5 | OWASP checklist + Phase 5 audit format |
 | token-optimization | All | Model routing, effort levels, compaction (Opus 4.7 aware) |
 | continuous-learning | All | Pattern extraction, session state, skill evolution |
 | parallelization | Phase 3+ | Worktree management, cascade method, scaling |
@@ -286,6 +285,40 @@ These skills carry the full details; this file only lists hard rules.
 ├── checkpoints/            # Milestone snapshots (max 10 + latest.md)
 └── learnings/              # Extracted patterns
 ```
+
+---
+
+## Claude Code Built-in Commands (rely on, don't duplicate)
+
+These built-ins are the canonical tools for their domain. The harness does NOT wrap them.
+
+| Built-in | Use for | Notes |
+|----------|---------|-------|
+| `/effort <level>` | Set effort: `low` / `high` / `xhigh` / `max` | Default for coding work is `xhigh`. Use `max` for hard debugging or architecture. |
+| `/model <name>` | Switch model | Use Opus 4.7 for Phase 1/3, Sonnet 4.6 for Phase 4 Tester, Haiku for broad search. |
+| `/fast` | Toggle fast mode | Opus 4.6 only. Opus 4.7 already runs `xhigh` by default. |
+| `/compact [focus]` | Manual context compaction | `pre-compact.sh` hook auto-saves checkpoint before running. MUST NOT run mid-implementation. |
+| `/resume <id>` | Resume a previous conversation | Distinct from our `/checkpoint` (work-state), which is session-independent. |
+| `/branch` | Fork conversation | Use for research forks while main work continues. |
+| `/memory` | Edit memory files | Our `.claude/session-state/` is separate; do not mix. |
+| `/review` | Local PR review | Complementary to team workflow Phase 5. |
+| `/security-review` | Scan diff for vulns | Runs alongside our `security-review` skill in Phase 5. |
+| `/simplify` | 3-agent code review | Invoke after Phase 3 for an independent second look. |
+| `/cost`, `/context` | Token usage + context grid | Check before deciding to compact. |
+| `/rewind` | Roll back conversation or code | Use when an agent's output is structurally wrong and targeted editing will not recover. |
+
+### Built-in skills we rely on (do NOT duplicate)
+
+| Built-in skill | Use for | Our equivalent or complement |
+|---------------|---------|-----------------------------|
+| `superpowers:systematic-debugging` | General reproduce → narrow → hypothesize → test methodology | Our `debug` skill covers LSP-specific TS patterns on top |
+| `superpowers:verification-before-completion` | "evidence before claims" discipline | Invoked by Designers before reporting completion |
+| `superpowers:using-git-worktrees` | Worktree creation details | Our `parallelization` skill covers scaling + cascade on top |
+| `superpowers:dispatching-parallel-agents` | When to parallelize 2+ independent tasks | Complementary to our `subagent-orchestration` |
+| `superpowers:test-driven-development` | General TDD discipline | Our `tdd-workflow` adds Vitest 4.x specifics |
+| `superpowers:requesting-code-review` | Pre-merge review checklist | Complementary to Phase 5 |
+
+Agents MAY invoke these built-ins directly when a task matches their trigger. Do NOT reimplement their content in our skills.
 
 ---
 

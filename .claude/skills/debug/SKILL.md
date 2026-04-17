@@ -1,87 +1,49 @@
 ---
 name: debug
-description: "Structured debugging workflow for codebase issues. Use when debugging bugs, errors, sync issues, or unexpected behavior. Covers context gathering, root cause analysis, targeted fixes, and verification. Useful in Phase 3-4 escalation scenarios."
+description: "LSP-driven debugging patterns for TypeScript codebases. Complements the general debugging methodology in superpowers:systematic-debugging. Use in Phase 3-4 escalation scenarios or when investigating unexpected behavior."
 ---
 
-# Debug Skill
+# Debug (LSP Patterns)
+
+This skill covers **LSP-accelerated debugging patterns** specific to this harness. For the full systematic debugging methodology (reproduce → narrow → hypothesize → test), use `superpowers:systematic-debugging`.
+
+## When to Use This Skill
+
+- Investigating TypeScript-specific errors (type mismatches, undefined access, stale refactor artifacts)
+- Tracing call paths in unfamiliar code before proposing fixes
+- Verifying refactors did not leave orphaned callers
 
 ## Workflow (MUST execute in order)
 
-1. **Gather Context** — Get exact symptoms (error message, reproduction steps, environment)
-2. **Read Completely** — Read every file in the suspected call path before suggesting changes
-3. **Use LSP for Code Intelligence** (TypeScript/supported languages):
-   - `hover` on suspicious variables to see inferred types
-   - `goToDefinition` on unfamiliar symbols
-   - `findReferences` on the failing function to see all call sites
-   - `incomingCalls` to trace the call path upward
-   - `outgoingCalls` to see what the failing function invokes
-4. **Analyze Root Cause** — Check trigger logic, validation, types, side effects
-5. **Propose Fix** — Minimal, targeted fix with file:line references and the reason
-6. **Verify** — Run tests; run `bunx tsc --noEmit` to confirm no type regression
+1. **Reproduce** — Use `superpowers:systematic-debugging` for the reproduction step
+2. **Locate** — Use LSP to find the failing symbol's definition and callers
+3. **Inspect types** — Use `hover` to check inferred types against assumptions
+4. **Trace call paths** — Use `incomingCalls` / `outgoingCalls` to map the flow
+5. **Propose fix** — Minimal, targeted, with file:line reference
+6. **Verify** — Run `bunx tsc --noEmit` + project test command; confirm no regression
 
 ## LSP Investigation Patterns
 
-| Symptom | First LSP operation |
-|---------|--------------------|
-| "X is not a function" | `goToDefinition` on X — is it actually exported? |
-| "Cannot read property Y of undefined" | `hover` on the object — what's the inferred type? |
-| Type mismatch after refactor | `findReferences` on the changed type — any missed updates? |
-| Unexpected behavior in downstream code | `incomingCalls` on the function called in the error path |
-| Stale cache / wrong data | `findReferences` on the store/query key — all call sites consistent? |
+| Symptom | First LSP operation | Second (if needed) |
+|---------|--------------------|--------------------|
+| `X is not a function` | `goToDefinition` on X — is it exported? | `findReferences` — is everyone importing the same symbol? |
+| `Cannot read property Y of undefined` | `hover` on the object — what's the inferred type? | `goToDefinition` on the type — does it declare Y? |
+| Type mismatch after refactor | `findReferences` on the changed type | `goToImplementation` on interfaces — any implementer missed? |
+| Downstream code broken unexpectedly | `incomingCalls` on the changed function | Check each caller manually |
+| Stale cache / wrong data | `findReferences` on store/query key | Confirm every call site uses the same key |
+| Unfamiliar function signature | `hover` for signature | `documentSymbol` for neighboring helpers |
 
-## Common Debug Patterns
+## Root Cause Rules
 
-### State Management Issues
+- Fix the root cause, not the symptom (duplicate from `superpowers:systematic-debugging`)
+- After any type-related fix, MUST run `bunx tsc --noEmit` before declaring the fix complete
+- After any refactor, MUST use `findReferences` to confirm no orphaned callers
 
-| Symptom | Common Cause | Fix |
-|---------|-------------|-----|
-| `ReferenceError: X is not defined` | Self-reference in store definition | Use local variable directly |
-| Property is `undefined` | Not in store's `return` statement | Add to return |
-| `Maximum call stack exceeded` | Circular dependency | Extract shared state |
-| Computed doesn't update | Non-reactive access | Check reactivity rules |
+## Escalation (when to stop debugging)
 
-### API Issues
+- Cannot reproduce after 3 attempts → request reproduction steps
+- Root cause spans 3+ modules → request architectural review (Phase 1)
+- Fix requires API/backend changes not in plan → escalate to Team Leader
+- Bug is timing-dependent → add logging, do not guess
 
-| Symptom | Common Cause | Fix |
-|---------|-------------|-----|
-| API not called | Missing `execute()` or wrong trigger | Verify call site |
-| Stale data after mutation | Not re-fetching after write | Call fetch after mutation |
-| Type mismatch on response | Assumed response structure | Read actual API types |
-| 401 loop | Token refresh failing | Check auth middleware |
-| Params not reactive | Plain object instead of reactive | Wrap in computed/reactive |
-
-### UI Issues
-
-| Symptom | Common Cause | Fix |
-|---------|-------------|-----|
-| Component not rendering | Wrong import path | Verify file exists at path |
-| Modal not opening | Model binding not wired | Check v-model/props |
-| i18n key showing raw | Key missing from locale | Add translation |
-| Route not matching | Wrong nesting or exclusion | Check router config |
-
-### Performance Issues
-
-| Symptom | Common Cause | Fix |
-|---------|-------------|-----|
-| Slow rendering | Creating functions in render loop | Hoist functions |
-| UI lag on input | Deep watchers on large objects | Use shallow ref + targeted updates |
-| Memory growing | Event listeners not cleaned | Add cleanup in unmount |
-
-## Root Cause Analysis Framework
-
-```
-1. Reproduce the bug reliably
-2. Narrow down: which file/function?
-3. Check inputs: are they what you expect?
-4. Check outputs: where does it diverge?
-5. Binary search: comment out half the code
-6. Fix the root cause, not the symptom
-```
-
-## Escalation Criteria
-
-When to stop debugging and ask for help:
-- Can't reproduce after 3 attempts → ask for reproduction steps
-- Root cause spans 3+ modules → may need architectural review
-- Fix requires API/backend changes → escalate to relevant team
-- Bug is intermittent/timing-dependent → need logging/tracing
+For non-TypeScript investigation patterns, fall back to `superpowers:systematic-debugging`.

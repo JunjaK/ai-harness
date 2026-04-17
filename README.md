@@ -117,15 +117,18 @@ Skills that agents reference during their workflow phases:
 | Skill | Phase | Purpose |
 |-------|-------|---------|
 | `plan-review` | Phase 1 | Critical review of plans before implementation |
-| `api-design` | Phase 1 | REST API design patterns for Architect B |
-| `coding-standards` | Phase 3 | Universal code quality baseline for Designers |
-| `tdd-workflow` | Phase 3 | Red-Green-Refactor TDD cycle |
-| `debug` | Phase 3-4 | Structured debugging during escalation |
+| `coding-standards` | Phase 3 | Universal code quality baseline (strict TS) |
+| `tdd-workflow` | Phase 3 | Red-Green-Refactor TDD cycle (Vitest 4.x) |
+| `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
 | `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
 | `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
+
+Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `subagent-orchestration`, `checkpoint`.
+
+For general API design patterns, use the Claude Code built-in `api-design` skill directly (the harness does not wrap it).
 
 ## File Structure
 
@@ -151,7 +154,6 @@ Skills that agents reference during their workflow phases:
     │       ├── agents.md
     │       └── escalation.md
     ├── plan-review/SKILL.md     # Phase 1: plan critique
-    ├── api-design/SKILL.md      # Phase 1: API patterns
     ├── coding-standards/SKILL.md # Phase 3: code quality
     ├── tdd-workflow/SKILL.md    # Phase 3: TDD cycle
     ├── debug/SKILL.md           # Phase 3-4: debugging
