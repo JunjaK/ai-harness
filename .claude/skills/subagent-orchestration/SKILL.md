@@ -28,16 +28,24 @@ Always evaluate subagent responses before accepting. Budget **up to 3 retrieval 
 ```
 Cycle 1: Broad retrieval
   → Agent does initial file/module overview
-  → Orchestrator evaluates: "Is this sufficient?"
+  → Orchestrator evaluates output against these gates:
+    GATE A: Did the agent return files matching the task scope?
+    GATE B: Does the output contain enough context to proceed?
+  If both PASS → skip to execution
+  If either FAILS → continue to Cycle 2
 
-Cycle 2: Contextual query (if needed)
-  → "What additional context do you need?"
-  → Agent identifies gaps in understanding
-  → Orchestrator provides targeted context
+Cycle 2: Contextual query
+  → Orchestrator sends follow-up: "Given [X], what context do you need?"
+  → Agent identifies specific gaps
+  → Orchestrator provides exact files/snippets requested
+  → Evaluate against GATE A and GATE B again
+  If both PASS → proceed to Cycle 3
+  If either still FAILS → escalate (insufficient information for this subagent)
 
-Cycle 3: Refined execution (if needed)
-  → Agent operates with focused, complete context
-  → Orchestrator accepts or rejects final output
+Cycle 3: Refined execution
+  → Agent operates with focused context
+  → Orchestrator validates output against task requirements
+  → Accept or reject (reject = escalate, not retry)
 ```
 
 ### Implementation
@@ -141,7 +149,7 @@ Each phase produces **one clear output** that serves as input for the next.
 ## Input: {what this agent received}
 ## Output: {what this agent produced}
 ## Confidence: {high|medium|low}
-## Next Phase Needs: {what the next agent should know}
+## Next Phase Needs: {facts the next agent MUST receive}
 ```
 
 ### Example Pipeline

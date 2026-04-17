@@ -111,19 +111,18 @@ After completing a significant task:
 
 ### From Learnings to Skills
 
-When 3+ related learnings cluster around a topic, consider evolving them into a formal skill:
+When 3+ related learnings cluster around a topic, evaluate skill evolution using the criteria below.
 
 ```
 Individual learnings → Cluster by topic → Draft skill → Validate → Install as SKILL.md
 ```
 
-### Evolution Criteria
+### Evolution Criteria (MUST evolve when ALL apply)
 
-A cluster is ready for skill evolution when:
 - 3+ learnings share a common domain
-- At least 2 have "high" confidence
-- The combined pattern is broadly applicable (not project-specific)
-- It would save significant time in future sessions
+- ≥ 2 learnings have "high" confidence
+- Pattern is broadly applicable (not tied to a specific project file/component)
+- Applying the pattern would save ≥ 15 minutes per future occurrence
 
 ### Skill Template (from learnings)
 

@@ -1,21 +1,33 @@
 ---
 name: token-optimization
-description: "Model routing, context efficiency, and compaction strategy for minimizing token waste. Use when spawning agents, selecting models for tasks, or managing context window pressure."
+description: "Model routing, effort levels, context efficiency, and compaction strategy for Opus 4.7. Use when spawning agents, selecting models, choosing effort levels, or managing context window pressure."
 ---
 
 # Token Optimization
 
-Minimize token spend while maintaining output quality. Three pillars: model routing, context efficiency, strategic compaction.
+Minimize token spend while maintaining output quality. Four pillars: model routing, effort level selection, context efficiency, strategic compaction.
 
 ## 1. Model Routing
 
-Select the cheapest model that can handle the task:
+Select the cheapest model that meets the task's minimum capability:
 
-| Task Complexity | Model | When to Use |
-|----------------|-------|-------------|
-| Exploration, simple edits, reference lookups | **Haiku** | `model: "haiku"` in Agent tool |
-| Default coding (90% of tasks) | **Sonnet** | Default for most agents |
-| Architecture, security-critical, 5+ files | **Opus** | Complex multi-file reasoning |
+| Task Complexity | Model | Use when |
+|----------------|-------|----------|
+| File search, exploration, simple edits | Haiku 4.5 | Read-only work, pattern matching, simple string ops |
+| Code implementation, review, testing | Sonnet 4.6 | 90% of coding tasks, default balance |
+| Architecture, security audit, multi-file refactor | Opus 4.7 | 5+ file changes, complex reasoning, critical decisions |
+
+## 2. Effort Level (Opus 4.7)
+
+Opus 4.7 introduces `xhigh` between `high` and `max`. Claude Code defaults to `xhigh`.
+
+| Effort | Use when |
+|--------|----------|
+| `high` | Mechanical edits (rename, import fix, formatting) |
+| `xhigh` | Default for coding and agent workflows |
+| `max` | Multi-step autonomous tasks, architecture, debugging hard failures |
+
+**Rule**: Start with `xhigh`. Upgrade to `max` only if `xhigh` fails to resolve the task in 2 attempts. Downgrade to `high` only for trivial mechanical work.
 
 ### Agent Model Assignment
 
@@ -27,23 +39,21 @@ Code review agents → Sonnet
 Security review agents → Opus
 ```
 
-### Upgrade Triggers
+### Upgrade Triggers (MUST upgrade when ANY applies)
 
-Escalate to a higher model when:
 - First attempt fails or produces incorrect output
 - Task spans 5+ files with cross-dependencies
-- Security-critical code (auth, payment, secrets)
+- Security-critical code (auth, payment, secrets, PII)
 - Architectural decisions with long-term impact
+- Debugging issue that survived 2 resolution attempts
 
-### Downgrade Opportunities
+### Downgrade Triggers (MAY downgrade when ALL apply)
 
-Use a cheaper model when:
-- Running repetitive file searches
-- Simple string replacements
-- Test execution and log reading
-- Documentation lookups
+- Task is read-only or a single-file mechanical edit
+- No cross-file reasoning required
+- Output shape is deterministic (not generative)
 
-## 2. Context Efficiency
+## 3. Context Efficiency
 
 ### MCP Tool Hygiene
 
@@ -73,7 +83,7 @@ Subagents get their own context window. Use them to:
 
 **Anti-pattern**: Don't use subagents for tasks that need the current conversation's full context.
 
-## 3. Strategic Compaction
+## 4. Strategic Compaction
 
 ### When to Compact
 
@@ -90,14 +100,13 @@ Subagents get their own context window. Use them to:
 - **During active debugging** — Loses reproduction steps
 - **Before saving session state** — Save first, then compact
 
-### Compaction Checklist
+### Compaction Checklist (MUST execute all steps)
 
 Before compacting:
-1. Save current state to `.claude/session-state/current.md`
-2. Ensure all important decisions are documented
-3. Verify no mid-task state will be lost
-4. Compact
-5. Re-read the state file after compaction if needed
+1. Write current state to `.claude/session-state/current.md` (task progress, verified approaches, decisions, remaining steps)
+2. Verify no mid-task variable names or intermediate state will be lost
+3. Execute compaction
+4. Re-read `.claude/session-state/current.md` to restore context
 
 ### Auto-Compact Configuration
 
@@ -112,11 +121,11 @@ Before compacting:
 Setting to `60` triggers compaction at 60% context usage instead of default 95%.
 This preserves more usable space but compacts more frequently.
 
-## 4. Background Processes
+## 5. Background Processes
 
 ### Run Builds/Tests in Background
 
-Long-running commands should use `run_in_background: true`:
+Long-running commands MUST use `run_in_background: true`:
 
 ```
 Bash({ command: "npm run build", run_in_background: true })
@@ -132,12 +141,19 @@ When tasks are independent, spawn agents simultaneously:
 - Each agent gets its own context window
 - Results return as they complete
 
+## 6. Opus 4.7 Tokenizer Notes
+
+- Same input now consumes 1.0–1.35× tokens compared to Opus 4.6 (depends on content type)
+- Higher effort levels produce more reasoning tokens (especially `max`)
+- Overall efficiency improved per Anthropic's internal evals — but budget audits MUST re-measure against the new baseline
+
 ## Quick Reference
 
 ```
-Model selection:  Haiku (search) → Sonnet (code) → Opus (architecture)
-Context:          <10 MCPs, <80 tools, slim CLAUDE.md
-Compaction:       After milestones, NEVER mid-task
-Background:       Builds, tests, long searches
-Parallel agents:  Independent tasks in single message
+Model:        Haiku (search) → Sonnet (code) → Opus (architecture)
+Effort:       high (mechanical) → xhigh (default) → max (hard problems)
+Context:      <10 MCPs, <80 tools, slim CLAUDE.md
+Compaction:   After milestones. NEVER mid-task. Save state first.
+Background:   Builds, tests, long searches → run_in_background: true
+Parallel:     Independent tasks in single message
 ```

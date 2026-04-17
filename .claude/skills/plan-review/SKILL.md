@@ -9,21 +9,26 @@ Critical review of implementation plans — before code is written.
 
 ## Core Philosophy
 
-**Think like a pessimist, review like an adversary.**
-Assume everything that can go wrong will go wrong. Surface hidden risks, not validate the plan.
+**Pessimist mode, adversary review.** Assume every failure mode will occur. Surface hidden risks; do not validate.
 
-## Review Process
+## Opus 4.7 Operating Notes
+
+- **Literal instructions**: Every risk category below MUST be evaluated. Skipped categories MUST state "N/A — [specific reason]".
+- **Minimum findings**: The reviewer MUST surface at least one concern per plan. "Looks good" is not a valid verdict.
+
+## Review Process (MUST execute in order)
 
 ### Phase 1: Context Gathering
 
-1. Read the plan document (from `_docs/` or user-provided)
-2. Identify affected areas in the codebase
-3. Read related existing code — stores, services, API types involved
-4. Check database schema if data relations are involved
+1. Read the plan document in full (from `_docs/` or provided inline)
+2. List all files and modules the plan mentions
+3. Read every file named in the plan (full read, not skim)
+4. Read database schema when the plan touches tables/collections
+5. Read API type definitions when the plan touches endpoints
 
 ### Phase 2: Risk Analysis
 
-Evaluate each area. Skip sections that don't apply, but state "N/A" with reason.
+Evaluate every category below. Each section MUST have a verdict (CRITICAL / HIGH / MEDIUM / LOW / N/A). N/A MUST state a specific reason.
 
 #### Data Integrity & Race Conditions
 - Concurrent edits: two users modifying same data simultaneously?
@@ -110,10 +115,10 @@ Evaluate each area. Skip sections that don't apply, but state "N/A" with reason.
 
 | Level | Meaning | Action |
 |-------|---------|--------|
-| CRITICAL | Data loss, security vulnerability, system-breaking | Must fix before implementation |
-| HIGH | Significant UX degradation or performance cliff | Should fix before implementation |
-| MEDIUM | Suboptimal but functional, tech debt risk | Fix during or as follow-up |
-| LOW | Nice-to-have, minor concern | Optional |
+| CRITICAL | Data loss, security vulnerability, system-breaking | MUST fix before implementation — blocks approval |
+| HIGH | Significant UX degradation or performance cliff | MUST fix before implementation |
+| MEDIUM | Suboptimal but functional, tech debt risk | MAY fix during implementation or log as follow-up |
+| LOW | Nice-to-have, minor concern | MAY defer to a future iteration |
 
 ## Anti-Patterns
 
