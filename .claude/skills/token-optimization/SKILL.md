@@ -128,8 +128,8 @@ This preserves more usable space but compacts more frequently.
 Long-running commands MUST use `run_in_background: true`:
 
 ```
-Bash({ command: "npm run build", run_in_background: true })
-Bash({ command: "npx vitest run", run_in_background: true })
+Bash({ command: "bun run build", run_in_background: true })
+Bash({ command: "bunx vitest run", run_in_background: true })
 ```
 
 This frees the context for other work while waiting.

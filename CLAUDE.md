@@ -47,6 +47,35 @@ Same input ≈ 1.0–1.35× Opus 4.6 tokens. Higher effort levels produce more r
 
 ---
 
+## Package Manager
+
+### Priority (MUST detect in this order)
+
+1. **Bun** (default) — detect via `bun.lockb` or `bun.lock`
+2. **pnpm** (first fallback) — detect via `pnpm-lock.yaml`
+3. **npm** (final fallback) — detect via `package-lock.json`
+
+If no lockfile exists, default to Bun.
+
+### Command Translation Table
+
+| Action | Bun (default) | pnpm | npm |
+|--------|--------------|------|-----|
+| Install deps | `bun install` | `pnpm install` | `npm install` |
+| Run package.json script | `bun run <script>` | `pnpm run <script>` | `npm run <script>` |
+| Execute package binary | `bunx <cmd>` | `pnpm exec <cmd>` | `npx <cmd>` |
+| Add dependency | `bun add <pkg>` | `pnpm add <pkg>` | `npm install <pkg>` |
+| Add dev dependency | `bun add -d <pkg>` | `pnpm add -D <pkg>` | `npm install -D <pkg>` |
+| Audit | `bun audit` | `pnpm audit` | `npm audit` |
+
+### Rule
+
+- Every shell command in agent outputs, skills, and docs MUST use Bun by default
+- If the target project uses pnpm or npm (detected via lockfile in project-profile), translate commands to that manager
+- MUST NOT mix managers within a single project (never `npm install` in a Bun project)
+
+---
+
 ## Required: Agent Teams Feature
 
 This harness requires Claude Code Agent Teams. Enabled via `settings.json`:

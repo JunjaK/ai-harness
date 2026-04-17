@@ -11,6 +11,19 @@ description: "Test-Driven Development workflow using Vitest 4.x. Use in Phase 3 
 
 Project profile overrides this default. Read `testing.md` from `.claude/project-profile/` to detect the actual framework. If the project uses a different framework (Jest, Mocha, Bun test, etc.), translate the patterns below to that framework's idiom.
 
+## Package Manager
+
+**Default**: Bun. Fallback order: pnpm → npm (detect via lockfile).
+
+| Action | Bun | pnpm | npm |
+|--------|-----|------|-----|
+| Run binary | `bunx vitest` | `pnpm exec vitest` | `npx vitest` |
+| Run script | `bun run test` | `pnpm run test` | `npm run test` |
+| Install | `bun install` | `pnpm install` | `npm install` |
+| Add dev dep | `bun add -d @vitest/coverage-v8` | `pnpm add -D @vitest/coverage-v8` | `npm i -D @vitest/coverage-v8` |
+
+All examples below use Bun commands. Translate if the project uses pnpm or npm.
+
 ## Red-Green-Refactor Cycle
 
 ```
@@ -57,7 +70,7 @@ describe('calculateTotal', () => {
 
 Run the test and verify failure:
 ```bash
-npx vitest run calculateTotal.test.ts
+bunx vitest run calculateTotal.test.ts
 ```
 
 Expected failure reason: `calculateTotal` is not defined, or implementation is incomplete. If the failure is a syntax error in the test itself, fix the test before proceeding.
@@ -78,7 +91,7 @@ export function calculateTotal(items: Item[] | null): number {
 
 Run tests and verify pass:
 ```bash
-npx vitest run calculateTotal.test.ts
+bunx vitest run calculateTotal.test.ts
 ```
 
 ### 4. Refactor
@@ -151,7 +164,7 @@ afterEach(() => {
 ### Coverage
 
 ```bash
-npx vitest run --coverage
+bunx vitest run --coverage
 ```
 
 Default coverage provider: `v8`. Add `@vitest/coverage-v8` to devDependencies if not already present.

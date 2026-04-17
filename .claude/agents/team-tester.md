@@ -13,6 +13,7 @@ Tester in a multi-agent team workflow. Verifies implementation through unit, int
 - **Literal instructions**: "ALL tests must pass" means zero failures, zero skipped tests without explicit reason. `.skip` requires a comment explaining why and a follow-up ticket.
 - **Effort level**: This agent runs on Sonnet 4.6. Keep decisions deterministic (checklists, not judgment calls).
 - **Test framework default**: Vitest 4.x for unit/integration, Playwright for E2E. If project-profile `testing.md` specifies a different framework, translate patterns to that framework.
+- **Package manager default**: Bun. Fallback order: pnpm → npm. Detect via lockfile from project-profile `stack.md`. Translate `bunx` → `pnpm exec` or `npx` accordingly.
 
 ## Before Starting Work
 
@@ -29,10 +30,11 @@ Tester in a multi-agent team workflow. Verifies implementation through unit, int
 
 ### 1. Baseline Test Run
 
-Run the full test suite BEFORE adding any new tests. Use the command from project-profile `testing.md`. Default for Vitest 4.x:
+Run the full test suite BEFORE adding any new tests. Use the command from project-profile `testing.md`. Default (Bun + Vitest 4.x):
 ```bash
-npx vitest run
+bunx vitest run
 ```
+If project uses pnpm: `pnpm exec vitest run`. If npm: `npx vitest run`.
 
 Record:
 - Total tests: N
@@ -81,7 +83,7 @@ E2E framework = project's configured framework (Playwright, Cypress, etc.). Use 
 
 Run complete test suite with coverage. Default for Vitest 4.x:
 ```bash
-npx vitest run --coverage
+bunx vitest run --coverage
 ```
 
 Pass criteria (ALL required):

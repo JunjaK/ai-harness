@@ -7,13 +7,15 @@ description: "6-phase verification system with checkpoint support and pass@k met
 
 Systematic quality assurance in 6 sequential phases with checkpoint tracking and pass@k evaluation. Stop on CRITICAL failure.
 
+**Package manager**: Commands below use Bun (default). If project has `pnpm-lock.yaml`, translate `bun run` → `pnpm run`, `bunx` → `pnpm exec`. If `package-lock.json`, translate to `npm run` / `npx`.
+
 ## Phases
 
 ### Phase 1: Build
 Verify the project builds without errors.
 ```bash
 # Adapt to your build system
-npm run build 2>&1 | tail -20
+bun run build 2>&1 | tail -20
 ```
 **Pass**: Exit code 0
 **Common failures**: Missing imports, circular dependencies, env issues
@@ -22,7 +24,7 @@ npm run build 2>&1 | tail -20
 Run type checking on the full project.
 ```bash
 # TypeScript
-npx tsc --noEmit 2>&1 | head -50
+bunx tsc --noEmit 2>&1 | head -50
 ```
 **Pass**: Zero type errors
 **Common failures**: Type mismatches, missing properties, incorrect generics
@@ -30,7 +32,7 @@ npx tsc --noEmit 2>&1 | head -50
 ### Phase 3: Lint
 Run linter and check for violations.
 ```bash
-npx eslint . --max-warnings=0 2>&1 | head -30
+bunx eslint . --max-warnings=0 2>&1 | head -30
 ```
 **Pass**: No errors (warnings acceptable if configured)
 **Common failures**: Unused imports, formatting issues, rule violations
@@ -38,7 +40,7 @@ npx eslint . --max-warnings=0 2>&1 | head -30
 ### Phase 4: Tests
 Run the full test suite. Use command from project-profile `testing.md`. Default for Vitest 4.x:
 ```bash
-npx vitest run --coverage 2>&1
+bunx vitest run --coverage 2>&1
 ```
 **Pass**: All tests pass, coverage ≥ 80% (lines, functions, branches, statements)
 **Common failures**: Broken assertions, missing mocks, flaky tests

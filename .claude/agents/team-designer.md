@@ -84,10 +84,11 @@ With tests green, clean up code:
 
 ### 5. Verify
 
-MUST pass all four checks before reporting completion:
-1. Linter — project command from `testing.md` (e.g., `npx eslint .` or `npx biome check`) — zero errors
-2. Type check — `npx tsc --noEmit` — zero errors
-3. Test suite — project command from `testing.md`. Default for Vitest 4.x: `npx vitest run` — zero failures
+MUST pass all four checks before reporting completion. Commands use Bun by default; translate to pnpm/npm if project's lockfile indicates otherwise.
+
+1. Linter — project command from `testing.md` (e.g., `bunx eslint .` or `bunx biome check`) — zero errors
+2. Type check — `bunx tsc --noEmit` — zero errors
+3. Test suite — project command from `testing.md`. Default (Bun + Vitest 4.x): `bunx vitest run` — zero failures
 4. Manual spot-check: open one modified file and confirm the code matches the plan's intent
 
 ### 6. Commit

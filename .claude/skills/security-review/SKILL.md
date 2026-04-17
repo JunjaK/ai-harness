@@ -56,7 +56,7 @@ description: "Security vulnerability detection and remediation. Use in Phase 5 (
 - HTTPS only in production
 
 ### 9. Dependency Security
-- Regular `npm audit` / `pnpm audit`
+- Regular audit — `bun audit` (default) / `pnpm audit` / `npm audit` (match project's package manager)
 - Lock files committed
 - Review new dependencies before adding
 

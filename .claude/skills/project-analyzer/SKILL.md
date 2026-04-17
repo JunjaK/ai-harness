@@ -31,6 +31,13 @@ Scan the codebase and generate a structured project profile that team workflow a
 - `tsconfig.json` / `jsconfig.json`
 - Framework configs: `nuxt.config.*`, `next.config.*`, `vite.config.*`, `angular.json`, etc.
 - `.nvmrc` / `.node-version` / `.tool-versions` / `.mise.toml`
+- **Package manager lockfile** (detect in this priority):
+  - `bun.lockb` or `bun.lock` → **Bun** (default)
+  - `pnpm-lock.yaml` → **pnpm**
+  - `package-lock.json` → **npm**
+  - `yarn.lock` → yarn (legacy — document but note migration path)
+  - No lockfile → default to **Bun**
+- `packageManager` field in `package.json` (overrides lockfile detection)
 
 **Extract:**
 ```markdown
@@ -39,7 +46,8 @@ Scan the codebase and generate a structured project profile that team workflow a
 ## Runtime
 - Language: [TypeScript/JavaScript/Python/Go/Rust/...]
 - Runtime: [Node 22 / Bun / Deno / Python 3.12 / ...]
-- Package manager: [pnpm / npm / yarn / bun / pip / cargo / ...]
+- Package manager: [Bun / pnpm / npm / yarn / pip / cargo / ...]
+- Package manager detection: [lockfile found: bun.lockb / pnpm-lock.yaml / package-lock.json / none — defaulted to Bun]
 
 ## Framework
 - Framework: [Nuxt 4 / Next.js 15 / Django / Spring Boot / ...]
@@ -51,10 +59,12 @@ Scan the codebase and generate a structured project profile that team workflow a
 |---------|---------|---------|
 | [name] | [version] | [what it does] |
 
-## Build
-- Dev: `[dev command]`
+## Build (use detected package manager)
+- Dev: `[dev command — e.g., bun run dev / pnpm run dev / npm run dev]`
 - Build: `[build command]`
 - Test: `[test command]`
+- Install: `[install command]`
+- Audit: `[audit command]`
 ```
 
 ### Step 2: Analyze File Structure → `structure.md`

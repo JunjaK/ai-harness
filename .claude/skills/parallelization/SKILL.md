@@ -169,7 +169,7 @@ Team Leader assigns files:
 ### Long-Running Tasks
 
 Always use `run_in_background: true` for:
-- `npm run build` / `npx vitest run`
+- `bun run build` / `bunx vitest run`
 - `git push` / `git pull`
 - Database migrations
 - Large file searches
