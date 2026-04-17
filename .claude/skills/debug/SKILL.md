@@ -5,13 +5,29 @@ description: "Structured debugging workflow for codebase issues. Use when debugg
 
 # Debug Skill
 
-## Workflow
+## Workflow (MUST execute in order)
 
-1. **Gather Context** — Ask user for symptoms, identify related files
-2. **Read Completely** — Read each file before suggesting changes
-3. **Analyze Root Cause** — Check trigger logic, validation, types
-4. **Propose Fix** — Minimal, targeted fix with file:line references
-5. **Verify** — Run tests or suggest manual verification steps
+1. **Gather Context** — Get exact symptoms (error message, reproduction steps, environment)
+2. **Read Completely** — Read every file in the suspected call path before suggesting changes
+3. **Use LSP for Code Intelligence** (TypeScript/supported languages):
+   - `hover` on suspicious variables to see inferred types
+   - `goToDefinition` on unfamiliar symbols
+   - `findReferences` on the failing function to see all call sites
+   - `incomingCalls` to trace the call path upward
+   - `outgoingCalls` to see what the failing function invokes
+4. **Analyze Root Cause** — Check trigger logic, validation, types, side effects
+5. **Propose Fix** — Minimal, targeted fix with file:line references and the reason
+6. **Verify** — Run tests; run `bunx tsc --noEmit` to confirm no type regression
+
+## LSP Investigation Patterns
+
+| Symptom | First LSP operation |
+|---------|--------------------|
+| "X is not a function" | `goToDefinition` on X — is it actually exported? |
+| "Cannot read property Y of undefined" | `hover` on the object — what's the inferred type? |
+| Type mismatch after refactor | `findReferences` on the changed type — any missed updates? |
+| Unexpected behavior in downstream code | `incomingCalls` on the function called in the error path |
+| Stale cache / wrong data | `findReferences` on the store/query key — all call sites consistent? |
 
 ## Common Debug Patterns
 

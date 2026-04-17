@@ -23,11 +23,17 @@ bun run build 2>&1 | tail -20
 ### Phase 2: Type Check
 Run type checking on the full project.
 ```bash
-# TypeScript
+# TypeScript (default)
 bunx tsc --noEmit 2>&1 | head -50
 ```
 **Pass**: Zero type errors
 **Common failures**: Type mismatches, missing properties, incorrect generics
+
+**Complementary checks (during implementation, NOT a replacement):**
+- `LSP` tool with `hover` — inspect inferred types on any symbol
+- `mcp__ide__getDiagnostics` (when IDE is connected) — live diagnostics per file
+
+Non-TypeScript projects: substitute the type check command from project-profile `stack.md` (e.g., `pyright`, `mypy --strict`, `go vet ./...`).
 
 ### Phase 3: Lint
 Run linter and check for violations.

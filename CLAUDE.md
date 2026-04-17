@@ -47,6 +47,46 @@ Same input ≈ 1.0–1.35× Opus 4.6 tokens. Higher effort levels produce more r
 
 ---
 
+## TypeScript-First
+
+This harness assumes TypeScript as the primary language. All agents and skills operate under the following defaults:
+
+### Type Check (hard gate)
+
+- Primary: `bunx tsc --noEmit` (via verification-loop Phase 2)
+- `tsconfig.json` MUST set `"strict": true` and `"noUncheckedIndexedAccess": true`
+- Zero type errors required before any phase completes
+- `any` types are prohibited — use `unknown` + narrowing, or define explicit types
+
+### LSP Tool (code intelligence)
+
+The LSP tool provides code navigation for TypeScript files. Use it during implementation and debugging — NOT as a replacement for `tsc`.
+
+| Operation | Use when |
+|-----------|----------|
+| `hover` | Checking a symbol's inferred type before editing |
+| `goToDefinition` | Finding where a symbol is declared before modifying |
+| `findReferences` | Identifying all callers before refactoring a function's signature |
+| `goToImplementation` | Finding concrete implementations of an interface |
+| `documentSymbol` | Getting an outline of a file before deep analysis |
+| `workspaceSymbol` | Broad codebase search for a symbol by name |
+| `incomingCalls` / `outgoingCalls` | Tracing call graphs before refactoring |
+
+**Rule**: Designers MUST use `findReferences` before modifying any exported function's signature. Skipping this risks breaking callers silently.
+
+### IDE Diagnostics (when available)
+
+If `mcp__ide__getDiagnostics` is available (IDE is connected), MAY use it as a faster complement to `tsc` during implementation. It does NOT replace the final `tsc --noEmit` gate.
+
+### Fallback: Non-TypeScript Projects
+
+If the target project is not TypeScript (e.g., pure JavaScript, Python, Go):
+- Skip LSP-TypeScript-specific steps
+- Use the project's native type checker (`pyright`, `mypy`, `go vet`, etc.) from `stack.md`
+- Verification-loop Phase 2 adapts to the project's type check command
+
+---
+
 ## Package Manager
 
 ### Priority (MUST detect in this order)

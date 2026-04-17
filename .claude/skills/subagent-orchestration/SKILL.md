@@ -23,6 +23,19 @@ Always evaluate subagent responses before accepting. Budget **up to 3 retrieval 
 
 ## 2. Iterative Retrieval Pattern
 
+### LSP-Accelerated Retrieval (TypeScript projects)
+
+For TypeScript codebases, use LSP before grep-based search. It is faster and more accurate:
+
+| Task | Prefer | Fallback |
+|------|--------|----------|
+| Find all callers of a function | `LSP.findReferences` | `grep` |
+| Find where a type is declared | `LSP.goToDefinition` | `grep` + manual read |
+| Get file outline (functions, classes, exports) | `LSP.documentSymbol` | `grep` |
+| Search symbol across project | `LSP.workspaceSymbol` | `grep` |
+
+Use `grep` when the search target is a string pattern (comments, strings, config keys) — not a TypeScript symbol.
+
 ### Three-Cycle Protocol
 
 ```

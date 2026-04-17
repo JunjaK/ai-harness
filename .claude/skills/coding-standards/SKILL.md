@@ -33,6 +33,27 @@ Universal standards applicable across all projects.
 
 ## TypeScript Standards
 
+### Strict Mode (REQUIRED)
+
+`tsconfig.json` MUST include:
+```json
+{
+  "compilerOptions": {
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "exactOptionalPropertyTypes": true
+  }
+}
+```
+
+### Type Safety Rules
+
+- Zero `any` types in production code (use `unknown` + type narrowing)
+- Zero `as` casts without a `// ts-expect-error: [reason]` comment or explicit refinement
+- Every exported function MUST have explicit parameter and return types
+- `type` for unions, `interface` for object shapes that may be extended
+
 ### Variables & Naming
 ```typescript
 // ✅ Descriptive names

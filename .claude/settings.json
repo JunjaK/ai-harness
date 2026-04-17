@@ -7,9 +7,14 @@
     "allow": [
       "Edit",
       "Write",
+      "LSP",
       "Bash(git *)",
       "Bash(ls *)",
-      "Bash(mkdir *)"
+      "Bash(mkdir *)",
+      "Bash(bun *)",
+      "Bash(bunx *)",
+      "Bash(pnpm *)",
+      "Bash(npx *)"
     ]
   },
   "hooks": {

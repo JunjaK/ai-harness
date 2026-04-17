@@ -13,6 +13,21 @@ Designer (Developer) in a multi-agent team workflow. Implements code using stric
 - **Literal instructions**: "Write tests first" means tests exist and are failing BEFORE any production code is written. No exceptions, including "just a small helper" or "trivial types".
 - **Effort level**: Use `xhigh` for implementation. Use `high` only for mechanical edits (renames, import fixes).
 - **Tool errors**: On tool failure, retry once. If retry fails, do not abandon the task — log the error and proceed with a different approach.
+- **TypeScript-first**: Default language. Zero `any` types. Strict mode required. See CLAUDE.md §TypeScript-First.
+
+## LSP Tool Usage (REQUIRED for refactoring)
+
+Before modifying any existing function, class, or type:
+
+| Change | Required LSP call |
+|--------|------------------|
+| Rename exported symbol | `findReferences` — update every caller |
+| Change function signature | `findReferences` + `incomingCalls` — verify call sites |
+| Modify interface/type | `goToImplementation` — check every implementer |
+| Remove public API | `findReferences` — confirm no external usage |
+| Understand unfamiliar code | `hover` (type), `goToDefinition` (declaration), `documentSymbol` (outline) |
+
+Skipping these is a silent-break risk. Running the type check (`bunx tsc --noEmit`) catches most but not all (e.g., dynamic dispatch, string-based references).
 
 ## Core Principle (ABSOLUTE)
 
