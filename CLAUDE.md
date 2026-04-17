@@ -255,154 +255,37 @@ Agents spawned by the team workflow MUST use:
 
 ---
 
-## Token Optimization
+## Operational Skills (load on demand)
 
-Settings (`settings.json`):
-```json
-{
-  "env": {
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
-  }
-}
-```
+These skills carry the full details; this file only lists hard rules.
 
-### Model Selection (required for every Agent spawn)
-
-| Task | Model | Rationale |
-|------|-------|-----------|
-| File search, exploration | Haiku 4.5 | Cheapest for read-only work |
-| Code implementation, review | Sonnet 4.6 | Balance of speed and quality |
-| Architecture, security, 5+ files | Opus 4.7 | Deep multi-file reasoning |
-
-### Context Efficiency (hard rules)
-
-- MUST keep enabled MCP servers under 10
-- MUST keep active tools under 80
-- MUST NOT compact mid-implementation (lose variable state)
-- MUST use `run_in_background: true` for commands expected to run > 30 seconds
-
-See skill: `token-optimization`.
-
----
-
-## Memory Persistence & Session State
+| Skill | Hard rule summary |
+|-------|------------------|
+| `token-optimization` | Model routing by task class; `xhigh` default effort; MCPs <10, tools <80; compact after milestones only |
+| `continuous-learning` | Write `current.md` during session; extract patterns after milestones; evolve to skill after 3+ high-confidence learnings |
+| `checkpoint` | Auto-save on Stop hook + Pre-Compact hook; manual `/checkpoint save [title]` at any time |
+| `verification-loop` | 6-phase gate (build/type/lint/test/security/diff); pass@1 ≥ 80% for tests, pass^3 = 100% for security |
+| `parallelization` | Max 5 worktrees, zero file overlap, merge order: types → backend → frontend → tests |
+| `subagent-orchestration` | 3-cycle retrieval cap; every prompt MUST include What/Why/Where/Context/Constraints/Already-tried |
 
 ### Active Hooks
 
-| Hook | Event | Script | Purpose |
-|------|-------|--------|---------|
-| Session Stop | `Stop` | `.claude/hooks/session-stop.sh` | Auto-checkpoint + archive session state |
-| Pre-Compact | `Notification` (autocompact) | `.claude/hooks/pre-compact.sh` | Auto-checkpoint + remind to save state |
-| Post-Edit Warn | `PostToolUse` (Edit, Write) | `.claude/hooks/post-edit-warn.sh` | Detect console.log, debugger, TODO markers |
+| Hook | Event | Script |
+|------|-------|--------|
+| Session Stop | `Stop` | `.claude/hooks/session-stop.sh` |
+| Pre-Compact | `Notification` (autocompact) | `.claude/hooks/pre-compact.sh` |
+| Post-Edit Warn | `PostToolUse` (Edit, Write) | `.claude/hooks/post-edit-warn.sh` |
 
-### Session State Files
+### Session State Layout
 
 ```
 .claude/session-state/
-├── current.md              # Active session state (write during session)
-├── last-session.md         # Previous session (auto-rotated by Stop hook)
-├── archive/                # Older sessions (max 20, 7-day TTL)
-├── checkpoints/            # Verification snapshots at milestones
-│   ├── latest.md           # Always most recent
-│   └── checkpoint-*.md     # Timestamped (max 10)
-└── learnings/              # Extracted reusable patterns
+├── current.md              # Active session (write during work)
+├── last-session.md         # Previous (auto-rotated by Stop)
+├── archive/                # Older (max 20, 7-day TTL)
+├── checkpoints/            # Milestone snapshots (max 10 + latest.md)
+└── learnings/              # Extracted patterns
 ```
-
-### Lifecycle
-
-```
-Session start → Stop hook injects last-session.md into context
-During session → Write/update current.md
-Before compact → pre-compact.sh auto-saves checkpoint
-Session end → Stop hook: save checkpoint → archive current.md
-```
-
----
-
-## Continuous Learning
-
-Extract reusable patterns via skill: `continuous-learning`.
-
-| Trigger | Action |
-|---------|--------|
-| Milestone completed | Extract patterns to `.claude/session-state/learnings/{topic}.md` |
-| Before compacting | Save verified approaches + key decisions to `current.md` |
-| Session ends | Stop hook saves checkpoint + archives state |
-| 3+ related learnings (all 4 criteria met) | Evolve into new SKILL.md |
-
-### Confidence Scoring
-
-- **Low** (1 session): Keep as pending, monitor
-- **Medium** (2–3 sessions): Promote to active
-- **High** (validated repeatedly): Candidate for skill evolution
-
----
-
-## Verification Checkpoints & Metrics
-
-Enhanced `verification-loop` supports checkpoints and pass@k metrics.
-
-### Checkpoint Triggers (MUST save when ANY applies)
-
-| Trigger | Checkpoint Name |
-|---------|----------------|
-| Phase 1 plan finalized | `phase1-baseline` |
-| Designer completes TDD cycle | `phase3-worktree-{name}` |
-| All worktrees merged | `phase3-integration` |
-| Phase 4 verification passes | `phase4-verified` |
-| Before PR (Phase 5) | `phase5-final-gate` |
-
-### Pass@k Targets (hard gates)
-
-| Metric | Target | Scope |
-|--------|--------|-------|
-| pass@1 ≥ 90% | Build, type check, lint | MUST almost never fail |
-| pass@1 ≥ 80% | Tests | Allows documented flaky tests |
-| pass@3 ≥ 95% | Full verification loop | ≥ 1 of 3 runs MUST be clean |
-| pass^3 = 100% | Security scan | Every run MUST pass |
-
----
-
-## Parallelization
-
-### Worktree Rules (hard caps)
-
-- Max 5 active worktrees
-- Zero file overlap between worktrees (hard rule)
-- Merge order: shared types → backend → frontend → tests
-- Clean up worktrees after merge: `git worktree remove`
-
-### Cascade Method (Multiple Claude Code Instances)
-
-- Max 3–4 concurrent instances
-- Each instance owns a disjoint file set
-- Sweep left → right for oversight
-- Use separate instances for research; MUST NOT overlap edits
-
-See skill: `parallelization`.
-
----
-
-## Subagent Orchestration
-
-### Iterative Retrieval (hard cap: 3 cycles)
-
-```
-Cycle 1: Broad retrieval (Haiku)     → evaluate gates
-Cycle 2: Contextual query (Sonnet)   → evaluate gates
-Cycle 3: Refined execution (Sonnet/Opus)
-```
-
-Gates are explicit (see `subagent-orchestration` skill). An agent that fails both gates after Cycle 2 is escalated, not retried a fourth time.
-
-### Context Briefing (MUST include in every subagent prompt)
-
-- **What**: Specific task
-- **Why**: Motivation and downstream impact
-- **Where**: Files and line ranges
-- **Context**: Relevant surrounding system info
-- **Constraints**: Hard rules the subagent MUST follow
-- **Already-tried**: What didn't work
 
 ---
 
