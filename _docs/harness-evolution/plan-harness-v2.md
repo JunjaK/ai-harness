@@ -7,7 +7,7 @@
 ## Task Description
 
 1. 두 레포에서 채택할 만한 추가 패턴 분석
-2. 작업 이어서 진행하는 특화 커맨드 (`/resume`) 설계
+2. 작업 이어서 진행하는 특화 커맨드 (`/checkpoint`) 설계
 3. 웹 개발 요청에 특화된 에이전트 설계
 
 ---
@@ -53,7 +53,7 @@
 
 ---
 
-## Part B: `/resume` 커맨드 설계
+## Part B: `/checkpoint` 커맨드 설계
 
 ### 목적
 
@@ -62,10 +62,10 @@
 ### 핵심 기능
 
 ```
-/resume               # 가장 최근 체크포인트 로드 + 계속
-/resume list          # 저장된 체크포인트 목록
-/resume save [title]  # 현재 작업 상태 명시적 저장
-/resume [id]          # 특정 체크포인트 복원
+/checkpoint               # 가장 최근 체크포인트 로드 + 계속
+/checkpoint list          # 저장된 체크포인트 목록
+/checkpoint save [title]  # 현재 작업 상태 명시적 저장
+/checkpoint [id]          # 특정 체크포인트 복원
 ```
 
 ### 체크포인트 저장 내용
@@ -114,7 +114,7 @@
 
 | 트리거 | 동작 |
 |--------|------|
-| `/resume save` | 수동 저장 |
+| `/checkpoint save` | 수동 저장 |
 | Stop 훅 | 자동 저장 (session-stop.sh 강화) |
 | 컴팩션 전 | 자동 저장 (pre-compact.sh 강화) |
 | 팀 워크플로우 페이즈 완료 | 각 페이즈 끝에 자동 저장 |
@@ -122,7 +122,7 @@
 ### 복원 워크플로우
 
 ```
-1. /resume 입력
+1. /checkpoint 입력
 2. latest.md 읽기
 3. 브랜치 확인 — 현재 브랜치와 체크포인트 브랜치 비교
 4. 플랜 파일 로드 (있으면)
@@ -134,7 +134,7 @@
 
 | 파일 | 유형 |
 |------|------|
-| `.claude/commands/resume.md` | 커맨드 정의 |
+| `.claude/commands/checkpoint.md` | 커맨드 정의 |
 | `.claude/skills/checkpoint/SKILL.md` | 체크포인트 관리 스킬 |
 | `.claude/hooks/session-stop.sh` (수정) | 자동 저장 통합 |
 | `.claude/hooks/pre-compact.sh` (수정) | 자동 저장 통합 |
@@ -259,7 +259,7 @@ Phase 5: web-reviewer (final review 참여 — security + web quality)
 
 | # | 항목 | 파일 수 |
 |---|------|---------|
-| 1 | `/resume` 커맨드 + checkpoint 스킬 | 4 |
+| 1 | `/checkpoint` 커맨드 + checkpoint 스킬 | 4 |
 | 2 | `web-architect` + `web-reviewer` 에이전트 | 2 |
 | 3 | Stop/PreCompact 훅에 자동 체크포인트 통합 | 2 (수정) |
 
@@ -291,12 +291,12 @@ Phase 5: web-reviewer (final review 참여 — security + web quality)
 - AI Slop Detection은 web-reviewer에 포함 → 디자인 리뷰 품질 크게 향상
 
 ### Arch B (BE) 관점
-- /resume의 체크포인트 포맷은 git status와 동기화 필수
+- /checkpoint의 체크포인트 포맷은 git status와 동기화 필수
 - /ship 파이프라인은 기존 verification-loop과 통합 필요
 - 웹 에이전트의 SEO/성능 검증은 백엔드 API 레이턴시와도 연관
 
 ### 합의 사항
-- /resume는 **기존 session-state 인프라** 위에 구축 (새 디렉토리 불필요)
+- /checkpoint는 **기존 session-state 인프라** 위에 구축 (새 디렉토리 불필요)
 - web-architect/web-reviewer는 **독립 에이전트** + 팀 워크플로우 통합 모두 지원
 - Sprint 1부터 시작, 나머지는 사용 피드백 후 결정
 

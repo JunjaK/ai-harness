@@ -118,12 +118,12 @@
 
 <div class="grid grid-3">
   <div class="card">
-    <div class="card-header"><span class="badge badge-new">NEW</span> /resume</div>
+    <div class="card-header"><span class="badge badge-new">NEW</span> /checkpoint</div>
     <p style="font-size:0.85rem;color:var(--text-muted)">세션 간 작업 재개 커맨드. 체크포인트 저장/복원, 브랜치 전환 후 복귀.</p>
     <table style="margin-top:0.8rem">
-      <tr><td><code>/resume</code></td><td>최근 체크포인트 로드</td></tr>
-      <tr><td><code>/resume save</code></td><td>현재 상태 저장</td></tr>
-      <tr><td><code>/resume list</code></td><td>체크포인트 목록</td></tr>
+      <tr><td><code>/checkpoint</code></td><td>최근 체크포인트 로드</td></tr>
+      <tr><td><code>/checkpoint save</code></td><td>현재 상태 저장</td></tr>
+      <tr><td><code>/checkpoint list</code></td><td>체크포인트 목록</td></tr>
     </table>
   </div>
 
@@ -140,15 +140,15 @@
   </div>
 </div>
 
-<!-- Section: /resume Flow -->
-<h2>B. /resume 커맨드 흐름</h2>
+<!-- Section: /checkpoint Flow -->
+<h2>B. /checkpoint 커맨드 흐름</h2>
 
 <div class="flow-container">
   <div class="flow-step">세션 진행 중<br><small>current.md 갱신</small></div>
   <span class="flow-arrow">&rarr;</span>
   <div class="flow-step highlight">세션 종료 / 컴팩션<br><small>자동 체크포인트 저장</small></div>
   <span class="flow-arrow">&rarr;</span>
-  <div class="flow-step">새 세션 시작<br><small>/resume 입력</small></div>
+  <div class="flow-step">새 세션 시작<br><small>/checkpoint 입력</small></div>
   <span class="flow-arrow">&rarr;</span>
   <div class="flow-step new">체크포인트 로드<br><small>브랜치+진행상황+Next Steps</small></div>
   <span class="flow-arrow">&rarr;</span>
@@ -205,7 +205,7 @@
   <div class="card">
     <div class="card-header"><span class="badge badge-tier1">TIER 1</span> 즉시</div>
     <ul class="checklist" style="font-size:0.85rem">
-      <li style="padding-left:0">/resume + checkpoint</li>
+      <li style="padding-left:0">/checkpoint + checkpoint</li>
       <li style="padding-left:0">web-architect + web-reviewer</li>
       <li style="padding-left:0">Hook 자동 체크포인트 통합</li>
     </ul>
@@ -266,7 +266,7 @@
 
 <table>
   <tr><th>파일</th><th>유형</th><th>Sprint</th><th>설명</th></tr>
-  <tr><td><code>.claude/commands/resume.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>/resume 커맨드 정의</td></tr>
+  <tr><td><code>.claude/commands/checkpoint.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>/checkpoint 커맨드 정의</td></tr>
   <tr><td><code>.claude/skills/checkpoint/SKILL.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>체크포인트 관리 스킬</td></tr>
   <tr><td><code>.claude/agents/web-architect.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>웹 아키텍처 설계 에이전트</td></tr>
   <tr><td><code>.claude/agents/web-reviewer.md</code></td><td style="color:var(--accent-green)">NEW</td><td>1</td><td>웹 품질 검증 에이전트</td></tr>

@@ -1,19 +1,22 @@
-# Resume — Checkpoint-Based Work Continuation
+# Checkpoint — Save and Restore Work State
 
-Resume interrupted work by loading saved checkpoints. Supports cross-session, cross-branch, and post-compaction recovery.
+Save or resume interrupted work via checkpoint files. Supports cross-session, cross-branch, and post-compaction recovery.
+
+> Note: This is a custom `/checkpoint` command for work-state management.
+> It does not replace Claude Code's built-in `/resume` (which resumes a previous conversation).
 
 ## Usage
 
 ```
-/resume               # Load most recent checkpoint and continue
-/resume list          # Show all saved checkpoints
-/resume save [title]  # Manually save current work state
-/resume [id]          # Load a specific checkpoint by timestamp
+/checkpoint                   # Load most recent checkpoint and continue work
+/checkpoint list              # Show all saved checkpoints
+/checkpoint save [title]      # Manually save current work state
+/checkpoint load [id]         # Load a specific checkpoint by timestamp
 ```
 
 ## Workflow
 
-### `/resume` (no args) — Load Latest
+### `/checkpoint` (no args) — Load Latest
 
 1. Read `.claude/session-state/checkpoints/latest.md`
 2. If not found, check `.claude/session-state/last-session.md`
@@ -27,7 +30,7 @@ Resume interrupted work by loading saved checkpoints. Supports cross-session, cr
    - If yes, read the plan for additional context
 6. Ask: "Continue from where you left off?" and proceed with Next Steps
 
-### `/resume save [title]` — Save Checkpoint
+### `/checkpoint save [title]` — Save Checkpoint
 
 1. Gather current state:
    - `git branch --show-current` → current branch
@@ -37,7 +40,7 @@ Resume interrupted work by loading saved checkpoints. Supports cross-session, cr
 3. Also write timestamped copy: `checkpoint-{YYYYMMDD-HHMM}.md`
 4. Confirm: "Checkpoint saved: {title}"
 
-### `/resume list` — List Checkpoints
+### `/checkpoint list` — List Checkpoints
 
 1. List all files in `.claude/session-state/checkpoints/`
 2. Parse each file's header (title, branch, timestamp)
@@ -49,10 +52,10 @@ Resume interrupted work by loading saved checkpoints. Supports cross-session, cr
    | 2 | 2026-04-16 11:00 | API design done     | main        |
    ```
 
-### `/resume [id]` — Load Specific
+### `/checkpoint load [id]` — Load Specific
 
 1. Match `[id]` against checkpoint timestamps or titles
-2. Load and display (same as `/resume` no-args flow)
+2. Load and display (same as `/checkpoint` no-args flow)
 
 ## Auto-Save Triggers
 

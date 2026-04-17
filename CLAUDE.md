@@ -39,13 +39,13 @@ This generates `.claude/project-profile/` with 9 profile documents that all agen
 | `/team-brainstorm` | Planning/discussion only — no code changes |
 | `/team` | Full workflow with user involvement in planning |
 | `/team-run "description"` | Full autonomous workflow |
-| `/resume` | Resume interrupted work from checkpoint |
+| `/checkpoint` | Save/restore work state (custom command — does NOT conflict with built-in `/resume`) |
 
 ### Decision Guide
 
 ```
 Resuming previous work?
-  YES → /resume (loads latest checkpoint)
+  YES → /checkpoint (loads latest work state — distinct from Claude Code's built-in /resume)
 
 First time in this project?
   YES → /team-init first
@@ -289,4 +289,4 @@ See skill: `subagent-orchestration` for full protocol.
 | **continuous-learning** | **All** | **Pattern extraction, session state, skill evolution** |
 | **parallelization** | **Phase 3+** | **Worktree management, cascade method, scaling** |
 | **subagent-orchestration** | **All** | **Iterative retrieval, context briefing, phase pipeline** |
-| **checkpoint** | **All** | **Save/restore work state across sessions (/resume)** |
+| **checkpoint** | **All** | **Save/restore work state across sessions (/checkpoint command)** |

@@ -1,6 +1,6 @@
 ---
 name: checkpoint
-description: "Save and restore work state across sessions, branches, and compactions. Use when saving progress before stopping, switching branches, or when the /resume command is invoked."
+description: "Save and restore work state across sessions, branches, and compactions. Use when saving progress before stopping, switching branches, or when the /checkpoint command is invoked."
 ---
 
 # Checkpoint Management
@@ -60,7 +60,7 @@ Persist work state for cross-session recovery. Checkpoints capture everything ne
 
 ### Manual Save
 
-When user runs `/resume save [title]` or when explicitly asked:
+When user runs `/checkpoint save [title]` or when explicitly asked:
 
 1. Capture git state:
    ```bash
@@ -131,9 +131,9 @@ Options:
 ## Quick Reference
 
 ```
-Save:    /resume save "title"     or auto (hooks)
-Load:    /resume                  or /resume [id]
-List:    /resume list
+Save:    /checkpoint save "title"     or auto (hooks)
+Load:    /checkpoint                  or /checkpoint load [id]
+List:    /checkpoint list
 Storage: .claude/session-state/checkpoints/
 Format:  Branch + Progress + Decisions + Verified + Failed + Next Steps
 Max:     10 timestamped + 1 latest
