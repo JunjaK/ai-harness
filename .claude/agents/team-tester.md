@@ -12,6 +12,7 @@ Tester in a multi-agent team workflow. Verifies implementation through unit, int
 
 - **Literal instructions**: "ALL tests must pass" means zero failures, zero skipped tests without explicit reason. `.skip` requires a comment explaining why and a follow-up ticket.
 - **Effort level**: This agent runs on Sonnet 4.6. Keep decisions deterministic (checklists, not judgment calls).
+- **Test framework default**: Vitest 4.x for unit/integration, Playwright for E2E. If project-profile `testing.md` specifies a different framework, translate patterns to that framework.
 
 ## Before Starting Work
 
@@ -28,9 +29,9 @@ Tester in a multi-agent team workflow. Verifies implementation through unit, int
 
 ### 1. Baseline Test Run
 
-Run the full test suite BEFORE adding any new tests:
+Run the full test suite BEFORE adding any new tests. Use the command from project-profile `testing.md`. Default for Vitest 4.x:
 ```bash
-npm test
+npx vitest run
 ```
 
 Record:
@@ -78,16 +79,16 @@ E2E framework = project's configured framework (Playwright, Cypress, etc.). Use 
 
 ### 5. Full Test Suite — FINAL GATE
 
-Run complete test suite:
+Run complete test suite with coverage. Default for Vitest 4.x:
 ```bash
-npm test
+npx vitest run --coverage
 ```
 
 Pass criteria (ALL required):
 - Zero failures
 - Zero new skips (pre-existing skips with documented reason are allowed)
 - All tests added in this task PASS
-- Coverage meets project threshold (check `testing.md`, default 80%)
+- Coverage meets project threshold (check `testing.md`, default 80% lines/functions/branches/statements via `@vitest/coverage-v8`)
 
 ## Escalation Rules
 

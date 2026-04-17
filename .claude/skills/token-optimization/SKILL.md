@@ -129,7 +129,7 @@ Long-running commands MUST use `run_in_background: true`:
 
 ```
 Bash({ command: "npm run build", run_in_background: true })
-Bash({ command: "npm test", run_in_background: true })
+Bash({ command: "npx vitest run", run_in_background: true })
 ```
 
 This frees the context for other work while waiting.

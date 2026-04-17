@@ -85,9 +85,9 @@ With tests green, clean up code:
 ### 5. Verify
 
 MUST pass all four checks before reporting completion:
-1. `npm run lint` (or project equivalent) — zero errors
-2. `npm run typecheck` (or `tsc --noEmit`) — zero errors
-3. Project test command — all tests pass, zero failures
+1. Linter — project command from `testing.md` (e.g., `npx eslint .` or `npx biome check`) — zero errors
+2. Type check — `npx tsc --noEmit` — zero errors
+3. Test suite — project command from `testing.md`. Default for Vitest 4.x: `npx vitest run` — zero failures
 4. Manual spot-check: open one modified file and confirm the code matches the plan's intent
 
 ### 6. Commit

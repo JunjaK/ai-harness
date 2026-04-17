@@ -36,11 +36,11 @@ npx eslint . --max-warnings=0 2>&1 | head -30
 **Common failures**: Unused imports, formatting issues, rule violations
 
 ### Phase 4: Tests
-Run the full test suite.
+Run the full test suite. Use command from project-profile `testing.md`. Default for Vitest 4.x:
 ```bash
-npm test 2>&1
+npx vitest run --coverage 2>&1
 ```
-**Pass**: All tests pass, coverage ≥ 80%
+**Pass**: All tests pass, coverage ≥ 80% (lines, functions, branches, statements)
 **Common failures**: Broken assertions, missing mocks, flaky tests
 
 ### Phase 5: Security Scan
