@@ -45,8 +45,8 @@ Before starting any phase, verify `.claude/project-profile/index.md` exists.
 
 ### Step 1: Spawn Team Leader
 
-Read `.claude/agents/team-leader.md` and spawn with the task description.
-Include `.claude/project-profile/index.md` content in the prompt.
+Spawn the `team-leader` agent via the Agent tool (subagent_type: `team-leader`) with the task description.
+Include `.claude/project-profile/index.md` content (from the user's project CWD) in the prompt.
 
 For `/team` mode: Include instruction "Ask the user about ambiguous decisions."
 For `/team-run` mode: Include instruction "Make all decisions autonomously."
@@ -56,8 +56,8 @@ For `/team-run` mode: Include instruction "Make all decisions autonomously."
 After Leader produces rough plan, spawn both architects in parallel:
 
 ```
-Agent(prompt="[team-architect-fe.md content]\n\nLeader Plan:\n[plan]\n\nCreate detailed frontend plan.")
-Agent(prompt="[team-architect-be.md content]\n\nLeader Plan:\n[plan]\n\nCreate detailed backend plan.")
+Agent(subagent_type="team-architect-fe", prompt="Leader Plan:\n[plan]\n\nCreate detailed frontend plan.")
+Agent(subagent_type="team-architect-be", prompt="Leader Plan:\n[plan]\n\nCreate detailed backend plan.")
 ```
 
 ### Step 3: Cross-Review
@@ -69,7 +69,7 @@ Each reviews the other's plan. Leader mediates and finalizes.
 
 If Leader flagged infra/security concerns, spawn Architect C:
 ```
-Agent(prompt="[team-architect-infra.md content]\n\nPlan:\n[consolidated plan]\n\nReview for infra/security concerns.")
+Agent(subagent_type="team-architect-infra", prompt="Plan:\n[consolidated plan]\n\nReview for infra/security concerns.")
 ```
 
 ### Step 5: Save Plan to _docs/
@@ -92,7 +92,7 @@ Status starts as "Planning" and progresses through "In Progress" → "Verificati
 Only if Leader indicated UI/UX changes needed:
 
 ```
-Agent(prompt="[team-uiux-master.md content]\n\nPlan:\n[plan]\n\nReview and propose UI/UX modifications.")
+Agent(subagent_type="team-uiux-master", prompt="Plan:\n[plan]\n\nReview and propose UI/UX modifications.")
 ```
 
 If UI/UX Master reports conflicts → escalate to Phase 1.
@@ -119,7 +119,8 @@ Designer 2: [file-c, file-d] → worktree-2
 For each Designer:
 ```
 Agent(
-  prompt="[team-designer.md content]\n\nYour assignment:\nFiles: [list]\nPlan: [relevant section]\n\nImplement using TDD.",
+  subagent_type="team-designer",
+  prompt="Your assignment:\nFiles: [list]\nPlan: [relevant section]\n\nImplement using TDD.",
   isolation="worktree",
   mode="bypassPermissions"
 )
@@ -142,7 +143,8 @@ Update `_docs/{category}/plan-{feature}.md` with implementation notes. Set statu
 
 ```
 Agent(
-  prompt="[team-tester.md content]\n\nImplementation reports:\n[reports]\n\nPlan:\n[plan]\n\nVerify all tests pass.",
+  subagent_type="team-tester",
+  prompt="Implementation reports:\n[reports]\n\nPlan:\n[plan]\n\nVerify all tests pass.",
   mode="bypassPermissions"
 )
 ```

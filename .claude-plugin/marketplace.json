@@ -1,0 +1,19 @@
+{
+  "name": "junjak-ai-harness",
+  "owner": {
+    "name": "Junjak",
+    "email": "haring157@gmail.com",
+    "url": "https://github.com/Junjak"
+  },
+  "description": "Junjak's AI Harness — multi-agent team workflow plugin for Claude Code",
+  "plugins": [
+    {
+      "name": "junjak-ai-harness",
+      "source": "./",
+      "description": "TypeScript-first multi-agent team workflow harness for Claude Opus 4.7",
+      "version": "1.0.0",
+      "category": "workflow",
+      "tags": ["team-workflow", "multi-agent", "tdd", "orchestration"]
+    }
+  ]
+}

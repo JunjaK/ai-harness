@@ -15,7 +15,7 @@ Analyze the current project and generate a structured profile that all team agen
 
 ## What It Does
 
-1. **Load skill**: Read `.claude/skills/project-analyzer/SKILL.md`
+1. **Load skill**: Invoke the `project-analyzer` skill
 2. **Scan project** following the 9-step analysis process
 3. **Generate profile** files in `.claude/project-profile/`
 4. **Report** what was found and any notable conventions

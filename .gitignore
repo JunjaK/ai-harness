@@ -1,0 +1,3 @@
+# Claude Code runtime data (session-state, settings.local.json)
+.claude/
+.DS_Store

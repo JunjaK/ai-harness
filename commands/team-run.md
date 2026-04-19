@@ -35,7 +35,7 @@ Same as `/team` but with key differences:
 
 ## Orchestration
 
-1. **Load skill**: Read `.claude/skills/team-workflow/SKILL.md`
+1. **Load skill**: Invoke the `team-workflow` skill
 2. After Phase 1: Generate HTML plan diagram using `plan-visualizer` skill
    - Save to `_docs/{category}/plan-{feature}.visual.html` (same dir as plan .md)
    - Add `[View Plan Diagram](./plan-{feature}.visual.html)` link in plan .md

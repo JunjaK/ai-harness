@@ -55,24 +55,63 @@ Phase 5: Final Security Review
 | `/team-run` | Autonomous mode — full auto-execution |
 | `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
 
-## Quick Start
+## Installation (Plugin)
+
+This harness is distributed as a **Claude Code plugin**.
 
 ```bash
-# 1. Clone this repo
-git clone https://github.com/JunjaK/ai-harness.git
+# 1. Add the marketplace
+/plugin marketplace add Junjak/ai-harness
 
-# 2. Copy .claude/ and CLAUDE.md into your project
-cp -r ai-harness/.claude/ /path/to/your/project/
-cp ai-harness/CLAUDE.md /path/to/your/project/
-
-# 3. Run project analysis (in Claude Code)
-/team-init
-
-# 4. Start working
-/team "Add user authentication"
+# 2. Install the plugin
+/plugin install junjak-ai-harness@junjak-ai-harness
 ```
 
-`/team-init` scans your project and generates `.claude/project-profile/` — all agents automatically adapt to your stack and conventions.
+### Required User Configuration
+
+The plugin manifest cannot set environment variables or permissions. Add to your **user** or **project** `settings.json`:
+
+```json
+{
+  "env": {
+    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
+    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
+  },
+  "permissions": {
+    "allow": [
+      "Edit",
+      "Write",
+      "LSP",
+      "Bash(git *)",
+      "Bash(ls *)",
+      "Bash(mkdir *)",
+      "Bash(bun *)",
+      "Bash(bunx *)",
+      "Bash(pnpm *)",
+      "Bash(npx *)"
+    ]
+  }
+}
+```
+
+> `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is **required** — `/team`, `/team-run`, `/team-brainstorm` depend on `TeamCreate` for cross-review.
+
+### Dependency
+
+This plugin depends on [`impeccable`](https://github.com/anthropics/claude-plugins-official) for UI/UX skills (`shape`, `critique`, `audit`, `polish`, etc.). Install first if not already:
+
+```bash
+/plugin install impeccable
+```
+
+### First Run
+
+```
+/team-init                        # Scan project → generate .claude/project-profile/
+/team "Add user authentication"   # Start a workflow
+```
+
+`/team-init` generates `.claude/project-profile/` in your project — all agents adapt to your stack and conventions.
 
 ## Customization
 
@@ -130,39 +169,46 @@ Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `
 
 For general API design patterns, use the Claude Code built-in `api-design` skill directly (the harness does not wrap it).
 
-## File Structure
+## Plugin Structure
 
 ```
-.claude/
-├── agents/
-│   ├── team-leader.md           # Coordination, planning, approval
-│   ├── team-architect-fe.md     # Frontend architecture
-│   ├── team-architect-be.md     # Backend architecture
-│   ├── team-architect-infra.md  # Infra/security review
-│   ├── team-uiux-master.md     # UI/UX proposals
-│   ├── team-designer.md        # TDD implementation
-│   └── team-tester.md          # Test verification
+junjak-ai-harness/
+├── .claude-plugin/
+│   ├── plugin.json              # Plugin manifest
+│   └── marketplace.json         # Marketplace definition (single-repo)
+├── agents/                      # 9 specialized agents
+│   ├── team-leader.md
+│   ├── team-architect-fe.md
+│   ├── team-architect-be.md
+│   ├── team-architect-infra.md
+│   ├── team-uiux-master.md
+│   ├── team-designer.md
+│   ├── team-tester.md
+│   ├── web-architect.md
+│   └── web-reviewer.md
 ├── commands/
-│   ├── team-init.md             # /team-init (project analysis)
-│   ├── team.md                  # /team (interactive)
-│   ├── team-run.md             # /team-run (autonomous)
-│   └── team-brainstorm.md      # /team-brainstorm (planning only)
-└── skills/
-    ├── team-workflow/           # Core orchestration
-    │   ├── SKILL.md
-    │   └── resources/
-    │       ├── agents.md
-    │       └── escalation.md
-    ├── plan-review/SKILL.md     # Phase 1: plan critique
-    ├── coding-standards/SKILL.md # Phase 3: code quality
-    ├── tdd-workflow/SKILL.md    # Phase 3: TDD cycle
-    ├── debug/SKILL.md           # Phase 3-4: debugging
-    ├── e2e-testing/SKILL.md     # Phase 4: E2E patterns
-    ├── verification-loop/SKILL.md # Phase 4-5: quality gate
-    ├── security-review/SKILL.md # Phase 5: security audit
-    ├── plan-visualizer/SKILL.md # HTML plan diagram
-    └── project-analyzer/SKILL.md # Project analysis
+│   ├── team-init.md             # /team-init
+│   ├── team.md                  # /team
+│   ├── team-run.md              # /team-run
+│   ├── team-brainstorm.md       # /team-brainstorm
+│   └── checkpoint.md            # /checkpoint
+├── hooks/
+│   ├── hooks.json               # Plugin hook registration
+│   ├── session-stop.sh
+│   ├── pre-compact.sh
+│   └── post-edit-warn.sh
+└── skills/                      # 15 workflow skills
+    ├── team-workflow/
+    ├── project-analyzer/
+    ├── tdd-workflow/
+    ├── verification-loop/
+    ├── security-review/
+    └── ... (11 more)
 ```
+
+### CLAUDE.md Note
+
+Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this repo root documents the harness's operating principles. Users who want the full ruleset should copy relevant sections into their own project `CLAUDE.md`.
 
 ## License
 

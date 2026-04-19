@@ -16,7 +16,7 @@ If no task description provided, ask the user for one.
 
 ## Workflow
 
-1. **Load skill**: Read `.claude/skills/team-workflow/SKILL.md` for agent definitions
+1. **Load skill**: Invoke the `team-workflow` skill for agent definitions
 2. **Spawn Team Leader** with task description
    - Leader drafts rough plan
    - Leader asks user about ambiguous decisions (always interactive)
@@ -39,7 +39,7 @@ After the plan is finalized, generate an HTML file with:
 - **Dependency graph** — component/store/API relationships
 - **Risk highlights** — from plan-review (if applicable)
 
-Use the plan-visualizer skill: `.claude/skills/plan-visualizer/SKILL.md`
+Invoke the `plan-visualizer` skill.
 
 ## Output
 

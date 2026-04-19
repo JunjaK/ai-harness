@@ -195,7 +195,7 @@ _docs/
 
 ## Agents
 
-All agents live in `.claude/agents/` and are invoked by the `team-workflow` skill.
+All agents live in the plugin's `agents/` directory and are invoked by the `team-workflow` skill via the Agent tool (`subagent_type: <agent-name>`).
 
 | Agent | Model | Role |
 |-------|-------|------|
@@ -246,7 +246,7 @@ Agents spawned by the team workflow MUST use:
 
 ## Escalation Rules
 
-- Each agent classifies issues as **Simple Fix** or **Fundamental Issue** using deterministic criteria in `.claude/skills/team-workflow/resources/escalation.md`
+- Each agent classifies issues as **Simple Fix** or **Fundamental Issue** using deterministic criteria in `skills/team-workflow/resources/escalation.md`
 - Per-phase retries: max 3
 - Global re-plan cycles: max 3 → ABORT on exceed
 - Every escalation MUST be reported to the user in the required format
@@ -271,9 +271,11 @@ These skills carry the full details; this file only lists hard rules.
 
 | Hook | Event | Script |
 |------|-------|--------|
-| Session Stop | `Stop` | `.claude/hooks/session-stop.sh` |
-| Pre-Compact | `Notification` (autocompact) | `.claude/hooks/pre-compact.sh` |
-| Post-Edit Warn | `PostToolUse` (Edit, Write) | `.claude/hooks/post-edit-warn.sh` |
+| Session Stop | `Stop` | `hooks/session-stop.sh` |
+| Pre-Compact | `PreCompact` (auto) | `hooks/pre-compact.sh` |
+| Post-Edit Warn | `PostToolUse` (Edit\|Write) | `hooks/post-edit-warn.sh` |
+
+Registered via `hooks/hooks.json` using `${CLAUDE_PLUGIN_ROOT}` for absolute paths.
 
 ### Session State Layout
 

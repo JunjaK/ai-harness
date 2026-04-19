@@ -16,7 +16,7 @@ If no task description provided, ask the user for one.
 
 ## Workflow
 
-1. **Load skill**: Read `.claude/skills/team-workflow/SKILL.md` for orchestration logic
+1. **Load skill**: Invoke the `team-workflow` skill for orchestration logic
 2. **Phase 1 — Planning** (user involved):
    - Spawn Team Leader with instruction to ask user about ambiguous decisions
    - Spawn Architects A + B in parallel

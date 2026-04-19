@@ -1,0 +1,24 @@
+{
+  "name": "junjak-ai-harness",
+  "description": "TypeScript-first multi-agent team workflow harness for Claude Opus 4.7 — 5 phases, TDD enforcement, escalation loops, worktree parallelization",
+  "version": "1.0.0",
+  "author": {
+    "name": "Junjak",
+    "email": "haring157@gmail.com"
+  },
+  "homepage": "https://github.com/Junjak/ai-harness",
+  "repository": "https://github.com/Junjak/ai-harness",
+  "license": "MIT",
+  "keywords": [
+    "team-workflow",
+    "multi-agent",
+    "tdd",
+    "typescript",
+    "opus-4.7",
+    "orchestration",
+    "agent-teams"
+  ],
+  "dependencies": [
+    "impeccable"
+  ]
+}
