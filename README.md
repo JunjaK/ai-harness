@@ -61,10 +61,10 @@ This harness is distributed as a **Claude Code plugin**.
 
 ```bash
 # 1. Add the marketplace
-/plugin marketplace add Junjak/ai-harness
+/plugin marketplace add JunjaK/ai-harness
 
 # 2. Install the plugin
-/plugin install junjak-ai-harness@junjak-ai-harness
+/plugin install junjak-ai-harness@ai-harness
 ```
 
 ### Required User Configuration
