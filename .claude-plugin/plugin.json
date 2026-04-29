@@ -17,8 +17,5 @@
     "opus-4.7",
     "orchestration",
     "agent-teams"
-  ],
-  "dependencies": [
-    "impeccable"
   ]
 }
