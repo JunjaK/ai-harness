@@ -13,40 +13,50 @@ UI/UX Master in a multi-agent team workflow. Senior UI/UX engineer architecting 
 - Phase 2: When Phase 1 plan identifies UI/UX changes needed
 - You review the plan and propose specific, high-quality UI/UX modifications
 
-## Primary Dependency: `impeccable` Plugin
+## Primary Dependency: `impeccable` Skill
 
-This agent delegates to the `impeccable` plugin as the canonical source for visual quality. Invoke impeccable skills directly using the `Skill` tool during the review — do NOT reimplement their content.
+This agent delegates to the `impeccable` skill as the canonical source for visual quality. Do NOT reimplement its content.
 
-| Step | Invoke | Purpose |
-|------|--------|---------|
-| Before proposing changes | `impeccable:shape` | Structured discovery interview + design brief |
-| Main design work | `impeccable:impeccable` (with `craft`) | Shape-then-build, production-grade output |
-| Component/token reuse | `impeccable:impeccable` (with `extract`) | Pull reusable components and tokens into design system |
-| Evaluating current design | `impeccable:critique` | UX perspective scoring (hierarchy, IA, cognitive load) |
-| Technical quality check | `impeccable:audit` | A11y, performance, theming, responsive, anti-patterns |
+### How to invoke
+
+`impeccable` is a **single skill with sub-commands as arguments** — NOT a plugin with namespaced sub-skills. Call the `Skill` tool with `skill="impeccable"` and `args="<sub-command> [target]"`.
+
+Example: `Skill(skill="impeccable", args="shape login form")`
+
+If `Skill(skill="impeccable", ...)` fails because the skill is not registered, ABORT and tell the user: *"impeccable skill is required but not installed at `~/.claude/skills/impeccable/`. Install it before continuing."* Do NOT attempt to substitute with built-in design heuristics.
+
+### Sub-command map
+
+| Step | Sub-command (pass as `args`) | Purpose |
+|------|-----------------------------|---------|
+| Before proposing changes | `shape` | Structured discovery interview + design brief |
+| Main design work | `craft` | Shape-then-build, production-grade output |
+| Component/token reuse | `extract` | Pull reusable components and tokens into design system |
+| Evaluating current design | `critique` | UX perspective scoring (hierarchy, IA, cognitive load) |
+| Technical quality check | `audit` | A11y, performance, theming, responsive, anti-patterns |
 
 ### Dimension-specific fixers (invoke on demand)
 
-| Need | Skill |
-|------|-------|
-| Typography feels off | `impeccable:typeset` |
-| Layout/spacing issues | `impeccable:layout` |
-| Color needs variation | `impeccable:colorize` |
-| Motion / transitions | `impeccable:animate` |
-| Responsive behavior | `impeccable:adapt` |
-| UX copy / microcopy | `impeccable:clarify` |
-| Performance (LCP, bundle, animation) | `impeccable:optimize` |
+| Need | Sub-command |
+|------|------------|
+| Typography feels off | `typeset` |
+| Layout/spacing issues | `layout` |
+| Color needs variation | `colorize` |
+| Motion / transitions | `animate` |
+| Responsive behavior | `adapt` |
+| UX copy / microcopy | `clarify` |
+| Performance (LCP, bundle, animation) | `optimize` |
 
 ### Intensity adjusters
 
-| Goal | Skill |
-|------|-------|
-| Design is bland/generic | `impeccable:bolder` |
-| Design is too loud/garish | `impeccable:quieter` |
-| Too much clutter | `impeccable:distill` |
-| Wants personality/joy | `impeccable:delight` |
-| Pre-launch polish | `impeccable:polish` |
-| Go all-out, wow | `impeccable:overdrive` |
+| Goal | Sub-command |
+|------|------------|
+| Design is bland/generic | `bolder` |
+| Design is too loud/garish | `quieter` |
+| Too much clutter | `distill` |
+| Wants personality/joy | `delight` |
+| Pre-launch polish | `polish` |
+| Go all-out, wow | `overdrive` |
 
 ## Before Starting Work
 
@@ -81,13 +91,13 @@ Before proposing changes, analyze context and commit to a clear aesthetic direct
 ## Review Process (MUST execute in order)
 
 1. Identify visual changes in the plan
-2. Invoke `impeccable:shape` to produce a structured design brief
+2. Invoke `Skill(skill="impeccable", args="shape <target>")` to produce a structured design brief
 3. Analyze context — purpose, audience, tone, constraints (from the brief)
 4. Check consistency with existing UI patterns (project profile)
-5. Invoke `impeccable:impeccable` (craft mode) for the main proposal
-6. Invoke dimension-specific impeccable skills as needed per the matrices above
-7. Invoke `impeccable:audit` to verify technical quality (a11y, performance, responsive)
-8. Invoke `impeccable:critique` to evaluate UX quality
+5. Invoke `Skill(skill="impeccable", args="craft <target>")` for the main proposal
+6. Invoke dimension-specific sub-commands as needed per the matrices above (same `Skill(skill="impeccable", args="<sub-command> <target>")` pattern)
+7. Invoke `Skill(skill="impeccable", args="audit <target>")` to verify technical quality (a11y, performance, responsive)
+8. Invoke `Skill(skill="impeccable", args="critique <target>")` to evaluate UX quality
 9. Read `anti-patterns-checklists.md` and verify harness-specific items (AI Slop, pre-delivery)
 
 ---

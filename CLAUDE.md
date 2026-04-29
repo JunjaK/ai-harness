@@ -309,13 +309,21 @@ These built-ins are the canonical tools for their domain. The harness does NOT w
 | `/cost`, `/context` | Token usage + context grid | Check before deciding to compact. |
 | `/rewind` | Roll back conversation or code | Use when an agent's output is structurally wrong and targeted editing will not recover. |
 
-### UI/UX delegation to `impeccable` plugin
+### UI/UX delegation to `impeccable` skill
 
-UI/UX quality is delegated to the `impeccable` plugin (installed). The harness does NOT reimplement its design guidance.
+UI/UX quality is delegated to the `impeccable` skill. The harness does NOT reimplement its design guidance.
 
-| Harness agent | Impeccable skills used |
-|---------------|-----------------------|
-| `team-uiux-master` | `shape`, `impeccable` (craft/extract), `critique`, `audit`, `typeset`/`layout`/`colorize`/`animate`/`adapt`/`clarify`/`optimize`, `bolder`/`quieter`/`distill`/`delight`/`polish`/`overdrive` |
+`impeccable` is a **single personal skill** (installed at `~/.claude/skills/impeccable/`), NOT a Claude Code plugin with namespaced sub-skills. Sub-commands are passed as the `args` parameter:
+
+```
+Skill(skill="impeccable", args="<sub-command> [target]")
+```
+
+MUST NOT call `Skill(skill="impeccable:shape", ...)` — that namespace does not exist and will fail. If the skill is not registered, abort and request the user install it.
+
+| Harness agent | Sub-commands used (passed as `args`) |
+|---------------|------------------------------------|
+| `team-uiux-master` | `shape`, `craft`, `extract`, `critique`, `audit`, `typeset`/`layout`/`colorize`/`animate`/`adapt`/`clarify`/`optimize`, `bolder`/`quieter`/`distill`/`delight`/`polish`/`overdrive` |
 | `web-architect` | `shape` (when planning visual elements) |
 | `web-reviewer` | `audit` (a11y + perf + theming + responsive), `critique` (UX), `polish` (final pass) |
 

@@ -98,11 +98,13 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 
 ### Dependency
 
-This plugin depends on [`impeccable`](https://github.com/anthropics/claude-plugins-official) for UI/UX skills (`shape`, `critique`, `audit`, `polish`, etc.). Install first if not already:
+This plugin depends on the `impeccable` skill for UI/UX work (`shape`, `critique`, `audit`, `polish`, etc.). `impeccable` is distributed as a **single personal skill**, not a Claude Code plugin — install it manually to:
 
-```bash
-/plugin install impeccable
 ```
+~/.claude/skills/impeccable/
+```
+
+The `impeccable` agents (`team-uiux-master`, `web-architect`, `web-reviewer`) call it via `Skill(skill="impeccable", args="<sub-command> [target]")`. If the skill is missing they will abort with a request to install it.
 
 ### First Run
 
