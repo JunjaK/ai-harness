@@ -44,6 +44,17 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 - Test: `[test command]`
 - Install: `[install command]`
 - Audit: `[audit command]`
+
+## Build & Verify — AUTHORITATIVE commands (verify these are NOT vacuous)
+> Every gate and agent uses THESE, never a convenience alias. A `typecheck`/`lint` npm script
+> can check nothing (e.g. a solution-style root `tsconfig.json` with `"files": []` makes
+> `tsc --noEmit` a no-op that always exits 0). Run each once and confirm it actually exercises
+> the code (type-check compiles real sources; test run collects > 0 tests; lint scans > 0 files).
+- Type-check (authoritative): `[e.g. tsc --noEmit -p tsconfig.app.json | vue-tsc -p .nuxt/tsconfig.app.json | pyright]`
+  - Vacuity-checked: [yes — confirmed it reports errors on real sources / N/A]
+  - Pre-existing error baseline: [count, or 0 for greenfield] — gate on net-new vs this
+- Lint (authoritative): `[e.g. eslint . | biome check .]` — baseline: [count]
+- Test (authoritative): `[e.g. vitest run]` — confirmed collects [N] tests
 ```
 
 ---
@@ -136,11 +147,15 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 - Base client: [axios / fetch / $fetch / ky]
 - Base URL config: [env variable name]
 
-## Generated Code (if any)
-- Generator: [openapi-generator / orval / ...]
+## Generated Code (if any) — REQUIRED for the contract-sync gate
+- Generator: [openapi-generator / orval / swagger-typescript-api / GraphQL Code Generator / tRPC / protobuf / Prisma / ...]
 - Models location: [path]
 - API composables/hooks: [path]
-- Editable: [which are safe to edit]
+- **Spec source**: [live endpoint e.g. `/v3/api-docs` (requires running backend) OR committed schema file path]
+- **Regen command**: [exact command to regenerate the client, e.g. `pnpm api:gen:all`]
+- **Hand-maintained overrides inside the generated tree**: [files the generator must NOT clobber — list paths, or "None". These get stripped on every regen and need restore.]
+- **Post-regen fixups**: [any deterministic post-process step that patches generator output, e.g. a brand-type/discriminated-union workaround — or "None". Keep these idempotent and in the generation chain, not as manual edits.]
+- Editable: [which generated files are safe to hand-edit — usually "none; backend is source of truth"]
 
 ## Request Patterns
 [Actual pattern from codebase]

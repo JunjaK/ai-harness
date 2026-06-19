@@ -110,6 +110,23 @@ function processOrder(order: Order): ProcessedOrder { ... }
 function processOrder(order: any): any { ... }
 ```
 
+## Reactivity & Effects (frameworks with reactive state)
+
+Applies to Vue, Svelte, Solid, MobX, RxJS, React effects — anywhere a value change can implicitly trigger code.
+
+- **Prefer explicit event/lifecycle/hook triggers over reactive watchers.** A `watch`/`$effect`/`useEffect`/`autorun` makes "when and why did this run" implicit — it fires on dependency changes you may not have intended, runs in an order that's hard to reason about, and is a frequent source of redundant work and feedback loops. An explicit handler (`onSubmit`, `afterChange`, a lifecycle hook, an event bus) says exactly when it runs.
+- **Before adding a watcher, justify it**: is there a concrete event or lifecycle point that expresses the same intent? Use the watcher only when the trigger genuinely is "this derived value changed and there is no event for it."
+- **Never chain watchers that write state other watchers read** — that is an implicit dependency graph that re-runs unpredictably. Make the flow explicit.
+- Why this matters: most "why did this run twice / in the wrong order / infinitely" bugs in reactive UIs trace back to a watcher doing work that an event should have done.
+
+## Data Integrity (write / sync / migration / automated-write paths)
+
+Operations that mutate user data, transition state, or run automated/AI writes need a higher-scrutiny lens than read paths.
+
+- **Validate at the input boundary AND re-validate on the server.** Client-side validation (a form/widget) is a UX affordance, not a guarantee — paste, import, and direct-API paths bypass it. The backstop is server-side re-validation on every non-UI write path. (Storing a value as text while validating shape at input time is a legitimate strategy, but only with that server backstop.)
+- **Make write/sync operations idempotent.** A sync/upsert that lacks a uniqueness guard or "already-applied" check will duplicate-write on every run. Before shipping a write path, ask: "if this runs twice, does it corrupt data?" If yes, add the guard (unique constraint, dedupe key, conditional insert).
+- **Don't silence a type/lint error on a write path without understanding it** — on these paths a suppressed error is disproportionately likely to be a real data-corruption bug (see verification-loop §"Baseline & Net-New").
+
 ## Code Smells
 
 | Smell | Fix |

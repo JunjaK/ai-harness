@@ -11,6 +11,11 @@ Systematic quality assurance in 6 sequential phases with checkpoint tracking and
 
 ## Phases
 
+### Phase 0: Contract Sync (conditional)
+If this change touched the **server contract** (DB schema → response, request/response DTO, enum, endpoint shape) AND the client is **code-generated** (project-profile `api-layer.md` → "Generated Code"), regenerate and re-verify the client BEFORE anything below. Type-checking before regenerating verifies stale types — the most expensive failure mode, because it passes while being wrong.
+
+Run the `contract-sync` skill (regenerate → isolate churn → authoritative type-check → cross-check consumption sites). Skip this phase only when there is no codegen or the change provably alters no served shape.
+
 ### Phase 1: Build
 Verify the project builds without errors.
 ```bash
@@ -21,26 +26,28 @@ bun run build 2>&1 | tail -20
 **Common failures**: Missing imports, circular dependencies, env issues
 
 ### Phase 2: Type Check
-Run type checking on the full project.
+Run the project's **authoritative** type-check command — the one that actually compiles the app sources, recorded in project-profile `stack.md` → "Build & Verify". Do NOT assume `bunx tsc --noEmit`: a root `tsconfig.json` that is solution-style (`"files": []` + `"references"`) makes `tsc --noEmit` a **no-op that always exits 0**, hiding a real error backlog. Likewise a `typecheck` npm script may point at the wrong config. Verify the command actually checks code before trusting a green result (see §"Vacuity guard").
 ```bash
-# TypeScript (default)
-bunx tsc --noEmit 2>&1 | head -50
+# Use the authoritative command from project-profile. Examples:
+#   tsc --noEmit -p tsconfig.app.json       (app-scoped, not the empty root)
+#   vue-tsc -p .nuxt/tsconfig.app.json       (Nuxt/Vue)
+#   pyright / mypy --strict / go vet ./...    (non-TS)
+<authoritative-typecheck-command> 2>&1 | head -50
 ```
-**Pass**: Zero type errors
+**Pass**: Zero **net-new** type errors vs the recorded baseline (see §"Baseline & Net-New"). Absolute zero only for greenfield projects with no baseline.
 **Common failures**: Type mismatches, missing properties, incorrect generics
 
 **Complementary checks (during implementation, NOT a replacement):**
 - `LSP` tool with `hover` — inspect inferred types on any symbol
 - `mcp__ide__getDiagnostics` (when IDE is connected) — live diagnostics per file
-
-Non-TypeScript projects: substitute the type check command from project-profile `stack.md` (e.g., `pyright`, `mypy --strict`, `go vet ./...`).
+- Note: editor/LSP diagnostics go **stale mid-edit** and can emit false cascades (e.g. a large inferred store collapsing to `any`). The standalone compiler run is the authority — re-run it before asserting a result.
 
 ### Phase 3: Lint
-Run linter and check for violations.
+Run the project's authoritative linter (from project-profile; `bunx eslint .` / `bunx biome check` / etc.).
 ```bash
-bunx eslint . --max-warnings=0 2>&1 | head -30
+<authoritative-lint-command> --max-warnings=0 2>&1 | head -30
 ```
-**Pass**: No errors (warnings acceptable if configured)
+**Pass**: Zero **net-new** errors vs baseline (see §"Baseline & Net-New"). Warnings acceptable if the project configures them as such.
 **Common failures**: Unused imports, formatting issues, rule violations
 
 ### Phase 4: Tests
@@ -65,6 +72,26 @@ Review `git diff` for:
 - Missing i18n (hardcoded user-facing text)
 - Type safety issues (`any`, `as` casts)
 - Missing test coverage for new code paths
+
+## Baseline & Net-New (applies to Phase 2 & 3)
+
+Greenfield projects gate on absolute zero. **Legacy projects accumulate a baseline** of pre-existing type/lint errors that no single task can clear — demanding absolute zero there is unactionable and pressures masking. So gate on **net-new** errors instead:
+
+1. **Record the baseline** once (and refresh it deliberately): run the authoritative type-check/lint on the untouched base and store the count + a normalized snapshot. Normalize by stripping `file:line:col` so unrelated line shifts don't read as new errors — compare error *signatures* (rule + message + symbol), not raw lines.
+2. **Gate on the delta**: `net-new = current − baseline`. Net-new must be **0**. A net-new count that is negative (you fixed some) is good; positive blocks.
+3. **Verify per file, not in bulk**: when fixing pre-existing errors, apply and re-check file by file. Batch auto-fixing across a large baseline regresses — a fix valid in isolation can break a caller elsewhere.
+4. **Never mask a net-new error that flags a real bug.** A type error can be correctly *blocking* an incomplete or wrong code path; silencing it with `as any`/`@ts-ignore`/a cast hides a runtime defect. Investigate the error's intent before suppressing — the test for "is this safe to ignore" is "does the runtime behavior remain correct," not "does the red go away."
+
+The Tester already applies this judgment to **tests** (failure predates task → pre-existing; else → regression). Phase 2 & 3 extend the same net-new discipline to **types and lint**.
+
+## Vacuity guard (applies to Phase 1–4)
+
+A green result is only trustworthy if the command actually exercised the code. Before trusting any PASS, confirm the command is not vacuous:
+- **Type-check**: a solution-style root `tsconfig.json` (`"files": []`) makes `tsc --noEmit` check nothing. Confirm the command targets the app's real tsconfig (the one with `include`/sources). If a typed framework wrapper exists (`vue-tsc`, `astro check`), the bare `tsc` may under-check.
+- **Tests**: zero tests collected is not a pass. Confirm a non-zero test count ran.
+- **Lint**: zero files linted (bad glob / wrong cwd) is not a pass. Confirm files were actually scanned.
+
+Record the **authoritative** command in project-profile `stack.md` so every phase and every agent uses the verified one, never a convenience alias whose behavior is unknown.
 
 ## Checkpoint System
 

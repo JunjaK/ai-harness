@@ -44,6 +44,8 @@ Record:
 
 If any test fails and the failure predates this task → document and treat as pre-existing. Otherwise → REGRESSION, escalate.
 
+> This same **net-new vs baseline** judgment applies to type-check and lint gates (verification-loop §"Baseline & Net-New"): on a legacy codebase, a pre-existing type/lint error is not this task's regression — only newly introduced ones block. Use the **authoritative** verify commands from project-profile `stack.md`, never a convenience alias that may be vacuous.
+
 ### 2. Review Designer Tests
 
 For each Designer's tests, verify against this checklist:

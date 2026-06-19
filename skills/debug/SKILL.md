@@ -20,7 +20,7 @@ This skill covers **LSP-accelerated debugging patterns** specific to this harnes
 3. **Inspect types** — Use `hover` to check inferred types against assumptions
 4. **Trace call paths** — Use `incomingCalls` / `outgoingCalls` to map the flow
 5. **Propose fix** — Minimal, targeted, with file:line reference
-6. **Verify** — Run `bunx tsc --noEmit` + project test command; confirm no regression
+6. **Verify** — Run the authoritative type-check (project-profile `stack.md` → "Build & Verify") + project test command; confirm no regression
 
 ## LSP Investigation Patterns
 
@@ -33,10 +33,14 @@ This skill covers **LSP-accelerated debugging patterns** specific to this harnes
 | Stale cache / wrong data | `findReferences` on store/query key | Confirm every call site uses the same key |
 | Unfamiliar function signature | `hover` for signature | `documentSymbol` for neighboring helpers |
 
+## Structural Traps (load on demand)
+
+When a bug looks like a **type-system or dependency-injection** failure rather than ordinary logic — a cascading "property does not exist" flood, an intermittent context/i18n/inject crash, or an opaque deserialization error on a bulk request — read `resources/ts-structural-traps.md` BEFORE rewriting logic. These have non-obvious structural causes (inference cycles, context-scoped singleton init order, deserialization caps) with near-zero-runtime-change fixes; diagnosing them as logic bugs wastes hours.
+
 ## Root Cause Rules
 
 - Fix the root cause, not the symptom (duplicate from `superpowers:systematic-debugging`)
-- After any type-related fix, MUST run `bunx tsc --noEmit` before declaring the fix complete
+- After any type-related fix, MUST run the authoritative type-check (project-profile `stack.md` → "Build & Verify") before declaring the fix complete
 - After any refactor, MUST use `findReferences` to confirm no orphaned callers
 
 ## Escalation (when to stop debugging)

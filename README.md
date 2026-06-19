@@ -163,6 +163,7 @@ Skills that agents reference during their workflow phases:
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
 | `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
+| `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
 | `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
@@ -199,11 +200,12 @@ junjak-ai-harness/
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-└── skills/                      # 15 workflow skills
+└── skills/                      # 16 workflow skills
     ├── team-workflow/
     ├── project-analyzer/
     ├── tdd-workflow/
     ├── verification-loop/
+    ├── contract-sync/
     ├── security-review/
     └── ... (11 more)
 ```

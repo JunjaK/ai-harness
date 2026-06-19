@@ -197,6 +197,52 @@ After each team workflow completion:
 2. Extract learnings from each phase
 3. Update session state with workflow outcomes
 
+## 6. Learning Reuse (closing the loop)
+
+Capturing learnings is worthless if nothing ever reads them back. Extraction (§2) is only half the loop — this is the consumption half. Without it, the same mistake recurs every session despite being "learned."
+
+### Consume at task start
+
+Before starting non-trivial work, **route the relevant learnings into the task**:
+1. Skim `.claude/session-state/learnings/` for entries whose "When to Apply" matches the current task's domain/area.
+2. Load the matching ones and treat their **Anti-patterns** as constraints and their **Pattern** as the default approach.
+3. If a learning names a specific gotcha for this area (a known trap, a required sequence, a non-obvious command), apply it instead of rediscovering it.
+
+### Route learnings into agent prompts
+
+When spawning an agent for a task that a learning covers, **include the relevant learning in the agent's briefing** (the `subagent-orchestration` Context section). An agent that never sees the learning cannot apply it. Prefer pasting the one matching learning over hoping the agent re-derives it.
+
+### Build a lightweight index
+
+When `learnings/` grows past ~10 entries, maintain a one-line index (`learnings/index.md`: area → file → hook) so "which learnings apply to area X" is a single read, not a folder scan. This is the router that makes reuse cheap enough to actually happen.
+
+### Promote project-stable learnings into the profile
+
+A high-confidence learning that is a **stable fact about this project** (not a transient finding) belongs in the project-profile (`.claude/project-profile/`) where every agent already reads it — e.g. "the authoritative typecheck command is X", "bulk search caps at N", "store Y must be eagerly initialized." Move it there so it is consumed by default, and leave a pointer in the learning.
+
+## 7. Knowledge-Base Maintenance Contract
+
+For projects that maintain a curated knowledge base (a wiki, a profile, an index, an ADR set), the base **drifts** the moment code changes without a matching doc update. A living knowledge base needs an explicit maintenance contract, or it rots into a misleading liability.
+
+### Two invariants
+
+1. **Link, don't duplicate.** The knowledge base holds routing + stable overview and **links** to the single source of truth (code, a skill, a reference doc). Duplicating a fact guarantees the copy goes stale. If a fact lives in two places, one is already wrong.
+2. **Same change, same update.** The commit that changes code/structure also updates the doc it invalidates. A "docs later" backlog never clears; treat the doc edit as part of the change, not a follow-up.
+
+### Trigger → update table (adapt per project)
+
+| When this changes | Update this |
+|-------------------|-------------|
+| API contract / endpoint / DTO | api-layer profile + any contract doc |
+| Authoritative verify command / baseline | `stack.md` "Build & Verify" |
+| A new recurring gotcha is confirmed | a learning (§2), promoted to profile if project-stable (§6) |
+| Architecture / module boundary | the architecture overview/wiki page (link to the code, don't restate it) |
+| A documented file/command/flag is renamed or removed | every doc that named it (grep the knowledge base for the old name) |
+
+### Self-audit routine
+
+Periodically (e.g. at workflow completion, or when a doc feels stale): pick a knowledge-base page, follow its claims to the code, and flag any that no longer hold. A recalled learning or wiki line that names a file/function/flag is only valid as of when it was written — **verify it still exists before acting on it.**
+
 ## Quick Reference
 
 ```
@@ -204,6 +250,9 @@ State file:    .claude/session-state/current.md (update during session)
 Learnings:     .claude/session-state/learnings/{topic}.md
 Archive:       .claude/session-state/archive/ (auto-managed by hooks)
 Extract:       After milestones — identify, validate, generalize, score, store
+Reuse:         At task start, load matching learnings; route them into agent briefings; index when >10
+Promote:       Project-stable learning → project-profile (read by default)
 Evolve:        3+ related high-confidence learnings → new SKILL.md
+Maintain:      Link don't duplicate; same change updates the doc it invalidates; verify a recalled fact still exists
 Prune:         30-day TTL for pending, immediate for contradicted
 ```

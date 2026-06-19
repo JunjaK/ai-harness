@@ -27,7 +27,7 @@ Before modifying any existing function, class, or type:
 | Remove public API | `findReferences` — confirm no external usage |
 | Understand unfamiliar code | `hover` (type), `goToDefinition` (declaration), `documentSymbol` (outline) |
 
-Skipping these is a silent-break risk. Running the type check (`bunx tsc --noEmit`) catches most but not all (e.g., dynamic dispatch, string-based references).
+Skipping these is a silent-break risk. Running the authoritative type check catches most but not all (e.g., dynamic dispatch, string-based references). Note: LSP/editor diagnostics go stale mid-edit — re-run the compiler for ground truth before asserting a result.
 
 ## Core Principle (ABSOLUTE)
 
@@ -101,9 +101,9 @@ With tests green, clean up code:
 
 MUST pass all four checks before reporting completion. Commands use Bun by default; translate to pnpm/npm if project's lockfile indicates otherwise.
 
-1. Linter — project command from `testing.md` (e.g., `bunx eslint .` or `bunx biome check`) — zero errors
-2. Type check — `bunx tsc --noEmit` — zero errors
-3. Test suite — project command from `testing.md`. Default (Bun + Vitest 4.x): `bunx vitest run` — zero failures
+1. Linter — **authoritative** command from project-profile `stack.md` → "Build & Verify" (e.g., `bunx eslint .` or `bunx biome check`) — zero **net-new** errors vs baseline
+2. Type check — **authoritative** command from `stack.md` (NOT a blind `bunx tsc --noEmit`, which is a no-op against a solution-style root tsconfig) — zero **net-new** errors vs baseline. Greenfield = absolute zero. Do not silence a net-new error with `as any`/`@ts-ignore` — it may be flagging a real runtime bug.
+3. Test suite — authoritative command from project-profile. Default (Bun + Vitest 4.x): `bunx vitest run` — zero failures (zero new; pre-existing failures documented by the Tester baseline)
 4. Manual spot-check: open one modified file and confirm the code matches the plan's intent
 
 ### 6. Commit

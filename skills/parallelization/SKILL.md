@@ -14,16 +14,27 @@ Scale Claude Code work across multiple agents, worktrees, and instances. Three s
 Each Designer agent in team workflow gets an isolated worktree:
 
 ```bash
-# Create worktree for feature branch
-git worktree add ../project-feature-a -b feature-a
+# Branch the worktree from the repo's CURRENT active HEAD (see "Base Selection"):
+BASE=$(git rev-parse --abbrev-ref HEAD)
+git worktree add ../project-feature-a -b feature-a "$BASE"
 
 # Each worktree = independent file system + own context window
 ```
+
+### Base Selection (default = current HEAD, not an assumed mainline)
+
+Branch every worktree from the **current active HEAD** of the target repo — the branch the user is actually on — not from an arbitrary `main`/`develop`/`master`. The user is usually working on top of a feature branch with stacked, uncommitted-to-mainline work; branching from `develop` silently drops that work and produces conflicts or lost changes at merge time.
+
+- **Default**: `git worktree add <path> -b <new> "$(git rev-parse --abbrev-ref HEAD)"`.
+- **Confirm before creating if the base is ambiguous** (detached HEAD, the user mentioned a different base, or you are in a submodule): state the base you will use in one line and proceed only if it matches intent.
+- **Exception**: the user explicitly names a different base — then use it.
+- **Submodules/monorepos**: derive the base from each target repo's own current HEAD, independently.
 
 ### Worktree Rules
 
 | Rule | Why |
 |------|-----|
+| **Base from current HEAD** (not arbitrary main/develop) | Includes the user's stacked in-progress work; arbitrary base = lost work / merge conflicts (see "Base Selection") |
 | **No file overlap** between worktrees | Prevents merge conflicts |
 | **Merge sequentially** after completion | Ordered conflict resolution |
 | **Clean up** after merge | `git worktree remove` to prevent stale trees |

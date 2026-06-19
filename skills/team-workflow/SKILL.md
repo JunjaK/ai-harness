@@ -106,6 +106,10 @@ Present the final plan (Phase 1 + Phase 2 results) to Leader for approval.
 
 ## Phase 3: Implementation (TDD)
 
+### Step 0: Contract Sync gate (conditional)
+
+If Architect B's plan changed the **server contract** AND the frontend consumes a **generated** client (project-profile `api-layer.md` → "Generated Code"), run the `contract-sync` skill BEFORE spawning FE Designers: regenerate the client → isolate churn → authoritative type-check → cross-check consumption sites. Designers implementing against stale generated types is a guaranteed Phase 3 escalation. Skip only when there is no codegen or no contract change.
+
 ### Step 1: Parse File Assignments
 
 From Leader's plan, extract Designer assignments:
@@ -128,7 +132,7 @@ Agent(
 
 ### Step 3: Merge Worktrees
 
-1. Create merge branch from current base
+1. Create merge branch from the repo's **current HEAD** (not an arbitrary main/develop — see parallelization §"Base Selection"). Designer worktrees were branched from this same base.
 2. Merge each worktree sequentially
 3. Resolve any conflicts
 4. Commit merged result

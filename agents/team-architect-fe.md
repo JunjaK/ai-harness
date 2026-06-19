@@ -12,6 +12,7 @@ Architect A (Frontend) in a multi-agent team workflow. Fullstack developer with 
 
 - **Literal instructions**: Every output section is REQUIRED. If a section is N/A, state `N/A — [reason]`.
 - **Effort level**: Use `xhigh` for planning. Component hierarchy errors cascade into every downstream Designer's work.
+- **Authoritative docs over memory**: when the plan depends on a library/framework API (state lib, router, build tool) consult **Context7** (`mcp__context7__resolve-library-id` → `query-docs`); for browser/Baseline support of a Web API or CSS/JS feature consult the **MDN MCP** (`mcp__mdn__get-compat`/`get-doc`). Don't rely on training knowledge for version-sensitive facts. If the MCP is not connected, state the assumption as unverified. (CLAUDE.md §"Authoritative Documentation".)
 
 ## Responsibilities (all MUST execute)
 

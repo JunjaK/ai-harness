@@ -53,9 +53,10 @@ This harness assumes TypeScript as the primary language. All agents and skills o
 
 ### Type Check (hard gate)
 
-- Primary: `bunx tsc --noEmit` (via verification-loop Phase 2)
+- **Authoritative command, not an alias**: use the command recorded in project-profile `stack.md` → "Build & Verify" — the one that actually compiles app sources. A solution-style root `tsconfig.json` (`"files": []`) makes `bunx tsc --noEmit` a no-op that always exits 0; a typed-framework wrapper (`vue-tsc`, `astro check`) may catch what bare `tsc` misses. Confirm the command is not vacuous before trusting a green result.
 - `tsconfig.json` MUST set `"strict": true` and `"noUncheckedIndexedAccess": true`
-- Zero type errors required before any phase completes
+- **Zero net-new type errors vs the recorded baseline** before any phase completes. Greenfield (no baseline) = absolute zero. Legacy = net-new 0, compared by error signature (strip `file:line:col`), verified per file. (verification-loop §"Baseline & Net-New".)
+- **Do not mask a type error that flags a real bug.** A type error can be correctly blocking an incomplete/wrong path; suppressing it with `as any`/`@ts-ignore` hides a runtime defect. The test for "safe to ignore" is "runtime stays correct," not "the red is gone."
 - `any` types are prohibited — use `unknown` + narrowing, or define explicit types
 
 ### LSP Tool (code intelligence)
@@ -84,6 +85,33 @@ If the target project is not TypeScript (e.g., pure JavaScript, Python, Go):
 - Skip LSP-TypeScript-specific steps
 - Use the project's native type checker (`pyright`, `mypy`, `go vet`, etc.) from `stack.md`
 - Verification-loop Phase 2 adapts to the project's type check command
+
+---
+
+## Cross-Boundary Contracts (generated clients)
+
+When the frontend consumes a **code-generated** API client/types (OpenAPI, GraphQL codegen, gRPC, tRPC, Prisma — detect from project-profile `api-layer.md`):
+
+- **Backend is the single source of truth** for types, models, and enums. The client **consumes** generated types and only **extends** them (interface-extends / `Omit`) for UI-only fields. MUST NOT hand-redefine a domain type to dodge a type error, and MUST NOT edit generated output to "match" the backend.
+- **Regenerate before you verify.** Any task that changes a server contract (DB schema → response, request/response DTO, enum, endpoint shape) MUST run the `contract-sync` skill — make the spec current → regenerate → isolate churn → authoritative type-check → cross-check consumption sites — BEFORE writing or verifying client code. Type-checking against a stale generated client passes while being wrong, which is the most expensive failure mode.
+- **Verify shape, not existence.** A green type-check proves internal consistency, not runtime shape. Confirm field names, nullability, nested access paths, and 1:1 enum mapping at the actual call sites.
+- In team workflows this gate runs at the **BE→FE handoff** (Architect B's contract change → before Designers consume). See `skills/contract-sync/SKILL.md`.
+
+---
+
+## Authoritative Documentation (MCP)
+
+Do not rely on training knowledge for version-sensitive or external-API facts — your knowledge has a cutoff and these drift. When the relevant MCP server is connected, consult it before implementing; if it is not connected, proceed but note the unverified assumption.
+
+| Source | Consult for | Tools (if connected) |
+|--------|-------------|----------------------|
+| **Context7** | Library/framework/SDK APIs, config, version-migration, CLI usage | `mcp__context7__resolve-library-id` → `query-docs` |
+| **MDN** | Web-platform facts: browser compatibility, Baseline status, Web API behavior, CSS/JS feature support, Core Web Vitals semantics | `mcp__mdn__search` / `get-doc` / `get-compat` |
+
+Notes:
+- Prefer these over web search for the domains above; prefer them over memory even for "well-known" APIs.
+- If your environment defers MCP tool schemas, load the tool first (e.g. a tool-search step) before calling it.
+- This is advisory, not a hard gate — it informs correctness, it does not block a phase. (Mirrors the user's global principle: consult official docs before implementing against SDKs/frameworks/APIs.)
 
 ---
 
@@ -224,7 +252,8 @@ All Opus agents default to `xhigh` effort. Sonnet agents use their model's defau
 | tdd-workflow | Phase 3 | Red-Green-Refactor cycle (Vitest 4.x) |
 | debug | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | e2e-testing | Phase 4 | Playwright E2E |
-| verification-loop | Phase 4-5 | 6-phase quality gate + checkpoints + pass@k |
+| verification-loop | Phase 4-5 | 6-phase quality gate + checkpoints + pass@k + baseline/net-new + vacuity guard |
+| contract-sync | Phase 0 / BE→FE handoff | Regenerate generated API client after a contract change → isolate churn → authoritative type-check → cross-check consumption sites |
 | security-review | Phase 5 | OWASP checklist + Phase 5 audit format |
 | token-optimization | All | Model routing, effort levels, compaction (Opus 4.7 aware) |
 | continuous-learning | All | Pattern extraction, session state, skill evolution |
@@ -261,9 +290,10 @@ These skills carry the full details; this file only lists hard rules.
 | Skill | Hard rule summary |
 |-------|------------------|
 | `token-optimization` | Model routing by task class; `xhigh` default effort; MCPs <10, tools <80; compact after milestones only |
-| `continuous-learning` | Write `current.md` during session; extract patterns after milestones; evolve to skill after 3+ high-confidence learnings |
+| `continuous-learning` | Write `current.md` during session; extract patterns after milestones; **reuse** them at task start (load + route into agent briefings, promote project-stable ones to the profile); evolve to skill after 3+ high-confidence learnings; maintain the knowledge base (link don't duplicate, same change updates the doc) |
 | `checkpoint` | Auto-save on Stop hook + Pre-Compact hook; manual `/checkpoint save [title]` at any time |
-| `verification-loop` | 6-phase gate (build/type/lint/test/security/diff); pass@1 ≥ 80% for tests, pass^3 = 100% for security |
+| `verification-loop` | 6-phase gate (build/type/lint/test/security/diff); authoritative (non-vacuous) commands; gate type/lint on net-new vs baseline; pass@1 ≥ 80% for tests, pass^3 = 100% for security |
+| `contract-sync` | When a contract change meets a generated client: regenerate → isolate churn → authoritative type-check (net-new) → verify consumption shape, BEFORE verifying client code; backend is SSOT, never edit generated output |
 | `parallelization` | Max 5 worktrees, zero file overlap, merge order: types → backend → frontend → tests |
 | `subagent-orchestration` | 3-cycle retrieval cap; every prompt MUST include What/Why/Where/Context/Constraints/Already-tried |
 
