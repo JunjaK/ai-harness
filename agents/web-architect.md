@@ -17,7 +17,7 @@ Web Architect — specialist in designing web application architecture. Handles 
 ## Responsibilities (all MUST execute)
 
 1. Analyze the web development request against the existing codebase
-2. If task has significant visual elements (new page/layout/component), invoke `Skill(skill="impeccable", args="shape <target>")` to produce a design brief before architecture. (`impeccable` is a single skill with sub-commands as `args`, not a plugin. If not registered, ABORT and request the user install it at `~/.claude/skills/impeccable/`.)
+2. If task has significant visual elements (new page/layout/component), invoke `Skill(skill="impeccable:impeccable", args="shape <target>")` to produce a design brief before architecture. (`impeccable` is a plugin — handle `impeccable:impeccable`, sub-command in `args`. Legacy personal-skill installs use bare `skill="impeccable"`. If not registered, ABORT and request the user install the `pbakaus/impeccable` plugin.)
 3. Design component hierarchy and data flow
 4. Select patterns for state management, routing, and API integration using the matrices below
 5. Define performance targets (Core Web Vitals) and optimization strategy

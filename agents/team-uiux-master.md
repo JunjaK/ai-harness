@@ -19,11 +19,11 @@ This agent delegates to the `impeccable` skill as the canonical source for visua
 
 ### How to invoke
 
-`impeccable` is a **single skill with sub-commands as arguments** — NOT a plugin with namespaced sub-skills. Call the `Skill` tool with `skill="impeccable"` and `args="<sub-command> [target]"`.
+`impeccable` is a **plugin** (`pbakaus/impeccable`) exposing one skill with sub-commands as arguments. Call the `Skill` tool with `skill="impeccable:impeccable"` and `args="<sub-command> [target]"`. The sub-command goes in `args`, NOT in the namespace — `skill="impeccable:shape"` is wrong. (Legacy personal-skill installs use bare `skill="impeccable:impeccable"`.)
 
-Example: `Skill(skill="impeccable", args="shape login form")`
+Example: `Skill(skill="impeccable:impeccable", args="shape login form")`
 
-If `Skill(skill="impeccable", ...)` fails because the skill is not registered, ABORT and tell the user: *"impeccable skill is required but not installed at `~/.claude/skills/impeccable/`. Install it before continuing."* Do NOT attempt to substitute with built-in design heuristics.
+If `Skill(skill="impeccable:impeccable", ...)` fails because the skill is not registered, ABORT and tell the user: *"impeccable is required but not installed. Install the `pbakaus/impeccable` plugin before continuing."* Do NOT attempt to substitute with built-in design heuristics.
 
 ### Sub-command map
 
@@ -91,13 +91,13 @@ Before proposing changes, analyze context and commit to a clear aesthetic direct
 ## Review Process (MUST execute in order)
 
 1. Identify visual changes in the plan
-2. Invoke `Skill(skill="impeccable", args="shape <target>")` to produce a structured design brief
+2. Invoke `Skill(skill="impeccable:impeccable", args="shape <target>")` to produce a structured design brief
 3. Analyze context — purpose, audience, tone, constraints (from the brief)
 4. Check consistency with existing UI patterns (project profile)
-5. Invoke `Skill(skill="impeccable", args="craft <target>")` for the main proposal
-6. Invoke dimension-specific sub-commands as needed per the matrices above (same `Skill(skill="impeccable", args="<sub-command> <target>")` pattern)
-7. Invoke `Skill(skill="impeccable", args="audit <target>")` to verify technical quality (a11y, performance, responsive)
-8. Invoke `Skill(skill="impeccable", args="critique <target>")` to evaluate UX quality
+5. Invoke `Skill(skill="impeccable:impeccable", args="craft <target>")` for the main proposal
+6. Invoke dimension-specific sub-commands as needed per the matrices above (same `Skill(skill="impeccable:impeccable", args="<sub-command> <target>")` pattern)
+7. Invoke `Skill(skill="impeccable:impeccable", args="audit <target>")` to verify technical quality (a11y, performance, responsive)
+8. Invoke `Skill(skill="impeccable:impeccable", args="critique <target>")` to evaluate UX quality
 9. Read `anti-patterns-checklists.md` and verify harness-specific items (AI Slop, pre-delivery)
 
 ---

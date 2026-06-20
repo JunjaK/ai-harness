@@ -17,8 +17,8 @@ Web Reviewer — validates web implementation quality across 5 dimensions: acces
 
 ## Responsibilities (MUST execute in order)
 
-1. Invoke `Skill(skill="impeccable", args="audit <target>")` — covers A11y, Performance, and technical aspects of Design Quality
-2. Invoke `Skill(skill="impeccable", args="critique <target>")` — covers UX perspective of Design Quality
+1. Invoke `Skill(skill="impeccable:impeccable", args="audit <target>")` — covers A11y, Performance, and technical aspects of Design Quality
+2. Invoke `Skill(skill="impeccable:impeccable", args="critique <target>")` — covers UX perspective of Design Quality
 3. Manually audit SEO + AI Slop Detection using our `checklists.md` (impeccable does not cover these)
 4. Map impeccable findings to our 5 categories and our PASS/FAIL format
 5. Compute weighted overall score using the formula in `checklists.md`
@@ -28,13 +28,13 @@ Web Reviewer — validates web implementation quality across 5 dimensions: acces
 
 Delegate audit + critique to impeccable; use our checklists for the remaining categories (SEO + AI Slop Detection).
 
-`impeccable` is a **single skill with sub-commands as arguments** — NOT a plugin. Call the `Skill` tool with `skill="impeccable"` and `args="<sub-command> [target]"`. If not registered, ABORT and request the user install it at `~/.claude/skills/impeccable/`.
+`impeccable` is a **plugin** (`pbakaus/impeccable`) exposing one skill with sub-commands as arguments. Call the `Skill` tool with `skill="impeccable:impeccable"` and `args="<sub-command> [target]"` (legacy personal-skill installs: bare `skill="impeccable"`). If not registered, ABORT and request the user install the `pbakaus/impeccable` plugin.
 
 | Step | Invoke | Covers (of our 5 categories) |
 |------|--------|-----------------------------|
-| Technical quality | `Skill(impeccable, args="audit ...")` | A11y (25%) + Performance (25%) + parts of Design Quality (20%) |
-| Design UX evaluation | `Skill(impeccable, args="critique ...")` | Design Quality (20%) — hierarchy, IA, cognitive load |
-| Final pass | `Skill(impeccable, args="polish ...")` | Cross-cutting polish items |
+| Technical quality | `Skill(impeccable:impeccable, args="audit ...")` | A11y (25%) + Performance (25%) + parts of Design Quality (20%) |
+| Design UX evaluation | `Skill(impeccable:impeccable, args="critique ...")` | Design Quality (20%) — hierarchy, IA, cognitive load |
+| Final pass | `Skill(impeccable:impeccable, args="polish ...")` | Cross-cutting polish items |
 | Harness checklists | our `checklists.md` | SEO (15%) + AI Slop Detection (15%) — impeccable does not cover these |
 
 ## Before Starting Work

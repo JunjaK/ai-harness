@@ -346,13 +346,13 @@ These built-ins are the canonical tools for their domain. The harness does NOT w
 
 UI/UX quality is delegated to the `impeccable` skill. The harness does NOT reimplement its design guidance.
 
-`impeccable` is a **single personal skill** (installed at `~/.claude/skills/impeccable/`), NOT a Claude Code plugin with namespaced sub-skills. Sub-commands are passed as the `args` parameter:
+`impeccable` is distributed as a **Claude Code plugin** (`pbakaus/impeccable`) exposing a single skill. The skill handle is `impeccable:impeccable` (plugin:skill); sub-commands are passed in the `args` parameter:
 
 ```
-Skill(skill="impeccable", args="<sub-command> [target]")
+Skill(skill="impeccable:impeccable", args="<sub-command> [target]")
 ```
 
-MUST NOT call `Skill(skill="impeccable:shape", ...)` — that namespace does not exist and will fail. If the skill is not registered, abort and request the user install it.
+The sub-command goes in `args`, NOT in the namespace — MUST NOT call `Skill(skill="impeccable:shape", ...)` (that conflates sub-command with skill name and will fail). Legacy installs as a personal skill at `~/.claude/skills/impeccable/` use the bare handle `skill="impeccable"`. If impeccable is not registered, abort and request the user install the `pbakaus/impeccable` plugin.
 
 | Harness agent | Sub-commands used (passed as `args`) |
 |---------------|------------------------------------|

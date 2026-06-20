@@ -98,13 +98,14 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 
 ### Dependency
 
-This plugin depends on the `impeccable` skill for UI/UX work (`shape`, `critique`, `audit`, `polish`, etc.). `impeccable` is distributed as a **single personal skill**, not a Claude Code plugin — install it manually to:
+This plugin depends on **`impeccable`** for UI/UX work (`shape`, `critique`, `audit`, `polish`, etc.). `impeccable` is distributed as a **Claude Code plugin** — install it from its marketplace:
 
-```
-~/.claude/skills/impeccable/
+```bash
+/plugin marketplace add pbakaus/impeccable
+/plugin install impeccable@impeccable
 ```
 
-The `impeccable` agents (`team-uiux-master`, `web-architect`, `web-reviewer`) call it via `Skill(skill="impeccable", args="<sub-command> [target]")`. If the skill is missing they will abort with a request to install it.
+The UI/UX agents (`team-uiux-master`, `web-architect`, `web-reviewer`) call it via `Skill(skill="impeccable:impeccable", args="<sub-command> [target]")` — the sub-command goes in `args`, not the namespace. (Legacy installs as a personal skill at `~/.claude/skills/impeccable/` use the bare handle `skill="impeccable"`.) If `impeccable` is missing the agents abort with a request to install it.
 
 ### First Run
 
