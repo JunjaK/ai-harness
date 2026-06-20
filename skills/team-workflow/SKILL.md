@@ -85,7 +85,7 @@ _docs/
 ```
 
 The plan document follows the template defined in `team-leader.md` (Plan Document Template section).
-Status starts as "Planning" and progresses through "In Progress" → "Verification" → "Complete".
+Status follows the `docs-lifecycle` skill: `planning` (here) → `processing` (Phase 3) → `complete` (Phase 5, with the sidecar-merge rule). Keep `status` frontmatter in lockstep with the folder, and update `index.md` on every transition.
 
 ## Phase 2: UI/UX (Conditional)
 
@@ -139,7 +139,7 @@ Agent(
 
 ### Step 4: Update _docs/
 
-Update `_docs/{category}/plan-{feature}.md` with implementation notes. Set status to "In Progress".
+Update `_docs/{category}/plan-{feature}.md` with implementation notes. Transition `planning → processing` per `docs-lifecycle` (move to `active/processing/`, bump `updated`, update `index.md`).
 
 ## Phase 4: Verification
 
@@ -155,7 +155,7 @@ Agent(
 
 ### Step 2: Collect Results
 
-If all tests pass → update `_docs/` plan with test results, set status to "Verification" → proceed to Phase 5.
+If all tests pass → append test results to the `_docs/` plan (status stays `processing` until ship) → proceed to Phase 5.
 If failures → check escalation rules (resources/escalation.md).
 
 ## Phase 5: Final Security Review
@@ -169,7 +169,7 @@ Agent(
 )
 ```
 
-- SHIP → update `_docs/` plan status to "Complete" with final summary, report success to user
+- SHIP → transition the plan `processing → complete` per `docs-lifecycle` (apply the **merge rule**: consolidate spec + plan + metrics + findings into one `complete/` doc, `git rm` sidecars, update `index.md`), then report success to user
 - Issues found → escalate per escalation rules
 
 ## Escalation Handling

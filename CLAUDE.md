@@ -219,6 +219,8 @@ _docs/
 │   └── plan-{feature}.visual.html  # Auto-generated visual diagram
 ```
 
+Documents follow a lifecycle (`planning → processing → complete → reference`, or `→ deprecated`) with `status` in frontmatter kept in **lockstep with the folder**, and a task's sidecar docs (spec + plan + metrics + findings) **merged into one document on completion**. See `skills/docs-lifecycle/SKILL.md` — apply it at every phase transition and before marking work complete.
+
 ---
 
 ## Agents
@@ -248,6 +250,7 @@ All Opus agents default to `xhigh` effort. Sonnet agents use their model's defau
 | team-workflow | Core | 5-phase orchestration |
 | plan-review | Phase 1 | Adversarial plan evaluation |
 | plan-visualizer | Phase 1+ | HTML plan diagram |
+| docs-lifecycle | All | `_docs/` status↔folder lifecycle + merge sidecar docs into one on completion |
 | coding-standards | Phase 3 | Code quality baseline (strict TS) |
 | tdd-workflow | Phase 3 | Red-Green-Refactor cycle (Vitest 4.x) |
 | debug | Phase 3-4 | LSP-driven debugging patterns (TS) |
@@ -376,6 +379,13 @@ Harness-specific supplements that are NOT in impeccable:
 Agents MAY invoke these built-ins directly when a task matches their trigger. Do NOT reimplement their content in our skills.
 
 ---
+
+## Operational Discipline
+
+- **Shared/external infra is the human's to start.** Do NOT auto-open tunnels to, or start, shared/managed infrastructure (cloud DB, managed cache, bastion, VPN). If such a dependency is down, surface a one-line "please start X" and proceed where you can — do not script around it or repeatedly probe it. Starting shared infra is scope escalation an agent should not self-authorize.
+- **Watch-mode dev servers: stop them during edit sessions.** A hot-reloading dev server recompiles on every file save, spiking CPU/memory while you edit. Stop the watched server during an editing session; restart it only when a step (codegen, smoke test, manual verify) actually needs it.
+- **Shell exit-code hygiene for quiet commands.** A command with no stdout piped into a filter (`… | grep …`) can exit non-zero on empty input — a false failure. Capture the exit code directly (`cmd > out 2>&1; rc=$?`) instead of inferring success through a masking pipe. (PowerShell: `-ErrorAction SilentlyContinue` suppresses error *output* but the cmdlet failure still sets exit 1 — wrap in `try { … -ErrorAction Stop } catch {}` to truly ignore.)
+- **Local-vs-production is the gate for destructive ops**, not the operation type: a destructive command against a verified-local target (localhost) may run without per-command confirmation; any command naming a production/remote endpoint always requires explicit confirmation.
 
 ## Safety & Security
 
