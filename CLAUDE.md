@@ -265,7 +265,8 @@ All Opus agents default to `xhigh` effort. Sonnet agents use their model's defau
 | team-workflow | Core | 5-phase orchestration |
 | plan-review | Phase 1 | Adversarial plan evaluation |
 | plan-visualizer | Phase 1+ | HTML plan diagram |
-| docs-lifecycle | All | `_docs/` status↔folder lifecycle + merge sidecar docs into one on completion |
+| docs-lifecycle | All | `_docs/` status↔folder lifecycle + 3-bucket model + merge sidecar docs into one on completion |
+| wiki | All | Agent wiki (`.claude/wiki/`) — compounding knowledge base: ingest/query/lint, link-don't-duplicate |
 | coding-standards | Phase 3 | Code quality baseline (strict TS) |
 | tdd-workflow | Phase 3 | Red-Green-Refactor cycle (Vitest 4.x) |
 | debug | Phase 3-4 | LSP-driven debugging patterns (TS) |

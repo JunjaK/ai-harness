@@ -243,6 +243,13 @@ For projects that maintain a curated knowledge base (a wiki, a profile, an index
 
 Periodically (e.g. at workflow completion, or when a doc feels stale): pick a knowledge-base page, follow its claims to the code, and flag any that no longer hold. A recalled learning or wiki line that names a file/function/flag is only valid as of when it was written — **verify it still exists before acting on it.**
 
+### Relationship to the `wiki` skill
+
+The agent wiki (`.claude/wiki/`) is maintained by the separate `wiki` skill, but continuous-learning **feeds and governs** it — no overlap:
+- **Feeds**: `learnings/` is one of the wiki's **ingest sources**. A high-confidence, project-stable learning may be promoted to a wiki page (in parallel with §6 profile promotion — routing, not duplication).
+- **Governs**: this §7 maintenance contract IS the wiki's **lint** discipline (link-don't-duplicate, same-change-same-update, self-audit).
+- **Boundary**: continuous-learning owns *patterns/instincts* (HOW to work — learnings, confidence, skill evolution); the wiki owns *knowledge/facts* (WHAT is true). Keep each in its own system.
+
 ## Quick Reference
 
 ```

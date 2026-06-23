@@ -169,7 +169,7 @@ Skills that agents reference during their workflow phases:
 | `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
 
-Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`.
+Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `wiki`.
 
 For general API design patterns, use the Claude Code built-in `api-design` skill directly (the harness does not wrap it).
 
@@ -201,15 +201,16 @@ junjak-ai-harness/
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-└── skills/                      # 17 workflow skills
+└── skills/                      # 18 workflow skills
     ├── team-workflow/
     ├── project-analyzer/
     ├── tdd-workflow/
     ├── verification-loop/
     ├── contract-sync/
     ├── docs-lifecycle/
+    ├── wiki/
     ├── security-review/
-    └── ... (11 more)
+    └── ... (10 more)
 ```
 
 ### CLAUDE.md Note
