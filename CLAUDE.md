@@ -381,6 +381,15 @@ Harness-specific supplements that are NOT in impeccable:
 - Harness output format + team-workflow Phase integration
 - Pre-delivery checklist tuned for Opus 4.7 literal evaluation
 
+### Code minimalism via `ponytail` plugin
+
+Code-bloat avoidance is delegated to the **ponytail** Claude Code plugin (YAGNI decision ladder — "the best code is the code you never wrote"). The harness does NOT reimplement it.
+
+- **Disposition (design-time)**: the YAGNI Decision Ladder is distilled into `coding-standards` §4 and applied by the build-deciding agents (`team-architect-fe/be/infra`, `team-designer`, `web-architect`). It lives in their definitions + a referenced skill so it reaches spawned subagents — plugin auto-inject alone does not.
+- **Review (code-time)**: Phase 4 Tester runs `/ponytail-review` on the diff; `team-leader` synthesizes the result at its approval gate (Phase 1 `plan-review` YAGNI dimension + Phase 4 `/ponytail-review`).
+- **Strong runtime dependency** (same pattern as impeccable): if a `/ponytail-review` invocation fails, ABORT and request `/plugin install ponytail@ponytail`. NOT declared in `plugin.json` dependencies — external-marketplace manifest deps break plugin load (commit 5522155).
+- **Guard**: minimalism applies to *solution complexity only*. Tests, validation, security, and accessibility are gated hard elsewhere (TDD, verification-loop, Phase 5) and are never trimmed ("lazy, not negligent").
+
 ### Built-in skills we rely on (do NOT duplicate)
 
 | Built-in skill | Use for | Our equivalent or complement |

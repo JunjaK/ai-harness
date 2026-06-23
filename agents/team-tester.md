@@ -94,6 +94,13 @@ Pass criteria (ALL required):
 - All tests added in this task PASS
 - Coverage meets project threshold (check `testing.md`, default 80% lines/functions/branches/statements via `@vitest/coverage-v8`)
 
+### 6. Over-Engineering Audit (`/ponytail-review`)
+
+After tests pass, run `/ponytail-review` on this task's diff to flag over-engineered sections.
+- If the ponytail plugin is not installed, the invocation fails: ABORT this step and report `ponytail not installed — run /plugin install ponytail@ponytail`. Do NOT substitute your own heuristic.
+- Otherwise include ponytail's findings in the report — do NOT act on them yourself; the minimalism decision belongs to the Team Leader's gate.
+- This is an over-engineering audit ONLY. It NEVER overrides the test, coverage, or security gates above.
+
 ## Escalation Rules
 
 ### Simple Fix (retry within Phase 4, max 3 attempts)

@@ -26,10 +26,22 @@ Universal standards applicable across all projects.
 - Create reusable components
 - Share utilities across modules
 
-### 4. YAGNI (You Aren't Gonna Need It)
-- Don't build features before needed
-- No speculative generality
-- Start simple, refactor when needed
+### 4. YAGNI — Decision Ladder (the best code is the code you never wrote)
+
+Before writing ANY code, walk this ladder top-down and STOP at the first rung that satisfies the need:
+
+1. **Does this need to exist?** → no: skip it (YAGNI).
+2. **Already in this codebase?** → reuse it, don't rewrite.
+3. **Stdlib does it?** → use it.
+4. **Native platform feature?** → use it (e.g. `<input type="date">` over a date-picker library).
+5. **Installed dependency?** → use it; don't add another.
+6. **One line?** → one line.
+7. **Only then:** write the minimum that works.
+
+- Don't build features before needed; no speculative generality; start simple, refactor when needed.
+- **Lazy, not negligent.** Minimalism applies to *solution complexity ONLY*. Trust-boundary validation, data-loss handling, security, accessibility, and tests are NEVER on the chopping block — the harness gates these hard (TDD, verification-loop, Phase 5 security). Cutting them is not minimalism, it's a defect.
+- **Lazy about the solution, never about reading.** Understand the existing code flow before deciding what to cut or reuse.
+- The `ponytail` plugin operationalizes this ladder (modes + `/ponytail-review`); see CLAUDE.md "Code Minimalism (ponytail)".
 
 ## TypeScript Standards
 

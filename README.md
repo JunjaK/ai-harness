@@ -96,7 +96,7 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 
 > `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is **required** — `/team`, `/team-run`, `/team-brainstorm` depend on `TeamCreate` for cross-review.
 
-### Dependency
+### Dependencies
 
 This plugin depends on **`impeccable`** for UI/UX work (`shape`, `critique`, `audit`, `polish`, etc.). `impeccable` is distributed as a **Claude Code plugin** — install it from its marketplace:
 
@@ -106,6 +106,14 @@ This plugin depends on **`impeccable`** for UI/UX work (`shape`, `critique`, `au
 ```
 
 The UI/UX agents (`team-uiux-master`, `web-architect`, `web-reviewer`) call it via `Skill(skill="impeccable:impeccable", args="<sub-command> [target]")` — the sub-command goes in `args`, not the namespace. (Legacy installs as a personal skill at `~/.claude/skills/impeccable/` use the bare handle `skill="impeccable"`.) If `impeccable` is missing the agents abort with a request to install it.
+
+This plugin also depends on **`ponytail`** for code-minimalism review (YAGNI decision ladder — "the best code is the code you never wrote"). Install it from its marketplace:
+
+```bash
+/plugin install ponytail@ponytail
+```
+
+The Phase 4 Tester runs `/ponytail-review` on the diff; if `ponytail` is missing it aborts with a request to install it. The decision ladder itself is distilled into `coding-standards` §4 and applied by the architect/designer agents at design time.
 
 ### First Run
 

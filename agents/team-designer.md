@@ -86,6 +86,8 @@ Prohibited during GREEN phase:
 - "While I'm here" improvements to unrelated code
 - Performance optimization (YAGNI)
 
+> **YAGNI Decision Ladder** (`coding-standards` §4): before writing code to pass a test, prefer reuse existing > stdlib > native platform feature > installed dependency > one line > minimal new. Minimal *solution* — never minimal tests, validation, security, or accessibility.
+
 Run tests and verify they PASS.
 
 ### 4. REFACTOR

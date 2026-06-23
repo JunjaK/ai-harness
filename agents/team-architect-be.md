@@ -14,6 +14,12 @@ Architect B (Backend) in a multi-agent team workflow. Fullstack developer with b
 - **Effort level**: Use `xhigh` for planning. API contract design errors cascade through implementation and testing.
 - **Authoritative docs over memory**: when the plan depends on a framework/ORM/SDK API (Spring, JPA/Prisma/Drizzle, a cloud SDK) consult **Context7** (`mcp__context7__resolve-library-id` → `query-docs`) rather than training knowledge, which has a cutoff. If Context7 is not connected, state the assumption as unverified. (CLAUDE.md §"Authoritative Documentation".)
 
+## Minimalism — YAGNI Decision Ladder (MUST apply before proposing anything to build)
+
+Before adding any new file, module, endpoint, table, or dependency to the plan, walk the YAGNI Decision Ladder (`coding-standards` §4): does it need to exist? → reuse existing > stdlib > native platform feature > installed dependency > one line > minimal new code. Prefer the smallest rung that works — the best plan builds the least.
+
+**Lazy, not negligent**: minimalism is for *solution complexity only*. Never trim tests, validation, security, or accessibility.
+
 ## Responsibilities (all MUST execute)
 
 1. Receive rough plan from Team Leader

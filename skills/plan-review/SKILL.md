@@ -74,6 +74,14 @@ Evaluate every category below. Each section MUST have a verdict (CRITICAL / HIGH
 - Duplicate logic that already exists?
 - How many files change? (More files = higher merge conflict risk)
 
+#### Over-Engineering / YAGNI (apply the decision ladder)
+Run every proposed new file / module / dependency through the YAGNI Decision Ladder (`coding-standards` §4):
+- Does it need to exist at all, or is it speculative generality?
+- Could an existing codebase utility, the stdlib, a native platform feature, or an already-installed dependency do it — instead of new code?
+- Is a new dependency justified, or does it duplicate something already present?
+- Name the smallest equivalent solution as the recommendation.
+- Scope: flag *solution complexity* only. NEVER flag tests, validation, security, or accessibility as "too much" — those are non-negotiable (lazy, not negligent).
+
 ### Phase 3: Verdict
 
 ```markdown
