@@ -7,3 +7,4 @@
 | [Agentic Testing 레이어 — 구현 계획](harness-evolution/impl-agentic-testing.md) | Planning | harness-evolution | 2026-06-23 |
 | [harness 문서저장 시스템 (3-버킷 × LLM Wiki)](harness-evolution/plan-doc-storage-system.md) | Processing | harness-evolution | 2026-06-23 |
 | [ponytail YAGNI decision-ladder 통합](harness-evolution/plan-ponytail-yagni.md) | Processing | harness-evolution | 2026-06-23 |
+| [세션 handoff (agentic-testing / doc-storage / ponytail)](harness-evolution/2026-06-23-session-handoff.md) | Processing | harness-evolution | 2026-06-23 |
