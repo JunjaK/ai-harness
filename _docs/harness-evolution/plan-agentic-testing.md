@@ -4,7 +4,7 @@ status: planning
 scope: harness
 created: 2026-06-23
 updated: 2026-06-23
-related: []
+related: [_docs/harness-evolution/impl-agentic-testing.md]
 ---
 
 # Agentic Testing 레이어 — 설계 spec
