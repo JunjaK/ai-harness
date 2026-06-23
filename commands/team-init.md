@@ -16,9 +16,10 @@ Analyze the current project and generate a structured profile that all team agen
 ## What It Does
 
 1. **Load skill**: Invoke the `project-analyzer` skill
-2. **Scan project** following the 9-step analysis process
+2. **Scan project** following the 10-step analysis process
 3. **Generate profile** files in `.claude/project-profile/`
-4. **Report** what was found and any notable conventions
+4. **Bootstrap document buckets** (if absent): `_note/README.md` (human-owned, agent read-only) and `.claude/wiki/{index.md, log.md, schema.md}` (agent wiki). Never overwrites existing files; never creates other files under `_note/`.
+5. **Report** what was found and any notable conventions
 
 ## Output
 
@@ -33,6 +34,15 @@ Analyze the current project and generate a structured profile that all team agen
 ├── testing.md            # Test framework, patterns
 ├── ui-components.md      # Component library, design system
 └── deployment.md         # Build, CI/CD, env management
+```
+
+Plus the document buckets (created only when absent):
+```
+_note/README.md           # human-owned scratch notes (agent read-only)
+.claude/wiki/
+├── index.md              # agent wiki — content catalog
+├── log.md                # agent wiki — chronological log
+└── schema.md             # agent wiki — conventions
 ```
 
 ## Full Analysis Mode (default)

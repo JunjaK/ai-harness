@@ -209,7 +209,22 @@ Task is single-file trivial (typo, config, one-line fix)?
 
 ---
 
+## Document Storage (3 buckets)
+
+Every document lives in one of three buckets, chosen by **owner** (not by name). Classify with the discriminator: *"If you swapped this agent CLI for another, would this doc still be meaningful?"* — Yes → project/human (repo root, `_` prefix); No, agent-only → `.claude/`.
+
+| Bucket | Owner | Automation |
+|--------|-------|-----------|
+| `_docs/` | project | `docs-lifecycle` (auto-move, merge-on-complete, `git rm`) |
+| `_note/` | human | **none — agent read-only** |
+| `.claude/wiki/` | agent | `wiki` skill (ingest/query/lint) |
+
+- **`_note/` is human-owned and agent read-only.** MUST NOT create, move, merge, reorganize, or delete under `_note/` on your own initiative — modify it ONLY on the human's explicit request; otherwise read for context and leave it untouched. It is exempt from `_docs/` lifecycle and frontmatter.
+- The discriminator and `_note/` governance detail live in `skills/docs-lifecycle/SKILL.md` (Three-bucket section).
+
 ## Plan Storage
+
+`_docs/` is the **project** bucket (above). Layout:
 
 ```
 _docs/

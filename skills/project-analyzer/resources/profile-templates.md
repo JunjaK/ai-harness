@@ -351,3 +351,62 @@ Relevance: REQUIRED (always read) > HIGH (read if related) > MEDIUM (optional) >
   - Your task touches that domain
   - File status is ✅ (not ⏭️ Skipped)
 ```
+
+---
+
+## 10. Document bucket scaffolds (bootstrap)
+
+Created by Step 10 only when absent. Establishes the `_note/` (human) and `.claude/wiki/` (agent) buckets alongside `_docs/`. Never overwrite existing files. Never create files under `_note/` other than `README.md`, and never modify an existing `_note/` afterward (agent read-only).
+
+**`_note/README.md`** (only if `_note/` does not exist):
+```markdown
+# _note/ — owner's personal notes (agent read-only)
+
+This bucket is **yours**. The agent treats it as **read-only**: it reads `_note/` for
+context but will NOT create, move, merge, reorganize, or delete anything here unless you
+explicitly ask. Dump notes freely — no frontmatter, no lifecycle, no structure required.
+
+- Owner: you (human). Tool-agnostic — lives at repo root, not under `.claude/`.
+- Exempt from `_docs/` automation (lifecycle, status frontmatter, merge-on-completion).
+- Keep one central `_note/` at the repo root; preserve provenance with subfolders (`_note/<source>/`).
+- Graduation: when a note becomes project-canonical, you (not the agent) promote it `_note/ → _docs/`.
+
+Governance detail: `skills/docs-lifecycle/SKILL.md` (Three-bucket section).
+```
+
+**`.claude/wiki/index.md`** (only if absent — empty catalog):
+```markdown
+# Wiki Index
+
+Content catalog of the agent wiki. The `wiki` skill updates this on every ingest.
+Query reads this first, then drills into pages.
+
+## Entities
+## Concepts
+## Sources
+```
+
+**`.claude/wiki/log.md`** (only if absent — empty chronicle):
+```markdown
+# Wiki Log
+
+Append-only. One entry per operation, consistent prefix so `grep "^## \[" log.md | tail` works.
+
+<!-- ## [YYYY-MM-DD] ingest|query|lint | <title> -->
+```
+
+**`.claude/wiki/schema.md`** (only if absent — conventions stub, filled by the `wiki` skill):
+```markdown
+# Wiki Schema
+
+How this wiki is structured and maintained (Karpathy "schema" layer). The `wiki` skill
+reads this before ingest/query/lint.
+
+## Conventions
+- Pages link to the SSOT (code / `_docs/` / `_note/`); they route and synthesize, they do NOT duplicate facts.
+- Page types: entity / concept / overview / comparison.
+- `index.md` = catalog; `log.md` = chronicle.
+
+## Maintenance
+- Governed by `continuous-learning` §7 (Knowledge-Base Maintenance Contract): link-don't-duplicate, same-change-same-update, periodic self-audit.
+```

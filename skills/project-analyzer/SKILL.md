@@ -53,6 +53,13 @@ Follow template §8. Skip if no CI/CD found.
 ### Step 9: Generate Index → `index.md`
 Follow template §9. MUST include relevance + status for every profile file.
 
+### Step 10: Bootstrap document buckets (if absent)
+Follow template §10. Establish the three document buckets alongside `_docs/`:
+- `_note/README.md` — only if `_note/` does not exist. MUST NOT create any other file under `_note/`, and MUST NOT modify an existing `_note/` (agent read-only).
+- `.claude/wiki/{index.md, log.md, schema.md}` — only the files that are absent (empty catalog / empty chronicle / conventions stub).
+
+Never overwrite an existing file. On `--update`, re-run this step but only create what is missing.
+
 ## Update Mode (`/team-init --update`)
 
 1. Read existing `index.md` to get current state

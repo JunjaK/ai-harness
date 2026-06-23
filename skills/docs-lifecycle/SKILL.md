@@ -7,6 +7,36 @@ description: "Manage the lifecycle of project documents (plans, specs, findings)
 
 Keep `_docs/` honest and useful as it grows. Two problems this prevents: (1) a document's stated `status` drifting out of sync with where it actually is in the work, and (2) a finished task leaving behind a scatter of spec + plan + metrics + findings files that no future reader can reassemble. The fix is a fixed folder lifecycle with status in lockstep, and a **merge-on-completion** rule.
 
+## Three-bucket document storage
+
+`_docs/` is one of **three document buckets**. Each bucket has a different OWNER, and the owner decides who may write it and what automation applies. Classify every document by ownership, not by name.
+
+| Bucket | Owner | Location | Automation | What lives here |
+|--------|-------|----------|------------|-----------------|
+| `_docs/` | the project | repo root | this skill (auto-move, merge-on-complete, `git rm`) | plans, specs, ADRs, findings — project knowledge |
+| `_note/` | the human | repo root, one central dir | **none — agent read-only** | the owner's personal / research / scratch notes |
+| `.claude/wiki/` | the agent | `.claude/` (tool-coupled) | the `wiki` skill (ingest/query/lint) | the agent's compounding knowledge synthesis |
+
+### The discriminator (classify ANY new document with this)
+
+> **"If you swapped this agent CLI for a different one, would this document still be meaningful?"**
+> - **Yes** → it belongs to the project or the human → repo root with a `_` prefix (`_docs/` or `_note/`).
+> - **No — it is agent-only knowledge** → under `.claude/`.
+>
+> The axis is **ownership and tool-coupling, NOT the name.** "They all start with `_`, group them" and "put everything under `.claude/`" are both wrong groupings. Decide per document with this question.
+
+### `_note/` governance (human-owned, agent read-only)
+
+`_note/` is the owner's unstructured scratch tier — a place to keep notes without `_docs/` automation friction.
+
+- **Agent read-only (load-bearing).** MUST NOT create, move, merge, reorganize, or delete anything under `_note/` on your own initiative. Modify `_note/` ONLY when the human explicitly asks; otherwise read it for context and leave it untouched. Without this rule `_note/` regresses into an unmanaged junk drawer.
+- **Exempt from `_docs/` automation.** `_note/` is NOT subject to the folder lifecycle, status frontmatter, or merge-on-completion below. Never apply the `_docs/` rules to it.
+- **No frontmatter / lifecycle required.** Notes are dumped freely; forcing the 6-field frontmatter defeats a scratch tier.
+- **One central dir at repo root.** Keep a single `_note/` at the repo root (not per-subdir / per-submodule). In multi-repo or submodule setups this stops personal notes from polluting shared history; preserve provenance with subfolders (`_note/<source>/`).
+- **Graduation path.** A note the owner judges project-canonical can be promoted `_note/ → _docs/` — but only the owner decides, never the agent unprompted.
+
+The rest of this skill governs the **`_docs/` bucket**.
+
 ## Folder lifecycle
 
 ```

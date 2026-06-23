@@ -1,6 +1,6 @@
 ---
 title: harness 문서저장 시스템 (3-버킷 × LLM Wiki)
-status: planning
+status: processing
 scope: harness
 created: 2026-06-23
 updated: 2026-06-23

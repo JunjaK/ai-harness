@@ -10,6 +10,13 @@ if [ -z "$FILE" ] || [ ! -f "$FILE" ]; then
   exit 0
 fi
 
+# _note/ is human-owned (agent read-only). Warn on ANY write, regardless of file type.
+case "$FILE" in
+  */_note/*|_note/*)
+    echo -e "[warn] $FILE is under _note/ — human-owned (agent read-only). Edit ONLY on the human's explicit request; never reorganize, merge, or delete _note/ on your own.\n"
+    ;;
+esac
+
 # Only check JS/TS/JSX/TSX files
 case "$FILE" in
   *.js|*.ts|*.jsx|*.tsx|*.mjs|*.mts)
