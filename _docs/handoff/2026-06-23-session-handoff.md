@@ -3,7 +3,7 @@ title: 하네스 3대 이니셔티브(agentic-testing / doc-storage / ponytail) 
 status: processing
 scope: harness
 created: 2026-06-23
-updated: 2026-06-23
+updated: 2026-06-24
 related:
   - _docs/harness-evolution/plan-agentic-testing.md
   - _docs/harness-evolution/impl-agentic-testing.md
@@ -15,13 +15,19 @@ related:
 
 > **인수자에게**: 이 한 세션에서 **3개 이니셔티브**가 진행됐다. 각 설계 전체(결정 로그·어댑터 표·파이프라인)는 아래 spec 링크를 **먼저** 읽어라. 본 문서는 그 위의 "지금 어디까지 됐고 / 뭐가 남았고 / 어떻게 검증하나" 상태 레이어다.
 
+## 갱신 2026-06-24 (이게 우선)
+- **agentic-testing 구현완료** — Phase A `ffa699c` + Phase B `d190de9`. 더 이상 park 아님. 구조검증 통과, **런타임(dry-run) 미검증**.
+- 미푸시 커밋 **10개**(ahead 10). 06-23 이후 추가: `05e6865`(handoff) `50fdb75`(handoff 폴더정책) `ffa699c` `d190de9`.
+- → 아래 본문의 *"agentic-testing park" · "6 커밋" · "남은작업 3(재개)"* 은 **2026-06-23 시점** 기록이며 본 갱신이 우선한다.
+- **현재 남은 일**: ① `git push`(선택) ② **3개 이니셔티브 전부 런타임 검증**(실제 web/TS 프로젝트: `/team-init` → 분류·부트스트랩·agentic dry-run; ponytail 플러그인 설치 후 `/ponytail-review`) → 만족 시 세 spec `processing→complete`.
+
 ## TL;DR 상태
 | 이니셔티브 | 상태 |
 |---|---|
 | **doc-storage** (3-버킷 × LLM Wiki) | ⚠️ 구현완료·구조검증·hook 실측. **런타임 미검증** |
 | **ponytail** YAGNI decision-ladder | ⚠️ 구현완료·구조검증. **`/ponytail-review` 런타임 미검증**(플러그인 미설치) |
-| **agentic-testing** 레이어 | ❌ 구현 미착수 (**park**) — spec+impl plan만 커밋, 체크박스 0/12 |
-| 6 커밋 origin push | ❌ **미푸시** (`main`, origin 대비 ahead 6) |
+| **agentic-testing** 레이어 | ⚠️ **구현완료**(Phase A `ffa699c` + B `d190de9`)·구조검증, 런타임 미검증 |
+| origin push | ❌ **미푸시** (`main`, origin 대비 ahead 10) |
 
 ## ⚠️ 단 하나만 읽는다면
 **구현된 두 이니셔티브(doc-storage·ponytail)는 "구조검증"만 통과했지 "런타임 검증"은 안 됐다.** 이 repo는 **Claude Code 하네스 *설정* repo**(마크다운 스킬·에이전트·규칙)라 구동할 앱이 없다 → 분류 dry-run / `/ponytail-review` / wiki ingest 는 **실제 프로젝트에서 `/team-init`·플러그인 설치 후에만** 검증된다. "grep 통과"를 "동작 보장"으로 읽지 마라. 그리고 6 커밋은 **로컬 `main`에만** 있다(미푸시) — 다른 클론에서 이어받으려면 `git push` 먼저.
