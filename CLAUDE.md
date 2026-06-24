@@ -236,6 +236,8 @@ _docs/
 
 Documents follow a lifecycle (`planning → processing → complete → reference`, or `→ deprecated`) with `status` in frontmatter kept in **lockstep with the folder**, and a task's sidecar docs (spec + plan + metrics + findings) **merged into one document on completion**. See `skills/docs-lifecycle/SKILL.md` — apply it at every phase transition and before marking work complete.
 
+**Handoff documents** (state layer for passing work to another agent/session) live in `_docs/handoff/` (flat, dated `YYYY-MM-DD-<topic>-handoff.md`), link to their spec via `related:`, and keep only the latest per work-stream (`git rm` superseded ones). See `skills/docs-lifecycle/SKILL.md` §"Handoff documents".
+
 ---
 
 ## Agents

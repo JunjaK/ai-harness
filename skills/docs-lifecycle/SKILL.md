@@ -98,6 +98,16 @@ When a task produced **multiple sidecar docs** (spec, plan, metrics, findings, s
 
 **Why**: a completed task's spec + plan + findings split across files has near-zero archive value. One document answering "why we started / how we did it / what we learned" is what makes the next task able to reuse it — and it stops `active/` from bloating.
 
+## Handoff documents
+
+A handoff is a **state layer** over a spec/plan — "what's done, what's left, how to resume" — written when work passes to another agent or a future session. It is ephemeral and **links** to the spec (never duplicates the design).
+
+- **Location: `_docs/handoff/`** (flat, dated). Naming: `YYYY-MM-DD-<topic>-handoff.md`. Handoffs are often cross-cutting (span multiple specs), so they do NOT live under a single category folder.
+- **`related:` links the spec/plan docs** it hands off; the design stays in those — the handoff carries only current state + remaining work + reproduction.
+- **Retention: keep only the latest handoff per work-stream.** When a newer handoff supersedes it, or the work completes, `git rm` the stale one (git history is the trail — a stale handoff is a liability, not an archive).
+- Index: list a live handoff in `index.md` like any active doc; remove its row when superseded.
+- Generation: use the `handoff` skill — it detects this convention and writes into `_docs/handoff/`.
+
 ## Index
 
 `_docs/index.md` lists active + complete docs (one line each). Update it in the same change as any create / status-move / merge — a stale index is as misleading as a stale status.
