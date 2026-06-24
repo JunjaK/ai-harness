@@ -1,10 +1,16 @@
 # AI Harness — Multi-Agent Team Workflow
 
-A reusable Claude Code harness for orchestrating multi-agent team workflows with 5 phases, escalation loops, and TDD enforcement.
+A reusable Claude Code harness for Claude Opus: a 5-phase multi-agent team workflow (TDD, escalation loops, worktree parallelization) plus a full testing stack, a document-storage system, code-minimalism discipline, and instinct-based learning.
 
 ## Overview
 
-This harness provides a structured team workflow where specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code.
+Specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code. Beyond the core team workflow, the harness adds:
+
+- **Testing stack** — unit (Vitest) → deterministic E2E (Playwright) → **agentic E2E** (Phase 4.5: an agent verifies goals and crystallizes deterministic tests) → **human QA** (`/test-scenario-doc`, an interactive checklist).
+- **Document storage (3 buckets)** — `_docs/` (project, lifecycle-managed) · `_note/` (human-owned, agent read-only) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge), classified by a portable ownership discriminator.
+- **Code minimalism** — the `ponytail` YAGNI decision ladder, applied at design time and reviewed in Phase 4.
+- **Instinct-based learning** — `continuous-learning` captures atomic, confidence-scored, project-scoped instincts that evolve into skills / commands / agents.
+- **Ultracode orchestration** — when enabled, fan-out phases run via the Workflow tool.
 
 ### Team Roles
 
@@ -17,6 +23,9 @@ This harness provides a structured team workflow where specialized AI agents col
 | UI/UX Master | `team-uiux-master` | sonnet | Phase 2 (conditional) |
 | Designer x N | `team-designer` | opus | Phase 3 (parallel, worktree isolated) |
 | Tester x N | `team-tester` | sonnet | Phase 4 (parallel) |
+| Agentic Tester | `team-agentic-tester` | opus | Phase 4.5 (conditional, after Tester PASS) |
+| Web Architect | `web-architect` | opus | Web architecture (standalone or complements FE) |
+| Web Reviewer | `web-reviewer` | sonnet | Web quality audit (a11y, CWV, SEO, AI-slop) |
 
 ### Workflow Phases
 
@@ -35,6 +44,10 @@ Phase 3: Implementation (TDD)
 
 Phase 4: Verification
   Tester x N (unit + E2E, loop until pass)
+
+Phase 4.5: Agentic Testing (conditional)
+  Agent explores goals → verifies → crystallizes deterministic tests
+  (then human QA via /test-scenario-doc, before final sign-off)
 
 Phase 5: Final Security Review
   Arch C security & infra audit → SHIP or escalate
@@ -101,22 +114,16 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 
 ### Dependencies
 
-This plugin depends on **`impeccable`** for UI/UX work (`shape`, `critique`, `audit`, `polish`, etc.). `impeccable` is distributed as a **Claude Code plugin** — install it from its marketplace:
+| # | Dependency | Required? | Role | Install / Enable |
+|---|------------|-----------|------|------------------|
+| 1 | **Agent Teams** | **Required** for `/team*` | cross-review dialog (`TeamCreate`) | `settings.json` env `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
+| 2 | **Ultracode** mode | Optional | when on, the harness uses the Workflow tool for fan-out phases **as much as possible** | runtime ultracode signal, or `settings.json` env `CLAUDE_HARNESS_ULTRACODE=1` |
+| 3 | **impeccable** plugin | **Required install** | UI design — <https://impeccable.style/> | `/plugin marketplace add pbakaus/impeccable` → `/plugin install impeccable@impeccable` |
+| 4 | **ponytail** plugin | **Required install** | YAGNI-style development — <https://github.com/DietrichGebert/ponytail> | `/plugin install ponytail@ponytail` |
 
-```bash
-/plugin marketplace add pbakaus/impeccable
-/plugin install impeccable@impeccable
-```
-
-The UI/UX agents (`team-uiux-master`, `web-architect`, `web-reviewer`) call it via `Skill(skill="impeccable:impeccable", args="<sub-command> [target]")` — the sub-command goes in `args`, not the namespace. (Legacy installs as a personal skill at `~/.claude/skills/impeccable/` use the bare handle `skill="impeccable"`.) If `impeccable` is missing the agents abort with a request to install it.
-
-This plugin also depends on **`ponytail`** for code-minimalism review (YAGNI decision ladder — "the best code is the code you never wrote"). Install it from its marketplace:
-
-```bash
-/plugin install ponytail@ponytail
-```
-
-The Phase 4 Tester runs `/ponytail-review` on the diff; if `ponytail` is missing it aborts with a request to install it. The decision ladder itself is distilled into `coding-standards` §4 and applied by the architect/designer agents at design time.
+- **impeccable**: the UI/UX agents (`team-uiux-master`, `web-architect`, `web-reviewer`) call it via `Skill(skill="impeccable:impeccable", args="<sub-command> [target]")` — the sub-command goes in `args`, not the namespace.
+- **ponytail**: Phase 4 runs `/ponytail-review` on the diff; the YAGNI decision ladder is also distilled into `coding-standards` §4 for the architect/designer agents at design time.
+- If either plugin is missing, the relevant agent **aborts with an install request** — install both before running the workflow.
 
 ### First Run
 
@@ -139,29 +146,17 @@ The agents are framework-agnostic by default. To specialize for your project:
 4. **team-designer.md** — Add your test framework and TDD patterns
 5. **team-tester.md** — Add your test runner commands and E2E setup
 
-### Plan Storage (`_docs/`)
+### Document Storage (3 buckets)
 
-Team plans are saved to the `_docs/` directory with the following structure:
+Documents are classified by **owner**, using a portable discriminator: *"swap the agent CLI — is this still meaningful?"* → yes = project / human (`_` prefix at repo root); no = agent-only (`.claude/`).
 
-```
-_docs/
-├── index.md              # Documentation index (always updated)
-├── data-template/        # Category folder
-├── data-sheet/           # Category folder
-├── infra/                # Category folder
-└── {category}/           # Add folders as needed
-    └── plan-{feature}.md # Team plan document
-```
+| Bucket | Owner | Holds |
+|--------|-------|-------|
+| `_docs/` | project | plans, specs, ADRs — lifecycle-managed (`planning → processing → complete`), sidecars merged on completion |
+| `_note/` | human | personal / research / scratch notes — **agent read-only** (edited only on explicit request), no frontmatter |
+| `.claude/wiki/` | agent | an **LLM wiki** — compounding, interlinked knowledge (ingest / query / lint); links to the SSOT, never duplicates |
 
-**Plan lifecycle:**
-1. Phase 1 complete → save plan to `_docs/{category}/plan-{feature}.md` (status: Planning)
-2. Phase 3 complete → update with implementation notes (status: In Progress)
-3. Phase 4 complete → update with test results (status: Verification)
-4. Phase 5 complete → update with final summary (status: Complete)
-
-Always update `_docs/index.md` when adding new plans. To customize the path, modify:
-- `team-leader.md` (plan output section)
-- `SKILL.md` (Phase 1 Step 5, Phase 3/4/5 update steps)
+Handoffs live in `_docs/handoff/`. `/team-init` bootstraps `_note/README.md` and `.claude/wiki/`. The rules live in the `docs-lifecycle` and `wiki` skills; `_docs/index.md` is updated on every plan change.
 
 ## Supporting Skills
 

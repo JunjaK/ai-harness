@@ -5,15 +5,15 @@
     "email": "haring157@gmail.com",
     "url": "https://github.com/Junjak"
   },
-  "description": "Junjak's AI Harness — multi-agent team workflow plugin for Claude Code",
+  "description": "Junjak's AI Harness — multi-agent team workflow plugin for Claude Code (TDD, agentic + human-QA testing, 3-bucket docs + LLM wiki, YAGNI minimalism, instinct learning, ultracode orchestration)",
   "plugins": [
     {
       "name": "junjak-ai-harness",
       "source": "./",
-      "description": "TypeScript-first multi-agent team workflow harness for Claude Opus 4.7",
+      "description": "TypeScript-first multi-agent team workflow harness — TDD, agentic + human-QA testing, 3-bucket docs + LLM wiki, YAGNI minimalism, instinct learning, ultracode orchestration",
       "version": "1.0.0",
       "category": "workflow",
-      "tags": ["team-workflow", "multi-agent", "tdd", "orchestration"]
+      "tags": ["team-workflow", "multi-agent", "tdd", "orchestration", "testing", "knowledge-base"]
     }
   ]
 }
