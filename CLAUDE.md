@@ -198,6 +198,7 @@ Generates `.claude/project-profile/` with 9 profile documents that every agent r
 | `/team <task>` | Full workflow with user involvement in planning |
 | `/team-run <task>` | Full autonomous workflow |
 | `/checkpoint` | Save/restore work state (NOT Claude Code's built-in `/resume`) |
+| `/test-scenario-doc` | Human wants an on-demand manual QA checklist HTML (human acceptance layer) |
 
 ### Decision Guide
 
@@ -291,6 +292,7 @@ All Opus agents default to `xhigh` effort. Sonnet agents use their model's defau
 | debug | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | e2e-testing | Phase 4 | Playwright E2E |
 | agentic-testing | Phase 4.5 | Adapter-based agentic E2E: explore goal → verify → crystallize deterministic test |
+| test-scenario-doc | Human acceptance | Generate interactive human QA checklist HTML (on-demand via `/test-scenario-doc`) |
 | verification-loop | Phase 4-5 | 6-phase quality gate + checkpoints + pass@k + baseline/net-new + vacuity guard |
 | contract-sync | Phase 0 / BE→FE handoff | Regenerate generated API client after a contract change → isolate churn → authoritative type-check → cross-check consumption sites |
 | security-review | Phase 5 | OWASP checklist + Phase 5 audit format |

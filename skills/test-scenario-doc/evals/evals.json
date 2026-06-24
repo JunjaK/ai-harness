@@ -1,0 +1,23 @@
+{
+  "skill_name": "test-scenario-doc",
+  "evals": [
+    {
+      "id": 0,
+      "name": "login-session-qa-ko",
+      "prompt": "방금 우리 앱에 로그인 + 세션 만료 처리를 붙였어. QA 팀(다 한국인)한테 줄 테스트 시나리오 문서를 하나 만들어줘. 케이스: ① 올바른 계정으로 로그인하면 대시보드로 진입, ② 비밀번호 틀리면 에러 안내가 뜸, ③ 30분 무동작 후 세션 만료 → 보호된 페이지 접근 시 로그인으로 리다이렉트, ④ 만료 후 다시 로그인하면 원래 가려던 페이지로 복귀. 각 케이스 통과/실패 체크하고 스크린샷도 붙일 수 있으면 좋겠어. 환경은 localhost:3000.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "cart-regression-ko",
+      "prompt": "장바구니에서 수량 바꿀 때 합계가 가끔 안 맞던 버그(#482)를 고쳤어. 회귀 테스트용 인터랙티브 체크리스트를 HTML로 만들어줘. 케이스: 수량 +/- 버튼으로 변경 시 합계 갱신, 직접 입력으로 0 만들면 삭제 확인, 쿠폰 적용된 상태에서 수량 변경 시 할인 재계산, 새로고침 후 장바구니 유지. 테스터가 통과/실패/보류를 표시하고 결과를 스크린샷 포함해서 공유할 수 있게 해줘.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "csv-export-qa-en",
+      "prompt": "we just shipped a CSV export feature and i need a QA checklist as a single self-contained html file the team can open and click through. cases: export an empty table (should still download a header-only file), export 10k rows (no timeout, correct row count), cells containing commas/quotes/newlines are properly escaped, and the download filename matches the report name + date. testers should mark pass/fail and be able to attach screenshots of the downloaded files.",
+      "files": []
+    }
+  ]
+}

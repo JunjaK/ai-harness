@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>__DOC_TITLE__</title>
+<style>
+  :root{
+    --bg:#0f1220; --panel:#171a2b; --panel2:#1f2336; --ink:#e8ebf5; --muted:#9aa3bf;
+    --line:#2c3147; --accent:#6ea8fe; --green:#4cd9a0; --amber:#f5c451; --red:#ff7a7a; --purple:#b89cff;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font:14px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI","Malgun Gothic","Apple SD Gothic Neo",sans-serif}
+  header{padding:24px 32px 16px;border-bottom:1px solid var(--line);
+    background:linear-gradient(180deg,#191d31,#12152400)}
+  header h1{margin:0 0 6px;font-size:25px;letter-spacing:.2px}
+  header .sub{color:var(--muted);font-size:13px}
+  .wrap{display:grid;grid-template-columns:250px 1fr;gap:0}
+  nav{position:sticky;top:0;align-self:start;height:100vh;overflow:auto;
+    padding:18px 12px;border-right:1px solid var(--line);background:var(--panel)}
+  nav a{display:block;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:7px;font-size:12.5px}
+  nav a:hover{background:var(--panel2);color:var(--ink)}
+  nav .grp{margin:14px 6px 6px;color:#6b7290;font-size:11px;text-transform:uppercase;letter-spacing:.8px}
+  main{padding:22px 30px 90px;max-width:1080px}
+  section{margin:0 0 34px;scroll-margin-top:16px}
+  h2{font-size:18px;margin:28px 0 10px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  h3{font-size:14px;margin:18px 0 8px;color:var(--accent)}
+  p{color:#d4d9ec}
+  .lead{color:var(--muted);margin:.2em 0 1em}
+  table{border-collapse:collapse;width:100%;margin:10px 0 8px;font-size:12.5px;background:var(--panel);
+    border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  th,td{border:1px solid var(--line);padding:7px 9px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:#cfd6f0;font-weight:600}
+  tbody tr:nth-child(2n){background:#161a2b}
+  code{font-family:"SF Mono",ui-monospace,Consolas,monospace;font-size:12px;
+    background:#0c0f1d;border:1px solid var(--line);border-radius:5px;padding:1px 5px;color:#bfe1ff}
+  .pill{display:inline-block;padding:1px 8px;border-radius:999px;font-size:11px;font-weight:700;white-space:nowrap;border:1px solid}
+  .note{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:12px 14px;margin:14px 0}
+  .note.amber{background:#241f0f;border-color:#4a3f1d}
+  .note.blue{background:#101a2e;border-color:#23406b}
+  .note.green{background:#0f2419;border-color:#1d5c44}
+  .small{font-size:11.5px;color:var(--muted)}
+  a.src-link{color:#7fb2ff;text-decoration:none}
+
+  .sc{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin:16px 0;padding:0;overflow:hidden;scroll-margin-top:16px}
+  .sc.done-pass{border-color:#1d5c44}
+  .sc.done-fail{border-color:#6b2a2a}
+  .sc-head{display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--panel2);border-bottom:1px solid var(--line);flex-wrap:wrap}
+  .sc-id{font-weight:800;color:var(--accent);font-size:13px;min-width:46px}
+  .sc-title{font-weight:700;font-size:14px;flex:1;min-width:200px}
+  .sc-edge{font-size:11.5px;color:var(--muted);font-family:"SF Mono",ui-monospace,Consolas,monospace}
+  .sc-body{padding:14px 16px}
+  .sc-meta{display:grid;grid-template-columns:78px 1fr;gap:4px 12px;margin:0 0 12px;font-size:12.5px}
+  .sc-meta .k{color:#6b7290}
+  .sc-meta .expect{color:var(--green)}
+  .sc-meta .fail{color:#ff9a9a}
+  ol.steps{margin:6px 0 4px;padding-left:0;list-style:none;counter-reset:s}
+  ol.steps li{counter-increment:s;display:flex;gap:9px;align-items:flex-start;padding:5px 0;border-top:1px dashed #2a2f47}
+  ol.steps li:first-child{border-top:0}
+  ol.steps li .n{color:#6b7290;font-weight:700;min-width:18px}
+  ol.steps li label{display:flex;gap:8px;align-items:flex-start;cursor:pointer;flex:1}
+  ol.steps li input[type=checkbox]{margin-top:3px;width:15px;height:15px;accent-color:var(--accent);flex:none}
+  ol.steps li.checked label{color:#7d86a5;text-decoration:line-through}
+  .verdict{display:flex;gap:14px;align-items:center;margin-top:12px;padding-top:11px;border-top:1px solid var(--line);flex-wrap:wrap}
+  .verdict label{display:inline-flex;gap:5px;align-items:center;cursor:pointer;font-size:12.5px}
+  .verdict .v-pass{color:var(--green)} .verdict .v-fail{color:#ff9a9a} .verdict .v-hold{color:var(--amber)}
+  .verdict input[type=text]{flex:1;min-width:180px;background:#0c0f1d;border:1px solid var(--line);
+    border-radius:6px;color:var(--ink);padding:5px 8px;font-size:12px}
+
+  /* image attach */
+  .imgrow{display:flex;gap:10px;align-items:flex-start;margin-top:10px;flex-wrap:wrap}
+  .imgrow .ilabel{color:#6b7290;font-size:11.5px;min-width:42px;padding-top:6px}
+  .imgctl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .ibtn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:7px;
+    padding:5px 10px;font-size:11.5px;cursor:pointer}
+  .ibtn:hover{border-color:var(--accent)}
+  .ipaste{border:1px dashed #3a4060;border-radius:7px;padding:5px 10px;font-size:11.5px;
+    color:var(--muted);cursor:text;background:#0c0f1d;outline:none}
+  .ipaste:focus,.ipaste.active{border-color:var(--accent);color:#bfe1ff;border-style:solid}
+  .thumbs{display:flex;gap:8px;flex-wrap:wrap;flex-basis:100%;margin-top:2px}
+  .thumb{position:relative;width:74px;height:56px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#0c0f1d;cursor:zoom-in}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .thumb .rm{position:absolute;top:1px;right:1px;width:16px;height:16px;line-height:14px;text-align:center;
+    background:rgba(20,10,12,.85);color:#ff9a9a;border:1px solid #6b2a2a;border-radius:4px;font-size:11px;cursor:pointer}
+  .lightbox{position:fixed;inset:0;z-index:50;background:rgba(6,8,16,.92);display:none;align-items:center;justify-content:center;padding:24px}
+  .lightbox.show{display:flex}
+  .lightbox img{max-width:96vw;max-height:92vh;border-radius:8px;border:1px solid var(--line)}
+
+  .bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+    background:#12152e;border:1px solid var(--line);border-radius:10px;padding:10px 16px;margin:0 0 18px}
+  .bar .stat{font-size:12.5px;color:var(--muted)}
+  .bar .stat b{color:var(--ink);font-size:14px}
+  .bar .meter{flex:1;min-width:140px;height:8px;background:#0c0f1d;border:1px solid var(--line);border-radius:99px;overflow:hidden}
+  .bar .meter i{display:block;height:100%;background:linear-gradient(90deg,#4cd9a0,#6ea8fe);width:0}
+  .btn{background:var(--panel2);border:1px solid var(--line);color:var(--ink);border-radius:7px;
+    padding:6px 12px;font-size:12px;cursor:pointer}
+  .btn:hover{border-color:var(--accent)}
+  .btn.danger:hover{border-color:var(--red)}
+  #exportBox{display:none;width:100%;height:180px;margin-top:10px;background:#0c0f1d;border:1px solid var(--line);
+    border-radius:8px;color:#bfe1ff;font-family:"SF Mono",ui-monospace,Consolas,monospace;font-size:11.5px;padding:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="hTitle"></h1>
+  <div class="sub" id="hSub"></div>
+</header>
+
+<div class="wrap">
+<nav id="nav"></nav>
+<main>
+  <div class="bar">
+    <div class="stat"><span id="lScenarios"></span> <b id="scDone">0</b>/<b id="scTotal">0</b> <span id="lJudged"></span></div>
+    <div class="stat"><span style="color:var(--green)"><span id="lPass"></span> <b id="scPass">0</b></span> · <span style="color:#ff9a9a"><span id="lFail"></span> <b id="scFail">0</b></span></div>
+    <div class="meter"><i id="meter"></i></div>
+    <button class="btn" id="btnExport"></button>
+    <button class="btn" id="btnReport"></button>
+    <button class="btn danger" id="btnReset"></button>
+    <textarea id="exportBox" readonly></textarea>
+  </div>
+  <div id="setup"></div>
+  <div id="groups"></div>
+</main>
+</div>
+<div class="lightbox" id="lightbox"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════════
+     EDIT ONLY THIS CONFIG BLOCK. Everything renders from it.
+     - META: header + storage. storageKey MUST be unique per doc/version
+             (e.g. 'ts:checkout-regression:v1') so multiple docs don't share state.
+     - LABELS: optional. Korean defaults applied for any key you omit.
+     - MODE_LABEL: tag id -> short label shown as a colored pill (test type/category).
+                   Colors auto-assigned per key order; no CSS needed.
+     - GROUPS: sections (nav + headings). id must match scenarios' `group`.
+     - SETUP_HTML: optional raw-HTML intro (env table, rules). '' to omit.
+     - SCENARIOS: the checklist. Fields:
+         id     short code shown in the chip (e.g. 'R1', 'C3')
+         group  one of GROUPS[].id
+         mode   one of MODE_LABEL keys
+         title  what this scenario verifies
+         edge   tiny mono caption (the dependency/fix/area under test) — optional
+         pre    precondition / setup
+         steps  array of action strings (each becomes a checkable step)
+         expect what PASS looks like (concrete + observable)
+         fail   the symptom if it FAILS (concrete)
+         ref    code/commit/source pointer — optional
+     ════════════════════════════════════════════════════════════════════════ -->
+<script id="ts-config">
+const META = {
+  title: '예시 · <span style="color:var(--accent)">테스트 시나리오</span>',
+  subtitle: '진행상태 localStorage 자동저장 · 시나리오별 스크린샷 첨부(파일/붙여넣기) · 작성 YYYY-MM-DD',
+  storageKey: 'ts:example:v1',
+  exportTitle: '# 테스트 결과',
+};
+const LABELS = {}; // 한국어 기본값 사용. 영어 문서면 {pass:'Pass', fail:'Fail', ...} 식으로 덮어쓰기.
+const MODE_LABEL = { S:'스모크', R:'회귀', E:'엣지케이스' };
+const GROUPS = [
+  { id:'g1', title:'G1. 핵심 흐름', lead:'기본 사용자 흐름이 동작하는지.' },
+  { id:'g2', title:'G2. 엣지/회귀', lead:'경계 조건과 과거 버그 재발 여부.' },
+];
+const SETUP_HTML = `
+  <h2>환경</h2>
+  <table>
+    <tr><th style="width:120px">항목</th><th>값</th></tr>
+    <tr><td>URL</td><td><code>http://localhost:3000</code></td></tr>
+    <tr><td>계정</td><td>test@example.com / (로컬 시드 비밀번호)</td></tr>
+  </table>
+  <div class="note blue">입력은 실제 클릭+타이핑. 각 시나리오 하단에서 <b>스크린샷</b>을 파일 첨부 또는 클릭 후 Ctrl+V로 붙여넣을 수 있습니다.</div>
+`;
+const SCENARIOS = [
+  { id:'S1', group:'g1', mode:'S', title:'로그인 → 대시보드 진입', edge:'auth',
+    pre:'미로그인 상태',
+    steps:['로그인 페이지에서 계정 입력 후 제출','대시보드로 리다이렉트되는지','상단에 사용자 이름이 보이는지'],
+    expect:'올바른 자격증명이면 대시보드로 이동 + 사용자 이름 표시.',
+    fail:'에러 토스트 / 빈 화면 / 무한 로딩.', ref:'POST /auth/login' },
+  { id:'R1', group:'g2', mode:'R', title:'빈 검색어 제출 (과거 버그)', edge:'search empty',
+    pre:'검색 화면',
+    steps:['검색창을 비운 채 Enter','결과 영역 확인'],
+    expect:'전체 목록 유지 또는 안내. 빈 화면/크래시 없음.',
+    fail:'빈 화면 또는 콘솔 에러.', ref:'#1234' },
+];
+</script>
+
+<script id="ts-runtime">
+(function(){
+  const DEFAULT_LABELS = {
+    pass:'통과', fail:'실패', hold:'보류/관찰',
+    scenarios:'시나리오', judged:'판정', passedShort:'통과', failedShort:'실패',
+    exportBtn:'결과 요약 복사', reportBtn:'이미지 포함 결과 HTML', resetBtn:'초기화',
+    pre:'전제', expect:'기대', failSym:'실패증상', ref:'근거',
+    notePlaceholder:'메모 (관측값/이슈)',
+    imgLabel:'이미지', imgFile:'파일 첨부', imgPaste:'클릭 후 Ctrl+V로 붙여넣기',
+    resetConfirm:'모든 체크/판정/메모/이미지를 초기화할까요?',
+    symPass:'✅ 통과', symFail:'❌ 실패', symHold:'⏸ 보류/관찰', symNone:'⬜ 미판정',
+    imgCount:(n)=>`[이미지 ${n}장]`,
+    reportSummary:(p,f,t)=>`통과 ${p} · 실패 ${f} · 전체 ${t}`,
+  };
+  const L = Object.assign({}, DEFAULT_LABELS, (typeof LABELS!=='undefined'?LABELS:{}));
+
+  // mode pill colors — auto-assigned from a palette by MODE_LABEL key order
+  const PALETTE = [
+    {bg:'#103022',fg:'#84e6bf',bd:'#1d5c44'}, {bg:'#101a2e',fg:'#9bd0ff',bd:'#23406b'},
+    {bg:'#1c1430',fg:'#d8b8ff',bd:'#573a73'}, {bg:'#2a2418',fg:'#f0cf8c',bd:'#574722'},
+    {bg:'#3a1414',fg:'#ff9a9a',bd:'#6b2a2a'}, {bg:'#222740',fg:'#aab4d8',bd:'#394060'},
+    {bg:'#37380f',fg:'#e9e07a',bd:'#5c5a1d'}, {bg:'#0f2a2e',fg:'#8fe0e0',bd:'#1d5560'},
+  ];
+  const MODES = (typeof MODE_LABEL!=='undefined'?MODE_LABEL:{});
+  const MODE_COLOR = {};
+  Object.keys(MODES).forEach((k,i)=>{ MODE_COLOR[k]=PALETTE[i%PALETTE.length]; });
+  function pillStyle(m){ const c=MODE_COLOR[m]||PALETTE[5]; return `background:${c.bg};color:${c.fg};border-color:${c.bd}`; }
+
+  const KEY = META.storageKey || 'ts:doc:v1';
+  let state = {};
+  try { state = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e){ state = {}; }
+  function save(){
+    try { localStorage.setItem(KEY, JSON.stringify(state)); }
+    catch(e){ alert('저장 공간 초과(이미지가 많을 수 있음). 일부 이미지를 줄이거나 제거하세요.\n'+e); }
+  }
+  function st(id){ state[id] = state[id] || {steps:{}, verdict:'', note:'', images:[]}; if(!state[id].images) state[id].images=[]; return state[id]; }
+  const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const escAttr = s => String(s==null?'':s).replace(/"/g,'&quot;');
+
+  // ── header / chrome ──
+  document.title = (META.title||'테스트 시나리오').replace(/<[^>]+>/g,'');
+  document.getElementById('hTitle').innerHTML = META.title || '테스트 시나리오';
+  document.getElementById('hSub').innerHTML = META.subtitle || '';
+  document.getElementById('lScenarios').textContent = L.scenarios;
+  document.getElementById('lJudged').textContent = L.judged;
+  document.getElementById('lPass').textContent = L.passedShort;
+  document.getElementById('lFail').textContent = L.failedShort;
+  document.getElementById('btnExport').textContent = L.exportBtn;
+  document.getElementById('btnReport').textContent = L.reportBtn;
+  document.getElementById('btnReset').textContent = L.resetBtn;
+  document.getElementById('setup').innerHTML = (typeof SETUP_HTML!=='undefined' && SETUP_HTML) ? SETUP_HTML : '';
+
+  // ── nav + group sections ──
+  const nav = document.getElementById('nav');
+  let navHtml = '<div class="grp">시나리오</div>';
+  GROUPS.forEach(g=>{ navHtml += `<a href="#${g.id}">${esc(g.title)}</a>`; });
+  nav.innerHTML = navHtml;
+
+  const groupsEl = document.getElementById('groups');
+  groupsEl.innerHTML = GROUPS.map(g=>(
+    `<section id="${g.id}"><h2>${esc(g.title)}</h2>${g.lead?`<p class="lead">${esc(g.lead)}</p>`:''}<div class="sc-mount" data-group="${g.id}"></div></section>`
+  )).join('');
+
+  // ── scenario cards ──
+  function scHtml(s){
+    const d = st(s.id);
+    const cls = d.verdict==='pass' ? 'done-pass' : d.verdict==='fail' ? 'done-fail' : '';
+    const steps = (s.steps||[]).map((txt,i)=>{
+      const ck = d.steps[i] ? 'checked' : '';
+      return `<li class="${ck}"><span class="n">${i+1}</span><label><input type="checkbox" data-sid="${s.id}" data-idx="${i}" ${ck?'checked':''}><span>${esc(txt)}</span></label></li>`;
+    }).join('');
+    const rc = v => d.verdict===v ? 'checked' : '';
+    const thumbs = d.images.map((src,i)=>`<div class="thumb" data-sid="${s.id}" data-i="${i}"><img src="${src}" alt=""><span class="rm" data-sid="${s.id}" data-i="${i}" title="삭제">×</span></div>`).join('');
+    const meta = []
+      .concat(s.pre   ? [`<span class="k">${L.pre}</span><span>${esc(s.pre)}</span>`]:[])
+      .concat(s.expect? [`<span class="k expect">${L.expect}</span><span class="expect">${esc(s.expect)}</span>`]:[])
+      .concat(s.fail  ? [`<span class="k fail">${L.failSym}</span><span class="fail">${esc(s.fail)}</span>`]:[])
+      .concat(s.ref   ? [`<span class="k">${L.ref}</span><span class="small">${esc(s.ref)}</span>`]:[])
+      .join('');
+    return `<div class="sc ${cls}" id="${s.id}">
+      <div class="sc-head">
+        <span class="sc-id">${esc(s.id)}</span>
+        <span class="sc-title">${esc(s.title)}</span>
+        ${s.mode?`<span class="pill" style="${pillStyle(s.mode)}">${esc(MODES[s.mode]||s.mode)}</span>`:''}
+        ${s.edge?`<span class="sc-edge">${esc(s.edge)}</span>`:''}
+      </div>
+      <div class="sc-body">
+        <div class="sc-meta">${meta}</div>
+        <ol class="steps">${steps}</ol>
+        <div class="verdict">
+          <label class="v-pass"><input type="radio" name="v-${s.id}" value="pass" ${rc('pass')}> ${L.pass}</label>
+          <label class="v-fail"><input type="radio" name="v-${s.id}" value="fail" ${rc('fail')}> ${L.fail}</label>
+          <label class="v-hold"><input type="radio" name="v-${s.id}" value="hold" ${rc('hold')}> ${L.hold}</label>
+          <input type="text" data-note="${s.id}" placeholder="${escAttr(L.notePlaceholder)}" value="${escAttr(d.note)}">
+        </div>
+        <div class="imgrow">
+          <span class="ilabel">${L.imgLabel}</span>
+          <div class="imgctl">
+            <button class="ibtn" data-file="${s.id}">${L.imgFile}</button>
+            <input type="file" accept="image/*" multiple data-fileinput="${s.id}" style="display:none">
+            <div class="ipaste" data-paste="${s.id}" tabindex="0">${L.imgPaste}</div>
+          </div>
+          <div class="thumbs" data-thumbs="${s.id}">${thumbs}</div>
+        </div>
+      </div>
+    </div>`;
+  }
+
+  function renderCards(){
+    document.querySelectorAll('.sc-mount').forEach(mount=>{
+      const g = mount.dataset.group;
+      mount.innerHTML = SCENARIOS.filter(s=>s.group===g).map(scHtml).join('');
+    });
+    wire();
+    refreshTotals();
+  }
+  function renderThumbs(sid){
+    const el = document.querySelector(`[data-thumbs="${sid}"]`);
+    if(!el) return;
+    el.innerHTML = st(sid).images.map((src,i)=>`<div class="thumb" data-sid="${sid}" data-i="${i}"><img src="${src}" alt=""><span class="rm" data-sid="${sid}" data-i="${i}" title="삭제">×</span></div>`).join('');
+    wireThumbs(el);
+  }
+
+  // ── image handling (downscale → dataURL → localStorage) ──
+  function processImage(file, cb){
+    if(!file || !/^image\//.test(file.type)) return;
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const max = 1600;
+        let w = img.width, h = img.height;
+        if (w>max || h>max){ const r = Math.min(max/w, max/h); w = Math.round(w*r); h = Math.round(h*r); }
+        const c = document.createElement('canvas'); c.width=w; c.height=h;
+        c.getContext('2d').drawImage(img,0,0,w,h);
+        try { cb(c.toDataURL('image/jpeg', 0.85)); } catch(err){ cb(e.target.result); }
+      };
+      img.onerror = () => cb(e.target.result);
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  function addImage(sid, dataURL){ st(sid).images.push(dataURL); save(); renderThumbs(sid); }
+
+  let activePasteSid = null;
+  document.addEventListener('paste', e=>{
+    if(!activePasteSid) return;
+    const items = (e.clipboardData||{}).items || [];
+    let used = false;
+    for(const it of items){ if(it.type && it.type.indexOf('image')===0){ const f=it.getAsFile(); if(f){ used=true; processImage(f, d=>addImage(activePasteSid, d)); } } }
+    if(used) e.preventDefault();
+  });
+
+  // ── lightbox ──
+  const lb = document.getElementById('lightbox');
+  lb.addEventListener('click', ()=>{ lb.classList.remove('show'); lb.innerHTML=''; });
+  function openLightbox(src){ const im=document.createElement('img'); im.alt=''; im.src=src; lb.innerHTML=''; lb.appendChild(im); lb.classList.add('show'); }
+
+  function wireThumbs(scope){
+    scope.querySelectorAll('.thumb img').forEach(im=>im.addEventListener('click', e=>{ openLightbox(e.target.src); }));
+    scope.querySelectorAll('.thumb .rm').forEach(b=>b.addEventListener('click', e=>{
+      e.stopPropagation();
+      const {sid,i} = e.target.dataset;
+      st(sid).images.splice(Number(i),1); save(); renderThumbs(sid);
+    }));
+  }
+
+  function wire(){
+    document.querySelectorAll('.sc input[type=checkbox]').forEach(cb=>cb.addEventListener('change', e=>{
+      const {sid,idx} = e.target.dataset;
+      st(sid).steps[idx] = e.target.checked;
+      e.target.closest('li').classList.toggle('checked', e.target.checked);
+      save(); refreshTotals();
+    }));
+    document.querySelectorAll('.sc input[type=radio]').forEach(r=>r.addEventListener('change', e=>{
+      const sid = e.target.name.replace('v-','');
+      st(sid).verdict = e.target.value; save(); refreshCard(sid); refreshTotals();
+    }));
+    document.querySelectorAll('.sc input[type=text]').forEach(t=>t.addEventListener('input', e=>{
+      st(e.target.dataset.note).note = e.target.value; save();
+    }));
+    document.querySelectorAll('[data-file]').forEach(b=>b.addEventListener('click', e=>{
+      document.querySelector(`[data-fileinput="${e.target.dataset.file}"]`).click();
+    }));
+    document.querySelectorAll('[data-fileinput]').forEach(inp=>inp.addEventListener('change', e=>{
+      const sid = e.target.dataset.fileinput;
+      Array.from(e.target.files||[]).forEach(f=>processImage(f, d=>addImage(sid,d)));
+      e.target.value='';
+    }));
+    document.querySelectorAll('[data-paste]').forEach(z=>{
+      const sid = z.dataset.paste;
+      z.addEventListener('focus', ()=>{ activePasteSid=sid; document.querySelectorAll('.ipaste').forEach(x=>x.classList.remove('active')); z.classList.add('active'); });
+      z.addEventListener('click', ()=>z.focus());
+      z.addEventListener('blur', ()=>{ z.classList.remove('active'); });
+    });
+    document.querySelectorAll('.thumbs').forEach(wireThumbs);
+  }
+
+  function refreshCard(sid){
+    const el = document.getElementById(sid); if(!el) return;
+    const v = (state[sid]||{}).verdict;
+    el.classList.toggle('done-pass', v==='pass');
+    el.classList.toggle('done-fail', v==='fail');
+  }
+  function refreshTotals(){
+    const total = SCENARIOS.length; let pass=0, fail=0, done=0;
+    SCENARIOS.forEach(s=>{ const v=(state[s.id]||{}).verdict; if(v==='pass'){pass++;done++;} else if(v==='fail'){fail++;done++;} else if(v==='hold'){done++;} });
+    document.getElementById('scTotal').textContent = total;
+    document.getElementById('scDone').textContent = done;
+    document.getElementById('scPass').textContent = pass;
+    document.getElementById('scFail').textContent = fail;
+    document.getElementById('meter').style.width = total ? Math.round(done/total*100)+'%' : '0%';
+  }
+
+  // ── exports ──
+  document.getElementById('btnReset').addEventListener('click', ()=>{
+    if(confirm(L.resetConfirm)){ state={}; save(); renderCards(); }
+  });
+  document.getElementById('btnExport').addEventListener('click', ()=>{
+    const sym = {pass:L.symPass, fail:L.symFail, hold:L.symHold, '':L.symNone};
+    const lines = [META.exportTitle||'# 테스트 결과', ''];
+    SCENARIOS.forEach(s=>{
+      const d = state[s.id]||{verdict:'',note:'',images:[]};
+      const imgN = (d.images||[]).length;
+      lines.push(`${s.id} [${sym[d.verdict||'']}] ${s.title}` + (d.note?`  — ${d.note}`:'') + (imgN?`  ${L.imgCount(imgN)}`:''));
+    });
+    const pass = SCENARIOS.filter(s=>(state[s.id]||{}).verdict==='pass').length;
+    const fail = SCENARIOS.filter(s=>(state[s.id]||{}).verdict==='fail').length;
+    lines.splice(2,0,L.reportSummary(pass,fail,SCENARIOS.length),'');
+    const box = document.getElementById('exportBox');
+    box.style.display='block'; box.value=lines.join('\n'); box.select();
+    if(navigator.clipboard) navigator.clipboard.writeText(box.value).catch(()=>{});
+  });
+  document.getElementById('btnReport').addEventListener('click', ()=>{
+    const sym = {pass:L.symPass, fail:L.symFail, hold:L.symHold, '':L.symNone};
+    const pass = SCENARIOS.filter(s=>(state[s.id]||{}).verdict==='pass').length;
+    const fail = SCENARIOS.filter(s=>(state[s.id]||{}).verdict==='fail').length;
+    const title = (META.title||'테스트 결과').replace(/<[^>]+>/g,'');
+    const rows = SCENARIOS.map(s=>{
+      const d = state[s.id]||{verdict:'',note:'',images:[]};
+      const imgs = (d.images||[]).map(src=>`<img src="${src}" style="max-width:480px;max-height:360px;border:1px solid #2c3147;border-radius:6px;margin:6px 8px 0 0;display:inline-block">`).join('');
+      return `<div style="border:1px solid #2c3147;border-radius:10px;margin:12px 0;padding:12px 14px;background:#171a2b">
+        <div style="font-weight:700"><span style="color:#6ea8fe">${esc(s.id)}</span> ${esc(s.title)} <span style="float:right">${sym[d.verdict||'']}</span></div>
+        ${s.expect?`<div style="color:#4cd9a0;font-size:12.5px;margin-top:4px">${esc(s.expect)}</div>`:''}
+        ${d.note?`<div style="color:#f5c451;font-size:12.5px;margin-top:4px">📝 ${esc(d.note)}</div>`:''}
+        ${imgs?`<div style="margin-top:8px">${imgs}</div>`:''}
+      </div>`;
+    }).join('');
+    const html = `<!DOCTYPE html><html lang="ko"><head><meta charset="UTF-8"><title>${esc(title)} · 결과</title>
+      <style>body{margin:0;background:#0f1220;color:#e8ebf5;font:14px/1.55 -apple-system,"Malgun Gothic",sans-serif;padding:24px 32px}
+      h1{font-size:22px}.sum{color:#9aa3bf;margin-bottom:16px}</style></head>
+      <body><h1>${esc(title)} · 결과</h1><div class="sum">${L.reportSummary(pass,fail,SCENARIOS.length)} · ${new Date().toLocaleString()}</div>${rows}</body></html>`;
+    const blob = new Blob([html], {type:'text/html'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = (KEY.replace(/[:\/]/g,'-')) + '-report.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  });
+
+  renderCards();
+})();
+</script>
+</body>
+</html>

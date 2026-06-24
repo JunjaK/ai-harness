@@ -54,6 +54,7 @@ Phase 5: Final Security Review
 | `/team` | Interactive mode — user participates in planning phase |
 | `/team-run` | Autonomous mode — full auto-execution |
 | `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
+| `/test-scenario-doc` | On-demand human QA checklist HTML (human acceptance layer) |
 
 ## Installation (Plugin)
 
@@ -174,6 +175,7 @@ Skills that agents reference during their workflow phases:
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
 | `agentic-testing` | Phase 4.5 | Adapter-based agentic E2E — explore goal → verify → crystallize deterministic test |
+| `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
 | `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
@@ -207,13 +209,14 @@ junjak-ai-harness/
 │   ├── team.md                  # /team
 │   ├── team-run.md              # /team-run
 │   ├── team-brainstorm.md       # /team-brainstorm
-│   └── checkpoint.md            # /checkpoint
+│   ├── checkpoint.md            # /checkpoint
+│   └── test-scenario-doc.md     # /test-scenario-doc
 ├── hooks/
 │   ├── hooks.json               # Plugin hook registration
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-└── skills/                      # 18 workflow skills
+└── skills/                      # 20 workflow skills
     ├── team-workflow/
     ├── project-analyzer/
     ├── tdd-workflow/
@@ -221,6 +224,8 @@ junjak-ai-harness/
     ├── contract-sync/
     ├── docs-lifecycle/
     ├── wiki/
+    ├── agentic-testing/
+    ├── test-scenario-doc/
     ├── security-review/
     └── ... (10 more)
 ```
