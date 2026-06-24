@@ -81,7 +81,7 @@ After completing a significant task:
 1. **Identify** — What did you learn that wasn't obvious at the start?
 2. **Validate** — Does evidence support it? (test results, successful builds)
 3. **Generalize** — Strip task-specific details, keep the reusable pattern
-4. **Score** — Rate confidence: low (1 session), medium (2-3), high (validated repeatedly)
+4. **Score** — Rate confidence 0.3–0.9 (0.3 = one session, 0.7 = confirmed across sessions, 0.9 = validated repeatedly, never contradicted). Same scale as instincts (§4).
 5. **Store** — Save to `.claude/session-state/learnings/`
 
 ### Learning File Format
@@ -89,7 +89,7 @@ After completing a significant task:
 ```markdown
 # {Pattern Name}
 
-**Confidence**: low | medium | high
+**Confidence**: 0.3–0.9 (numeric — see §4)
 **Category**: debugging | architecture | tooling | domain | performance
 **Discovered**: {date}
 **Last validated**: {date}
@@ -109,18 +109,21 @@ After completing a significant task:
 
 ## 3. Skill Evolution
 
-### From Learnings to Skills
+### From Learnings & Instincts to Skills / Commands / Agents
 
-When 3+ related learnings cluster around a topic, evaluate skill evolution using the criteria below.
+When 3+ related learnings or instincts cluster around a topic, evolve them — and not only into a skill. Pick the target by shape:
+- reusable methodology / knowledge → **skill**
+- a repeatable invocation the human runs → **command**
+- a specialized role / persona → **agent**
 
 ```
-Individual learnings → Cluster by topic → Draft skill → Validate → Install as SKILL.md
+learnings + instincts → cluster by domain → draft (skill | command | agent) → validate → install
 ```
 
 ### Evolution Criteria (MUST evolve when ALL apply)
 
-- 3+ learnings share a common domain
-- ≥ 2 learnings have "high" confidence
+- 3+ learnings/instincts share a common domain
+- ≥ 2 items at confidence ≥ 0.7
 - Pattern is broadly applicable (not tied to a specific project file/component)
 - Applying the pattern would save ≥ 15 minutes per future occurrence
 
@@ -147,33 +150,76 @@ description: "{when to activate this skill}"
 {From failed approaches across learnings}
 ```
 
-## 4. Instinct System
+## 4. Instinct System (atomic, confidence-scored, project-scoped)
 
-### Instinct Lifecycle
+An **instinct** is an atomic learned behavior — **one trigger, one action** — finer-grained than a learning. A learning is a prose pattern; an instinct is a small, evidence-backed rule the agent applies by default.
+
+### Observe via hooks, not skill-firing
+
+Observation that relies on a skill firing is **probabilistic** (~50–80% — it fires on the agent's judgment). Hooks fire **100%** of the time, deterministically. So capture observations through the harness's hooks (Stop / PreCompact / PostToolUse), not by hoping a skill notices — every user correction, error resolution, and repeated workflow is an observation, and none should be missed.
+
+### Instinct file format
+
+Store at `.claude/session-state/instincts/<id>.md` (repo-local = **project-scoped** by nature):
+
+```markdown
+---
+id: grep-before-edit
+trigger: "before editing an unfamiliar file"
+action: "grep/Read the file and its callers first"
+confidence: 0.6        # 0.3 tentative → 0.9 near-certain
+domain: tooling        # code-style | testing | git | debugging | workflow | tooling | domain | security
+scope: global          # project (default) | global
+evidence: 3            # observation count backing it
+discovered: {date}
+last-validated: {date}
+---
+- Action: {exactly what to do}
+- Evidence: {the observations that created or raised it}
+```
+
+### Confidence (numeric 0.3–0.9)
+
+| Score | Meaning | Behavior |
+|-------|---------|----------|
+| 0.3 | Tentative | suggested, not enforced |
+| 0.5 | Moderate | applied when relevant |
+| 0.7 | Strong | auto-applied |
+| 0.9 | Near-certain | core behavior |
+
+**Increase** when: repeatedly observed · user does not correct the applied behavior · an instinct from another source agrees.
+**Decrease** when: user corrects it · not observed for a long stretch · contradicting evidence appears.
+
+### Scope: project vs global
+
+Default **project** (lives in this repo's `.claude/session-state/instincts/`). Tag **global** only for cross-project-stable behaviors.
+
+| Pattern type | Scope |
+|---|---|
+| Framework/lang conventions, file structure, code style, error strategy | **project** |
+| Security practices, general best practices, tool-workflow, git practices | **global** |
+
+**Promotion (project → global)**: when the same instinct appears in 2+ projects with avg confidence ≥ 0.8, promote it — for this harness that means moving the stable fact into the **project-profile** (§6, where every agent reads it) or evolving it into a **skill** (§3). Project-scoping prevents cross-project contamination (React conventions never leak into a Python repo).
+
+### Lifecycle
 
 ```
-Observation → Pending instinct (30-day TTL)
-                ↓ validated
-             Active instinct (confidence scored)
-                ↓ 3+ related instincts
-             Skill candidate
-                ↓ evolved
-             SKILL.md installed
+Observation (hook-captured)
+  → instinct @0.3 (atomic, project-scoped)
+  → confidence grows with repeat / non-correction
+  → 3+ related, ≥0.7 → cluster → evolve (§3: skill | command | agent)
+  → cross-project stable → promote to global (profile / skill)
 ```
-
-### Confidence Scoring
-
-| Score | Meaning | Action |
-|-------|---------|--------|
-| 1 (low) | Single observation | Keep as pending, monitor |
-| 2 (medium) | Confirmed across 2-3 sessions | Promote to active |
-| 3 (high) | Validated repeatedly, never contradicted | Candidate for skill |
 
 ### Pruning
 
-- **Pending instincts**: Auto-expire after 30 days if not validated
-- **Contradicted instincts**: Remove immediately when evidence disproves them
-- **Superseded instincts**: Remove when a better pattern replaces them
+- **Tentative (≤0.3) not reinforced in 30 days** → expire.
+- **Contradicted** → remove immediately (user corrected it, or evidence disproves it).
+- **Superseded** → remove when a better instinct replaces it.
+
+### Observation capture (opt-in, harness-native — no Python/daemon)
+
+To get v2's deterministic 100% capture without a background process: a lean **shell PostToolUse hook** appends a compact line (tool, target, outcome) to `.claude/session-state/observations.jsonl`; the existing **Stop hook**'s session-end step extracts instincts from it. This stays inside the harness's shell-hook + `.claude/session-state/` model — no background observer, no Python. Until that hook is wired, capture observations in `current.md` during work and extract instincts at milestones / Stop.
 
 ## 5. Integration with Team Workflow
 
@@ -258,8 +304,9 @@ Learnings:     .claude/session-state/learnings/{topic}.md
 Archive:       .claude/session-state/archive/ (auto-managed by hooks)
 Extract:       After milestones — identify, validate, generalize, score, store
 Reuse:         At task start, load matching learnings; route them into agent briefings; index when >10
-Promote:       Project-stable learning → project-profile (read by default)
-Evolve:        3+ related high-confidence learnings → new SKILL.md
+Instincts:     .claude/session-state/instincts/<id>.md — atomic (1 trigger/1 action), confidence 0.3–0.9, scope project|global
+Promote:       Project-stable learning/instinct → project-profile (read by default); project→global when seen in 2+ projects ≥0.8
+Evolve:        3+ related items at ≥0.7 → skill | command | agent
 Maintain:      Link don't duplicate; same change updates the doc it invalidates; verify a recalled fact still exists
 Prune:         30-day TTL for pending, immediate for contradicted
 ```
