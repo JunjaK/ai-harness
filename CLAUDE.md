@@ -160,6 +160,22 @@ If not set, `/team`, `/team-run`, and `/team-brainstorm` will not function (they
 
 ---
 
+## Ultracode Orchestration
+
+When the runtime signals **ultracode** mode (or `CLAUDE_HARNESS_ULTRACODE=1` is set as an explicit override) AND the Workflow tool (`workflow()`) is callable, every harness process with 2+ independent work units, a fan-out-then-barrier shape, or a per-item multi-stage flow MUST execute via the Workflow tool — `parallel()` for barriered fan-out, `pipeline()` for per-item flow, `workflow()` to nest one level — selecting the matching pattern (adversarial-verify, perspective-diverse verify, judge-panel, completeness-critic, self-repair) and passing `schema` whenever a downstream gate consumes a structured field.
+
+**Named fan-out points**: Phase 1 architecture (FE/BE parallel; cross-review stays `TeamCreate`), Phase 3 Designer-and-merge (worktree-isolated), Phase 4 Tester-per-designer, and the agentic-testing Explorer→Generator pipeline (Phase 4.5).
+
+The harness's **max-5-worktree cap** and **types→backend→frontend→tests merge order** OVERRIDE the looser `min(16, cores-2)` Workflow cap for code-writers.
+
+**MUST NOT** use the Workflow path for: a single-agent task; a strictly sequential chain with no per-item streaming benefit; work sharing mutable state (`parallelization` "When NOT to Scale" applies unchanged); parallel use of the single shared Playwright MCP browser; or deterministic state-file bookkeeping.
+
+**Outside ultracode mode, all of the above MUST use the current lightweight `Agent()`/`TeamCreate` path and MUST NOT introduce a Workflow layer.**
+
+Note: ultracode is an orchestration-**topology** signal, separate from **effort** (`/effort max`) — effort ≠ topology. `CLAUDE_HARNESS_ULTRACODE=1` (settings.json env) is an optional explicit override for headless / non-Claude-Code contexts; normally the runtime signal is enough.
+
+---
+
 ## First Run: Project Analysis
 
 Before using any team command:

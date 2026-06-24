@@ -41,6 +41,13 @@ Before starting any phase, verify `.claude/project-profile/index.md` exists.
 
 **Loading rule**: Only `index.md` is required. Agents load other profile files on-demand based on relevance (see index.md's file table). Some files may not exist — agents fall back to general best practices.
 
+## Orchestration Mode (read once)
+
+selectMode: **ULTRACODE** iff `workflow()` is callable AND ultracode is active (runtime signal or `CLAUDE_HARNESS_ULTRACODE=1`) AND the step has 2+ independent units; else **STANDARD**. Record the mode in the plan's Orchestration field. Workflow unavailable → STANDARD (hard fallback). See CLAUDE.md "Ultracode Orchestration" for fan-out points and guards.
+
+- **STANDARD**: spawn agents via `Agent()` / `TeamCreate` (the steps below, as written).
+- **ULTRACODE**: run the named fan-outs (Phase 1 architects, Phase 3 designers+merge, Phase 4 testers, Phase 4.5 agentic pipeline) via the Workflow tool — `parallel()` / `pipeline()`. Keep the max-5-worktree cap + types→backend→frontend→tests merge order; serialize the shared Playwright MCP browser.
+
 ## Phase 1: Planning
 
 ### Step 1: Spawn Team Leader
@@ -52,6 +59,8 @@ For `/team` mode: Include instruction "Ask the user about ambiguous decisions."
 For `/team-run` mode: Include instruction "Make all decisions autonomously."
 
 ### Step 2: Spawn Architects A + B (parallel)
+
+> **Ultracode**: run FE/BE as a Workflow `parallel()` fan-out (cross-review in Step 3 stays `TeamCreate`). Standard: the `Agent()` calls below.
 
 After Leader produces rough plan, spawn both architects in parallel:
 
@@ -120,6 +129,8 @@ Designer 2: [file-c, file-d] → worktree-2
 
 ### Step 2: Spawn Designers (parallel, worktree isolated)
 
+> **Ultracode**: run Designers as a Workflow `parallel()` with `isolation: 'worktree'`, then the sequential merge (Step 3). Max-5-worktree cap + types→backend→frontend→tests merge order still bind. Standard: the `Agent()` calls below.
+
 For each Designer:
 ```
 Agent(
@@ -144,6 +155,8 @@ Update `_docs/{category}/plan-{feature}.md` with implementation notes. Transitio
 ## Phase 4: Verification
 
 ### Step 1: Spawn Testers (parallel)
+
+> **Ultracode**: run one Tester per Designer as a Workflow `parallel()` fan-out. Standard: the `Agent()` call below.
 
 ```
 Agent(

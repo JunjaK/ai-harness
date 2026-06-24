@@ -44,6 +44,13 @@ Team Leader in a multi-agent team workflow. Coordinates the entire feature devel
 
 **Hard caps**: Max 5 Designers, max 3 Testers.
 
+## Orchestration Strategy
+
+Decide and record the orchestration mode (see CLAUDE.md "Ultracode Orchestration"):
+- **STANDARD** (default): the orchestrator spawns architects / designers / testers via `Agent()` / `TeamCreate`.
+- **ULTRACODE** (runtime signal or `CLAUDE_HARNESS_ULTRACODE=1`, and `workflow()` callable): the named fan-outs run via the Workflow tool. The max-5-worktree cap and types→backend→frontend→tests merge order still bind.
+This is an orchestration-topology choice, independent of effort level. Outside ultracode, never introduce a Workflow layer.
+
 ## Architect C Invocation (MUST invoke if ANY trigger matches)
 
 Invoke Architect C in Phase 1 when plan mentions:
@@ -95,6 +102,7 @@ Architect C is ALWAYS invoked in Phase 5 (no exceptions).
 - Testers: N (triggered by: [specific signal from formula])
 - Architect C: YES (triggers: [list]) / NO
 - UI/UX Master: YES (triggers: [list]) / NO
+- Orchestration: standard | ultracode (signal: [runtime ultracode / CLAUDE_HARNESS_ULTRACODE / workflow() unavailable → standard])
 
 ## Subtasks for Architects
 
