@@ -1,6 +1,6 @@
 ---
 title: Agentic Testing 레이어 (adapter × mode-aware)
-status: planning
+status: processing
 scope: harness
 created: 2026-06-23
 updated: 2026-06-23

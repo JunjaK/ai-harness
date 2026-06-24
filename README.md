@@ -171,6 +171,7 @@ Skills that agents reference during their workflow phases:
 | `tdd-workflow` | Phase 3 | Red-Green-Refactor TDD cycle (Vitest 4.x) |
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
+| `agentic-testing` | Phase 4.5 | Adapter-based agentic E2E — explore goal → verify → crystallize deterministic test |
 | `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
@@ -188,7 +189,7 @@ junjak-ai-harness/
 ├── .claude-plugin/
 │   ├── plugin.json              # Plugin manifest
 │   └── marketplace.json         # Marketplace definition (single-repo)
-├── agents/                      # 9 specialized agents
+├── agents/                      # 10 specialized agents
 │   ├── team-leader.md
 │   ├── team-architect-fe.md
 │   ├── team-architect-be.md
@@ -196,6 +197,7 @@ junjak-ai-harness/
 │   ├── team-uiux-master.md
 │   ├── team-designer.md
 │   ├── team-tester.md
+│   ├── team-agentic-tester.md
 │   ├── web-architect.md
 │   └── web-reviewer.md
 ├── commands/

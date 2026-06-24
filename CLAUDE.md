@@ -253,6 +253,7 @@ All agents live in the plugin's `agents/` directory and are invoked by the `team
 | team-uiux-master | Opus 4.7 | UI/UX design intelligence |
 | team-designer | Opus 4.7 | TDD implementation (Red-Green-Refactor) |
 | team-tester | Sonnet 4.6 | Unit + E2E test verification |
+| team-agentic-tester | Opus 4.7 | Phase 4.5 agentic testing (explore-gate + deterministic test generator) |
 | web-architect | Opus 4.7 | Web architecture design (components, state, API, perf) |
 | web-reviewer | Sonnet 4.6 | Web quality audit (A11y, CWV, SEO, design, AI Slop) |
 
@@ -273,6 +274,7 @@ All Opus agents default to `xhigh` effort. Sonnet agents use their model's defau
 | tdd-workflow | Phase 3 | Red-Green-Refactor cycle (Vitest 4.x) |
 | debug | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | e2e-testing | Phase 4 | Playwright E2E |
+| agentic-testing | Phase 4.5 | Adapter-based agentic E2E: explore goal → verify → crystallize deterministic test |
 | verification-loop | Phase 4-5 | 6-phase quality gate + checkpoints + pass@k + baseline/net-new + vacuity guard |
 | contract-sync | Phase 0 / BE→FE handoff | Regenerate generated API client after a contract change → isolate churn → authoritative type-check → cross-check consumption sites |
 | security-review | Phase 5 | OWASP checklist + Phase 5 audit format |

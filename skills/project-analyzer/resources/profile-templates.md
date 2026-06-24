@@ -235,6 +235,13 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 ## Coverage
 - Target: [percentage if configured]
 - Report: [format and location]
+
+## Agentic Testing Adapter
+- Surface: <web | backend | mobile>
+- Driver: <playwright-mcp | http | maestro | patrol | mobile-mcp | UNAVAILABLE>
+- Emitter house-style: <e2e-testing | springboot-tdd + kotlin-testing | integration_test>
+- Concurrency: <serial-shared-browser | parallel-stateless | serial-per-device>
+- Generated spec dir: <tests/e2e/ | src/test/ | integration_test/>
 ```
 
 ---
@@ -313,6 +320,7 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 
 > Generated: [timestamp]
 > Last updated: [timestamp]
+> Profile-Generated-At: [current git HEAD short sha]
 
 ## Quick Summary
 - **Stack**: [Framework] + [Language] + [UI Library]

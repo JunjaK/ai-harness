@@ -155,8 +155,18 @@ Agent(
 
 ### Step 2: Collect Results
 
-If all tests pass → append test results to the `_docs/` plan (status stays `processing` until ship) → proceed to Phase 5.
+If all tests pass → append test results to the `_docs/` plan (status stays `processing` until ship) → proceed to Phase 4.5.
 If failures → check escalation rules (resources/escalation.md).
+
+## Phase 4.5: Agentic Testing (conditional)
+
+Trigger: Phase 4 = PASS AND a user-facing flow changed.
+
+1. Enforce the `agentic-testing` precondition (project-profile present + adapter section + not stale). If unmet → instruct `/team-init`, skip Phase 4.5 (non-blocking).
+2. **STANDARD mode**: `Agent(subagent_type="team-agentic-tester", prompt="Plan + team-tester report + adapter from testing.md. Explore goals, verify, crystallize specs.", mode="bypassPermissions")` (sequential).
+3. Consume its report: unmet/distrusted goals → escalate; green generated specs join the deterministic suite.
+
+(Ultracode mode runs the agentic-testing Workflow pipeline instead — see "Orchestration Mode".)
 
 ## Phase 5: Final Security Review
 

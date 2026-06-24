@@ -1,6 +1,6 @@
 ---
 title: Agentic Testing 레이어 — 구현 계획
-status: planning
+status: processing
 scope: harness
 created: 2026-06-23
 updated: 2026-06-23

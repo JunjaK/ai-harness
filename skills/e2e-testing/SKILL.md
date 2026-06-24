@@ -7,6 +7,8 @@ description: "Playwright E2E testing patterns. Use in Phase 4 (Verification) by 
 
 Playwright patterns for stable, fast, maintainable E2E tests.
 
+> This is the **deterministic** layer. For the exploratory goal-verification + test-generation layer above it (Phase 4.5), see the `agentic-testing` skill — its Generator emits specs that MUST follow the conventions here.
+
 ## Test File Organization
 
 ```

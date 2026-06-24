@@ -69,6 +69,12 @@ Only rescans and rewrites sections that changed. Use when:
 
 Compares current codebase against existing profile, updates only changed files, appends to changelog in `index.md`.
 
+### Staleness Detection (MUST)
+On `--update`, before rescanning:
+1. Read `Profile-Generated-At` from `index.md`. Compare to current `git rev-parse --short HEAD`.
+2. If the profile is missing the "Agentic Testing Adapter" section (older profile), force a `testing.md` rescan.
+3. Report drift: "Profile generated at `<old-sha>`, HEAD now `<new-sha>`". Regenerate changed sections and rewrite `Profile-Generated-At`.
+
 ## After Running
 
 The profile is automatically used by team workflow commands:

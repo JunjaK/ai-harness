@@ -44,6 +44,11 @@ Follow template §5. Skip for projects without state library and mark ⏭️ Ski
 ### Step 6: Analyze Testing → `testing.md`
 Follow template §6. Default framework expectation: Vitest 4.x for unit, Playwright for E2E.
 
+Also derive the **Agentic Testing Adapter** (template §6 block):
+- Surface: `web` if a browser UI (React/Vue/Svelte/Angular/Next…); `backend` if API-only (Spring/Express/FastAPI…); `mobile` if Flutter/React-Native.
+- Driver / Emitter house-style / Concurrency / spec dir: fill per the Adapter table in the `agentic-testing` skill.
+- If Surface=mobile and no mobile driver (maestro/Patrol/mobile-MCP) is detectable, set `Driver: UNAVAILABLE` and note it.
+
 ### Step 7: Analyze UI Components → `ui-components.md`
 Follow template §7. Skip for backend-only projects.
 
@@ -51,7 +56,7 @@ Follow template §7. Skip for backend-only projects.
 Follow template §8. Skip if no CI/CD found.
 
 ### Step 9: Generate Index → `index.md`
-Follow template §9. MUST include relevance + status for every profile file.
+Follow template §9. MUST include relevance + status for every profile file. Record `Profile-Generated-At: <git rev-parse --short HEAD>` so staleness can be detected later (`/team-init --update`).
 
 ### Step 10: Bootstrap document buckets (if absent)
 Follow template §10. Establish the three document buckets alongside `_docs/`:

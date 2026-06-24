@@ -101,6 +101,8 @@ After tests pass, run `/ponytail-review` on this task's diff to flag over-engine
 - Otherwise include ponytail's findings in the report — do NOT act on them yourself; the minimalism decision belongs to the Team Leader's gate.
 - This is an over-engineering audit ONLY. It NEVER overrides the test, coverage, or security gates above.
 
+> On PASS, the orchestrator may invoke **Phase 4.5 agentic testing** (`team-agentic-tester`) before Phase 5. team-tester does not run it.
+
 ## Escalation Rules
 
 ### Simple Fix (retry within Phase 4, max 3 attempts)
