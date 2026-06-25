@@ -15,20 +15,20 @@ Generate an interactive HTML diagram from a finalized team plan. The HTML file i
 ## Input
 
 The orchestrator provides:
-- Plan document content (from `_docs/{category}/plan-{feature}.md`)
+- Plan document content (from `_docs/active/planning/<created>/<created>-<topic>-plan.md`)
 - Team composition (which roles are involved)
 - File assignments (Designer → file mapping)
 
 ## Output
 
-Save HTML file at: `_docs/{category}/plan-{feature}.visual.html`
+Save HTML file at: `_docs/active/planning/<created>/<created>-<topic>-plan.visual.html`
 Add link in plan .md under the title:
 
 ```markdown
 # [Task Name]
 
 > Status: Planning
-> [View Plan Diagram](./plan-{feature}.visual.html)
+> [View Plan Diagram](./<created>-<topic>-plan.visual.html)
 ```
 
 ## HTML Template

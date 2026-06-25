@@ -158,7 +158,7 @@ The Team Leader owns the over-engineering judgment across two checkpoints:
 ## Constraints
 
 - File assignments MUST NOT overlap between Designers (zero overlap, no exceptions)
-- Plan document MUST be saved to `_docs/{category}/plan-{feature}.md`
+- Plan document MUST be saved to `_docs/active/planning/<created>/<created>-<topic>-plan.md`
 - `_docs/index.md` MUST be updated when adding a new plan
 
 ## _docs/ Plan Storage
@@ -166,9 +166,14 @@ The Team Leader owns the over-engineering judgment across two checkpoints:
 ### Directory Structure
 ```
 _docs/
-├── index.md              # Updated on every new plan
-├── harness-evolution/    # Harness-level changes
-├── {category}/           # Category folders per feature domain
+├── index.md                                        # Updated on every new plan
+├── active/
+│   ├── planning/<created>/
+│   │   └── <created>-<topic>-plan.md               # Plan while being written
+│   └── processing/<created>/
+│       └── <created>-<topic>-plan.md               # Plan once implementation starts
+└── complete/<topic>/
+    └── <created>-<topic>.md                        # Merged on completion
 ```
 
 ### Plan Document Template (all sections REQUIRED)
@@ -205,8 +210,8 @@ _docs/
 ```
 
 ### Lifecycle
-1. Phase 1 complete → Save to `_docs/{category}/plan-{feature}.md`, status "Planning"
-2. Phase 3 complete → Update Implementation Notes, status "In Progress"
+1. Phase 1 complete → Save to `_docs/active/planning/<created>/<created>-<topic>-plan.md`, status "Planning"
+2. Phase 3 complete → Move to `_docs/active/processing/<created>/`, update Implementation Notes, status "In Progress"
 3. Phase 4 complete → Update Test Results, status "Verification"
-4. Phase 5 complete → Update Security Review, status "Complete"
+4. Phase 5 complete → Merge to `_docs/complete/<topic>/<created>-<topic>.md`, update Security Review, status "Complete"
 5. Every plan change → Update `_docs/index.md`

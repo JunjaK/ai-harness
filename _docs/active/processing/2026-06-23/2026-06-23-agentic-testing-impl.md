@@ -1,10 +1,12 @@
 ---
 title: Agentic Testing 레이어 — 구현 계획
 status: processing
+topic: agentic-testing
+kind: impl
 scope: harness
 created: 2026-06-23
 updated: 2026-06-23
-related: [_docs/harness-evolution/plan-agentic-testing.md]
+related: [_docs/active/processing/2026-06-23/2026-06-23-agentic-testing-plan.md]
 ---
 
 # Agentic Testing 레이어 Implementation Plan
@@ -550,7 +552,7 @@ git commit -m "feat(agentic-testing): finalize ultracode pipeline section + adap
 ### Task B5: Phase B 검증 — 가드·일관성 + 문서 상태 전이
 
 **Files:**
-- Modify: `_docs/harness-evolution/plan-agentic-testing.md` + `impl-agentic-testing.md` (status 전이) — 또는 docs-lifecycle 머지(완료 시).
+- Modify: `_docs/active/processing/2026-06-23/2026-06-23-agentic-testing-plan.md` + `2026-06-23-agentic-testing-impl.md` (status 전이) — 또는 docs-lifecycle 머지(완료 시).
 
 - [ ] **Step 1: 비-ultracode 가드 일관성 검사**
 

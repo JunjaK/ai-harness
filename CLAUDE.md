@@ -178,14 +178,15 @@ Note: ultracode is an orchestration-**topology** signal, separate from **effort*
 
 ## First Run: Project Analysis
 
-Before using any team command:
+Branch on whether code exists yet:
 
 ```
-/team-init          # Analyze project → generate .claude/project-profile/
+/team-new <idea>    # GREENFIELD (empty repo): research → scaffold → profile, then hand off to /team-run
+/team-init          # EXISTING tree: analyze project → generate .claude/project-profile/
 /team-init --update # Refresh after major changes
 ```
 
-Generates `.claude/project-profile/` with 9 profile documents that every agent reads.
+`/team-new` bootstraps a brand-new project from an idea (via the `greenfield-bootstrap` skill) and ends by running `project-analyzer` (Seeded Mode) — do NOT run `/team-init` on an empty repo (it would produce a vacuous profile). Both paths generate `.claude/project-profile/` (9 docs) that every agent reads.
 
 ---
 
@@ -193,12 +194,14 @@ Generates `.claude/project-profile/` with 9 profile documents that every agent r
 
 | Command | Use when |
 |---------|---------|
-| `/team-init` | Project not yet analyzed (no `.claude/project-profile/`) |
+| `/team-new <idea>` | **Greenfield** — empty repo, start a new project from scratch (research → scaffold → profile) |
+| `/team-init` | **Existing** project not yet analyzed (has code, no `.claude/project-profile/`) |
 | `/team-brainstorm <task>` | Plan-only discussion, no code changes |
 | `/team <task>` | Full workflow with user involvement in planning |
 | `/team-run <task>` | Full autonomous workflow |
 | `/checkpoint` | Save/restore work state (NOT Claude Code's built-in `/resume`) |
 | `/test-scenario-doc` | Human wants an on-demand manual QA checklist HTML (human acceptance layer) |
+| `/docs-sweep` | `_docs/active/` is piling up or you want to re-verify orphan invariants — reap stale docs + lint |
 
 ### Decision Guide
 
@@ -206,7 +209,10 @@ Generates `.claude/project-profile/` with 9 profile documents that every agent r
 Resuming previous work?
   YES → /checkpoint
 
-First time in this project?
+Starting a brand-new project (empty repo, no code yet)?
+  YES → /team-new (research → scaffold → profile, then /team-run)
+
+First time in an EXISTING project (has code, no profile)?
   YES → /team-init (MUST run before any /team* command)
 
 Task matches ANY of:
@@ -241,19 +247,23 @@ Every document lives in one of three buckets, chosen by **owner** (not by name).
 
 ## Plan Storage
 
-`_docs/` is the **project** bucket (above). Layout:
+`_docs/` is the **project** bucket (above), organized by **status × date/topic** (`docs-lifecycle` v2):
 
 ```
 _docs/
-├── index.md                        # MUST update when adding any plan
-├── {category}/
-│   ├── plan-{feature}.md           # Plan document
-│   └── plan-{feature}.visual.html  # Auto-generated visual diagram
+├── active/
+│   ├── planning/<created>/    YYYY-MM-DD-<topic>[-<kind>].md   # + .visual.html sidecar alongside
+│   └── processing/<created>/  YYYY-MM-DD-<topic>[-<kind>].md
+├── complete/<topic>/          YYYY-MM-DD-<topic>.md            # sidecars merged into one on completion
+├── reference/<topic>/         # durable consolidated synthesis
+├── deprecated/                # flat
+├── handoff/                   # flat, dated, keep-latest-per-stream
+└── index.md                   # ① status list  ② handoffs  ③ TOPIC VOCABULARY (SSOT) — MUST update on any create/move/merge
 ```
 
-Documents follow a lifecycle (`planning → processing → complete → reference`, or `→ deprecated`) with `status` in frontmatter kept in **lockstep with the folder**, and a task's sidecar docs (spec + plan + metrics + findings) **merged into one document on completion**. See `skills/docs-lifecycle/SKILL.md` — apply it at every phase transition and before marking work complete.
+Top axis = **status** (folder↔`status` lockstep: `planning → processing → complete → reference`, or `→ deprecated`, or `deprecated → active` revive). Second axis = **date** for active, **topic** for done. Filename `YYYY-MM-DD-<topic>[-<kind>].md` (all hyphens; `<kind>` ∈ brief/research/stack-decision/spec/plan/impl/findings, required when ≥2 docs share topic+date). Topics are drawn from the `index.md` controlled vocabulary (reuse-or-register). Every status move is a **reference-safe transaction** (cross-bucket link rewrite incl. `.claude/wiki/`, warn on `_note/`), and a task's sidecar docs **merge into one** on completion. Orphan-document defenses (6 invariants) are enforced by `/docs-sweep`. See `skills/docs-lifecycle/SKILL.md` — apply at every phase transition and before marking work complete.
 
-**Handoff documents** (state layer for passing work to another agent/session) live in `_docs/handoff/` (flat, dated `YYYY-MM-DD-<topic>-handoff.md`), link to their spec via `related:`, and keep only the latest per work-stream (`git rm` superseded ones). See `skills/docs-lifecycle/SKILL.md` §"Handoff documents".
+**Handoff documents** (state layer for passing work to another agent/session) live in `_docs/handoff/` (flat, dated `YYYY-MM-DD-<topic>-handoff.md`), link to their spec via `related:`, and keep only the latest per work-stream (`git rm` superseded ones). Generate them with the `handoff` skill. See `skills/docs-lifecycle/SKILL.md` §"Handoff documents".
 
 ---
 
@@ -283,9 +293,11 @@ All Opus agents default to `xhigh` effort. Sonnet agents use their model's defau
 | Skill | Phase | Purpose |
 |-------|-------|---------|
 | team-workflow | Core | 5-phase orchestration |
+| greenfield-bootstrap | /team-new | Greenfield bootstrap: G0 intake → G1 deep-research → G2 stack decision → G3 user gate → G4 scaffold → G5 seeded profile |
 | plan-review | Phase 1 | Adversarial plan evaluation |
 | plan-visualizer | Phase 1+ | HTML plan diagram |
-| docs-lifecycle | All | `_docs/` status↔folder lifecycle + 3-bucket model + merge sidecar docs into one on completion |
+| docs-lifecycle | All | `_docs/` status↔folder lifecycle + date/topic foldering + reference-safe moves + 3-bucket model + merge sidecar docs into one on completion |
+| handoff | All | Write a handoff (state layer) into `_docs/handoff/` — links the spec, keep-latest-per-stream |
 | wiki | All | Agent wiki (`.claude/wiki/`) — compounding knowledge base: ingest/query/lint, link-don't-duplicate |
 | coding-standards | Phase 3 | Code quality baseline (strict TS) |
 | tdd-workflow | Phase 3 | Red-Green-Refactor cycle (Vitest 4.x) |
@@ -342,6 +354,7 @@ These skills carry the full details; this file only lists hard rules.
 
 | Hook | Event | Script |
 |------|-------|--------|
+| Session Start | `SessionStart` (startup\|resume) | `hooks/session-start.sh` |
 | Session Stop | `Stop` | `hooks/session-stop.sh` |
 | Pre-Compact | `PreCompact` (auto) | `hooks/pre-compact.sh` |
 | Post-Edit Warn | `PostToolUse` (Edit\|Write) | `hooks/post-edit-warn.sh` |

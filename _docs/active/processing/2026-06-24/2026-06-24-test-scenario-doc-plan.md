@@ -1,6 +1,8 @@
 ---
 title: test-scenario-doc 범용 스킬 + /test-scenario-doc command 통합
 status: processing
+topic: test-scenario-doc
+kind: plan
 scope: harness
 created: 2026-06-24
 updated: 2026-06-24

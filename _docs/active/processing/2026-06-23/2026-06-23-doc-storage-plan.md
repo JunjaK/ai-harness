@@ -1,6 +1,8 @@
 ---
 title: harness 문서저장 시스템 (3-버킷 × LLM Wiki)
 status: processing
+topic: doc-storage
+kind: plan
 scope: harness
 created: 2026-06-23
 updated: 2026-06-23
@@ -146,4 +148,4 @@ raw sources ─┬─ _note/ (사람, read-only)         ┐
 5. 위키 페이지 frontmatter + Dataview/Marp 등 Obsidian 연동 — 선택, 후속.
 
 ## 11. 문서 위치
-하네스 `_docs/` 관례 → 본 spec `_docs/harness-evolution/plan-doc-storage-system.md`, `_docs/index.md` 갱신(docs-lifecycle frontmatter).
+하네스 `_docs/` 관례 → 본 spec `_docs/active/processing/2026-06-23/2026-06-23-doc-storage-plan.md`, `_docs/index.md` 갱신(docs-lifecycle frontmatter).

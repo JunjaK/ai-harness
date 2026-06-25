@@ -33,13 +33,13 @@ Follow template §1. Detect package manager via lockfile priority (bun.lockb →
 Follow template §2. Capture directory layout, routing pattern, module organization, naming conventions.
 
 ### Step 3: Detect Code Style → `code-style.md`
-Follow template §3. Read 5-10 source files to identify patterns. Skip if no consistent pattern emerges and mark N/A.
+Follow template §3. Read 5-10 source files to identify patterns. Skip if no consistent pattern emerges and mark N/A. *(Seeded Mode: on a scaffold with <5 source files, derive style from the CLI's formatter config (eslint/prettier/biome) and mark provisional.)*
 
 ### Step 4: Analyze API Layer → `api-layer.md`
-Follow template §4. Skip for projects without API integration and mark ⏭️ Skipped in index.md.
+Follow template §4. Skip for projects without API integration and mark ⏭️ Skipped in index.md. *(Seeded Mode: do NOT skip — inject the stack-decision doc's planned client/contract and mark `🌱 Seeded`. See Seeded Mode.)*
 
 ### Step 5: Analyze State Management → `state-management.md`
-Follow template §5. Skip for projects without state library and mark ⏭️ Skipped.
+Follow template §5. Skip for projects without state library and mark ⏭️ Skipped. *(Seeded Mode: do NOT skip — inject the planned state library + store patterns and mark `🌱 Seeded`. See Seeded Mode.)*
 
 ### Step 6: Analyze Testing → `testing.md`
 Follow template §6. Default framework expectation: Vitest 4.x for unit, Playwright for E2E.
@@ -64,6 +64,24 @@ Follow template §10. Establish the three document buckets alongside `_docs/`:
 - `.claude/wiki/{index.md, log.md, schema.md}` — only the files that are absent (empty catalog / empty chronicle / conventions stub).
 
 Never overwrite an existing file. On `--update`, re-run this step but only create what is missing.
+
+## Seeded Mode (greenfield — G5 of `/team-new`)
+
+Called by the `greenfield-bootstrap` skill (G5) on a freshly-scaffolded project. A bare official-CLI scaffold has no API/state code yet, so Steps 4 & 5 would normally mark `api-layer.md` and `state-management.md` as `⏭️ Skipped` — the OPPOSITE of what the first `/team-run` needs. Seeded Mode SCANS what exists and INJECTS the forward-looking decisions from the stack-decision doc.
+
+**Trigger**: invoked with a path to the G2 **stack-decision doc** (`_docs/.../project-bootstrap-stack-decision.md`). Precondition: G4 scaffold + git first-commit already ran, so Step 9 `Profile-Generated-At` resolves to that SHA.
+
+**Two passes:**
+- **SCAN-fill** (real source on the scaffold): `stack.md` (baseline = absolute 0 for greenfield), `structure.md`, `code-style.md` (formatter-config fallback if <5 files), `testing.md` (frameworks + agentic adapter, table-derived), `ui-components.md` (only if a UI lib was scaffolded), `index.md`. `deployment.md` → `⏭️ Skipped` (no CI/CD in a scaffold) is correct.
+- **INJECT-fill** (no scan source → from the decision doc), marked **`🌱 Seeded`**:
+  - `api-layer.md` — planned client + generated-vs-manual + generator/regen command + spec source + auth posture + base-URL env. *(The single most valuable injected doc — Architect-BE and Designers read it on the first `/team-run`.)*
+  - `state-management.md` — planned library + intended store-scope patterns.
+
+**INPUT CONTRACT** — the stack-decision doc MUST carry: chosen framework + package manager; planned API client (generated-vs-manual, generator, regen command, auth, base-URL env); planned state library + store patterns; planned UI lib; planned test stack. *(Same contract the greenfield-bootstrap G2 step produces.)*
+
+**Provenance**: every `🌱 Seeded` doc gets the line `> Source: injected from <stack-decision path>, not yet observed in code — re-verify on /team-init --update`. The next `--update` re-scans seeded docs against now-real code and upgrades `🌱 → ✅`.
+
+Seeded Mode is purely additive override rules; the skill never hard-errors on an empty tree.
 
 ## Update Mode (`/team-init --update`)
 
@@ -102,6 +120,8 @@ The 8 profile files represent a best-practice template. Not every project has al
 - Backend-only project may skip `ui-components.md`
 
 Mark skipped files in `index.md` as `⏭️ Skipped (reason)`. Do not assume skipped files exist.
+
+Status tokens (index.md): `✅` scanned-from-code · `⏭️ Skipped (reason)` not applicable · `🌱 Seeded` planned-and-injected-from-stack-decision-doc, not yet in code (greenfield Seeded Mode; upgrades to `✅` on the next `--update` re-scan).
 
 ### Adaptation Rules (agents MUST)
 

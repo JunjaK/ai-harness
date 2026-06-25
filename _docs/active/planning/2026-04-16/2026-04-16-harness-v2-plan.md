@@ -1,3 +1,13 @@
+---
+title: Harness v2 Evolution Plan
+status: planning
+topic: harness-v2
+kind: plan
+scope: harness
+created: 2026-04-16
+updated: 2026-06-25
+---
+
 # Harness v2 Evolution Plan
 
 > Status: Planning (Brainstorm)

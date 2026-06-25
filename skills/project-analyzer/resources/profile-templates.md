@@ -334,13 +334,15 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 
 Relevance: REQUIRED (always read) > HIGH (read if related) > MEDIUM (optional) > SKIPPED (not applicable)
 
+Status tokens: `✅` scanned-from-code · `⏭️` Skipped (not applicable) · `🌱` Seeded (planned + injected from a stack-decision doc, not yet in code — greenfield `/team-new`; upgrades to `✅` on the next `--update`).
+
 | File | Relevance | Status | Contents |
 |------|-----------|--------|----------|
 | [stack.md](./stack.md) | REQUIRED | ✅/⏭️ | Runtime, framework, dependencies, build |
 | [structure.md](./structure.md) | REQUIRED | ✅/⏭️ | Directory layout, routing, naming |
 | [code-style.md](./code-style.md) | HIGH | ✅/⏭️ | Formatting, imports, naming patterns |
-| [api-layer.md](./api-layer.md) | HIGH | ✅/⏭️ | API client, auth, error handling |
-| [state-management.md](./state-management.md) | MEDIUM | ✅/⏭️ | Store patterns, reactivity rules |
+| [api-layer.md](./api-layer.md) | HIGH | ✅/🌱/⏭️ | API client, auth, error handling |
+| [state-management.md](./state-management.md) | MEDIUM | ✅/🌱/⏭️ | Store patterns, reactivity rules |
 | [testing.md](./testing.md) | HIGH | ✅/⏭️ | Test frameworks, commands, patterns |
 | [ui-components.md](./ui-components.md) | MEDIUM | ✅/⏭️ | Component library, icons, tokens |
 | [deployment.md](./deployment.md) | MEDIUM | ✅/⏭️ | CI/CD, environments, build output |

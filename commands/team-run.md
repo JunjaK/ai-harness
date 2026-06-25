@@ -37,8 +37,8 @@ Same as `/team` but with key differences:
 
 1. **Load skill**: Invoke the `team-workflow` skill
 2. After Phase 1: Generate HTML plan diagram using `plan-visualizer` skill
-   - Save to `_docs/{category}/plan-{feature}.visual.html` (same dir as plan .md)
-   - Add `[View Plan Diagram](./plan-{feature}.visual.html)` link in plan .md
+   - Save to `_docs/active/planning/<created>/<created>-<topic>-plan.visual.html` (same dir & basename as plan .md)
+   - Add `[View Plan Diagram](./<created>-<topic>-plan.visual.html)` link in plan .md
    - Update HTML after Phase 3, 4, 5 with progress
 3. Execute all 5 phases following skill orchestration logic
 3. All agents run with `mode: "bypassPermissions"`

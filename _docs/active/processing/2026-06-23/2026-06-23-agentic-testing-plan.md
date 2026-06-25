@@ -1,10 +1,12 @@
 ---
 title: Agentic Testing 레이어 (adapter × mode-aware)
 status: processing
+topic: agentic-testing
+kind: plan
 scope: harness
 created: 2026-06-23
 updated: 2026-06-23
-related: [_docs/harness-evolution/impl-agentic-testing.md]
+related: [_docs/active/processing/2026-06-23/2026-06-23-agentic-testing-impl.md]
 ---
 
 # Agentic Testing 레이어 — 설계 spec

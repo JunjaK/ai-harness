@@ -1,19 +1,24 @@
 ---
 title: 하네스 3대 이니셔티브(agentic-testing / doc-storage / ponytail) 세션 handoff
 status: processing
+topic: agentic-testing
+kind: handoff
 scope: harness
 created: 2026-06-23
-updated: 2026-06-24
+updated: 2026-06-25
 related:
-  - _docs/harness-evolution/plan-agentic-testing.md
-  - _docs/harness-evolution/impl-agentic-testing.md
-  - _docs/harness-evolution/plan-doc-storage-system.md
-  - _docs/harness-evolution/plan-ponytail-yagni.md
+  - _docs/active/processing/2026-06-23/2026-06-23-agentic-testing-plan.md
+  - _docs/active/processing/2026-06-23/2026-06-23-agentic-testing-impl.md
+  - _docs/active/processing/2026-06-23/2026-06-23-doc-storage-plan.md
+  - _docs/active/processing/2026-06-23/2026-06-23-ponytail-yagni-plan.md
 ---
 
 # 세션 Handoff — 하네스 3대 이니셔티브
 
 > **인수자에게**: 이 한 세션에서 **3개 이니셔티브**가 진행됐다. 각 설계 전체(결정 로그·어댑터 표·파이프라인)는 아래 spec 링크를 **먼저** 읽어라. 본 문서는 그 위의 "지금 어디까지 됐고 / 뭐가 남았고 / 어떻게 검증하나" 상태 레이어다.
+
+## 갱신 2026-06-25 (docs-lifecycle v2 마이그레이션)
+- `_docs/`가 **버킷+날짜/topic 레이아웃**으로 이관됨. 이 세 spec은 이제 `_docs/active/processing/2026-06-23/`(agentic-testing-plan·impl, doc-storage-plan, ponytail-yagni-plan)에 있다. 아래 본문에서 `_docs/harness-evolution/...`로 적힌 경로 언급은 **마이그레이션 이전 시점** 기록이며, 실제 위치는 `related:`(상단 frontmatter)를 따른다.
 
 ## 갱신 2026-06-24 (이게 우선)
 - **agentic-testing 구현완료** — Phase A `ffa699c` + Phase B `d190de9`. 더 이상 park 아님. 구조검증 통과, **런타임(dry-run) 미검증**.
@@ -48,13 +53,13 @@ related:
 작업트리: clean. 워크트리 분리 없음(전부 main에서 직접 — 사용자 승인).
 
 ## ✅ 완료 — doc-storage (`9ec546b`, `5532f8e`)
-spec: `_docs/harness-evolution/plan-doc-storage-system.md` (status: processing)
+spec: `_docs/active/processing/2026-06-23/2026-06-23-doc-storage-plan.md` (status: processing)
 - **Phase A**(`9ec546b`): `docs-lifecycle`에 3-버킷 모델 + 포터블 판별기준 + `_note` 거버넌스 / `hooks/post-edit-warn.sh`에 `_note/` 경고 / `project-analyzer`+`team-init` 부트스트랩(`_note/README.md`, `.claude/wiki/{index,log,schema}.md`) / `CLAUDE.md` "Document Storage (3 buckets)"
 - **Phase B**(`5532f8e`): `skills/wiki/SKILL.md`(ingest/query/lint) / `continuous-learning` 연동(learnings→ingest, §7→lint) / `CLAUDE.md`+`README` 등재
 - 검증: ✅ 구조 grep + **hook 실측**(`_note/` 파일 쓰기 시 경고 발화, `_docs/`엔 무음 확인). ⚠️ 런타임 미검증.
 
 ## ✅ 완료 — ponytail (`d6f58e0`)
-spec: `_docs/harness-evolution/plan-ponytail-yagni.md`
+spec: `_docs/active/processing/2026-06-23/2026-06-23-ponytail-yagni-plan.md`
 - `coding-standards` §4 → 7-rung **YAGNI Decision Ladder** + "lazy not negligent" 가드 (단일 출처)
 - 빌드-결정 에이전트가 설계시 적용: `team-architect-fe/be/infra`, `web-architect`, `team-designer` (각 `.md`에 박아 스폰 서브에이전트에 닿음)
 - `plan-review`에 "Over-Engineering / YAGNI" 차원 / `team-tester` Phase 4 `### 6. /ponytail-review` 단계(미설치 시 ABORT+설치안내) / `team-leader` "Minimalism Gate" 종합
@@ -96,6 +101,6 @@ spec: `_docs/harness-evolution/plan-ponytail-yagni.md`
 - ⚠️ **혼동 주의**: 세 이니셔티브는 독립이다. doc-storage·ponytail은 구현됨, agentic-testing은 계획만. 같은 `_docs/harness-evolution/`에 spec이 섞여 있으니 status 컬럼(`_docs/index.md`)으로 구분.
 
 ## 참고
-- specs/plans: `plan-doc-storage-system.md`, `plan-ponytail-yagni.md`, `plan-agentic-testing.md`, `impl-agentic-testing.md` (모두 `_docs/harness-evolution/`)
+- specs/plans (마이그레이션 후): `_docs/active/processing/2026-06-23/`의 `2026-06-23-doc-storage-plan.md`, `2026-06-23-ponytail-yagni-plan.md`, `2026-06-23-agentic-testing-plan.md`, `2026-06-23-agentic-testing-impl.md`
 - 커밋: `38699fc abf76e2 c418996 9ec546b 5532f8e d6f58e0` (base `42fa95c`, `main`, `JunjaK/ai-harness`, **미푸시**)
 - 구조 재검증 명령(예): `grep -c "Decision Ladder\|lazy, not negligent" skills/coding-standards/SKILL.md` · `bash hooks/post-edit-warn.sh <any _note/ path>`

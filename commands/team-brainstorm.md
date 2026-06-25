@@ -24,10 +24,10 @@ If no task description provided, ask the user for one.
 4. **Cross-Review** via TeamCreate dialog (Leader + Arch A + Arch B)
 5. **Optional**: Spawn Architect C if infra/security concerns
 6. **Optional**: Spawn UI/UX Master if visual changes needed
-7. **Save plan** to `_docs/{category}/plan-{feature}.md`
+7. **Save plan** to `_docs/active/planning/<created>/<created>-<topic>-plan.md`
 8. **Generate visualization** — create HTML diagram of the plan
-   - Save to `_docs/{category}/plan-{feature}.visual.html`
-   - Add link in plan .md: `[View Plan Diagram](./plan-{feature}.visual.html)`
+   - Save to `_docs/active/planning/<created>/<created>-<topic>-plan.visual.html`
+   - Add link in plan .md: `[View Plan Diagram](./<created>-<topic>-plan.visual.html)`
 9. **Present plan** to user for review
 
 ## Visualization
@@ -46,8 +46,8 @@ Invoke the `plan-visualizer` skill.
 ```
 📋 TEAM BRAINSTORM COMPLETE
 Task: [description]
-Plan: _docs/{category}/plan-{feature}.md
-Diagram: _docs/{category}/plan-{feature}.visual.html
+Plan: _docs/active/planning/<created>/<created>-<topic>-plan.md
+Diagram: _docs/active/planning/<created>/<created>-<topic>-plan.visual.html
 Team: Leader + Arch A + Arch B [+ Arch C] [+ UI/UX Master]
 
 Ready to execute? Use:

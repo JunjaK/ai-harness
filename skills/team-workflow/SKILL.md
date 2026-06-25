@@ -37,7 +37,9 @@ graph TD
 
 Before starting any phase, verify `.claude/project-profile/index.md` exists.
 - If it exists: include `index.md` content in all agent prompts as context
-- If it does NOT exist: prompt user to run `/team-init` first, then proceed
+- If it does NOT exist, branch on whether the project has code yet:
+  - **Existing tree** (has `package.json`/`src/`): prompt user to run `/team-init` first, then proceed.
+  - **Greenfield** (empty/near-empty repo, no source tree): prompt user to run **`/team-new`** — it bootstraps the project (research → scaffold → profile) and ends by generating the profile `/team-run` then consumes. Do NOT run `/team-init` on an empty repo (it would produce a vacuous profile).
 
 **Loading rule**: Only `index.md` is required. Agents load other profile files on-demand based on relevance (see index.md's file table). Some files may not exist — agents fall back to general best practices.
 
@@ -83,14 +85,16 @@ Agent(subagent_type="team-architect-infra", prompt="Plan:\n[consolidated plan]\n
 
 ### Step 5: Save Plan to _docs/
 
-Write the consolidated plan to `_docs/{category}/plan-{feature}.md`.
+Write the consolidated plan to `_docs/active/planning/<created>/<created>-<topic>-plan.md`.
 Update `_docs/index.md` with the new entry.
 
 ```
 _docs/
-├── index.md              # Always update this
-├── {category}/
-│   └── plan-{feature}.md # Team plan document
+├── index.md                                            # Always update this
+└── active/
+    └── planning/
+        └── <created>/
+            └── <created>-<topic>-plan.md               # Team plan document
 ```
 
 The plan document follows the template defined in `team-leader.md` (Plan Document Template section).
@@ -150,7 +154,7 @@ Agent(
 
 ### Step 4: Update _docs/
 
-Update `_docs/{category}/plan-{feature}.md` with implementation notes. Transition `planning → processing` per `docs-lifecycle` (move to `active/processing/`, bump `updated`, update `index.md`).
+Update `_docs/active/processing/<created>/<created>-<topic>-plan.md` with implementation notes. Transition `planning → processing` per `docs-lifecycle` (move to `active/processing/`, bump `updated`, update `index.md`).
 
 ## Phase 4: Verification
 
