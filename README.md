@@ -1,6 +1,6 @@
 # AI Harness — Multi-Agent Team Workflow
 
-A reusable Claude Code harness for Claude Opus: a 5-phase multi-agent team workflow (TDD, escalation loops, worktree parallelization) plus a full testing stack, a document-storage system, code-minimalism discipline, and instinct-based learning.
+A reusable Claude Code harness for Claude Opus: greenfield project bootstrap (research → scaffold → profile) plus a 5-phase multi-agent team workflow (TDD, escalation loops, worktree parallelization), a full testing stack, a lifecycle-managed document-storage system, code-minimalism discipline, and instinct-based learning.
 
 ## Overview
 
@@ -20,7 +20,7 @@ Specialized AI agents collaborate through defined phases to implement features, 
 | Architect A (Frontend) | `team-architect-fe` | opus | Phase 1 (parallel with B) |
 | Architect B (Backend) | `team-architect-be` | opus | Phase 1 (parallel with A) |
 | Architect C (Infra/Security) | `team-architect-infra` | opus | Phase 1 (on-demand) + Phase 5 (always) |
-| UI/UX Master | `team-uiux-master` | sonnet | Phase 2 (conditional) |
+| UI/UX Master | `team-uiux-master` | opus | Phase 2 (conditional) |
 | Designer x N | `team-designer` | opus | Phase 3 (parallel, worktree isolated) |
 | Tester x N | `team-tester` | sonnet | Phase 4 (parallel) |
 | Agentic Tester | `team-agentic-tester` | opus | Phase 4.5 (conditional, after Tester PASS) |
@@ -63,10 +63,13 @@ Phase 5: Final Security Review
 
 | Command | Description |
 |---------|-------------|
-| `/team-init` | Analyze project → generate profile (run first!) |
+| `/team-new` | Greenfield — empty repo → deep-research → scaffold → seeded profile, then hand off to `/team-run` |
+| `/team-init` | Analyze an existing project → generate profile (run first on a project with code!) |
 | `/team` | Interactive mode — user participates in planning phase |
 | `/team-run` | Autonomous mode — full auto-execution |
 | `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
+| `/checkpoint` | Save / restore work state across sessions, branches, and compactions |
+| `/docs-sweep` | Reap stale `_docs/` and re-verify orphan-document invariants |
 | `/test-scenario-doc` | On-demand human QA checklist HTML (human acceptance layer) |
 
 ## Installation (Plugin)
@@ -164,6 +167,7 @@ Skills that agents reference during their workflow phases:
 
 | Skill | Phase | Purpose |
 |-------|-------|---------|
+| `greenfield-bootstrap` | `/team-new` | G0 intake → G1 deep-research → G2 stack decision → G3 user gate → G4 scaffold → G5 seeded profile |
 | `plan-review` | Phase 1 | Critical review of plans before implementation |
 | `coding-standards` | Phase 3 | Universal code quality baseline (strict TS) |
 | `tdd-workflow` | Phase 3 | Red-Green-Refactor TDD cycle (Vitest 4.x) |
@@ -177,7 +181,7 @@ Skills that agents reference during their workflow phases:
 | `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
 
-Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `wiki`.
+Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `wiki`.
 
 For general API design patterns, use the Claude Code built-in `api-design` skill directly (the harness does not wrap it).
 
@@ -199,25 +203,29 @@ junjak-ai-harness/
 │   ├── team-agentic-tester.md
 │   ├── web-architect.md
 │   └── web-reviewer.md
-├── commands/
+├── commands/                    # 8 slash commands
+│   ├── team-new.md              # /team-new
 │   ├── team-init.md             # /team-init
 │   ├── team.md                  # /team
 │   ├── team-run.md              # /team-run
 │   ├── team-brainstorm.md       # /team-brainstorm
 │   ├── checkpoint.md            # /checkpoint
+│   ├── docs-sweep.md            # /docs-sweep
 │   └── test-scenario-doc.md     # /test-scenario-doc
 ├── hooks/
 │   ├── hooks.json               # Plugin hook registration
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-└── skills/                      # 20 workflow skills
+└── skills/                      # 22 workflow skills
     ├── team-workflow/
+    ├── greenfield-bootstrap/
     ├── project-analyzer/
     ├── tdd-workflow/
     ├── verification-loop/
     ├── contract-sync/
     ├── docs-lifecycle/
+    ├── handoff/
     ├── wiki/
     ├── agentic-testing/
     ├── test-scenario-doc/

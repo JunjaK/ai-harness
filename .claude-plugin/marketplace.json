@@ -3,15 +3,15 @@
   "owner": {
     "name": "Junjak",
     "email": "haring157@gmail.com",
-    "url": "https://github.com/Junjak"
+    "url": "https://github.com/JunjaK"
   },
-  "description": "Junjak's AI Harness — multi-agent team workflow plugin for Claude Code (greenfield bootstrap, TDD, agentic + human-QA testing, 3-bucket docs + LLM wiki, YAGNI minimalism, instinct learning, ultracode orchestration)",
+  "description": "Junjak's AI Harness — multi-agent team workflow plugin for Claude Code (greenfield bootstrap, TDD, agentic + human-QA testing, lifecycle-managed 3-bucket docs + LLM wiki, YAGNI minimalism, instinct learning, ultracode orchestration)",
   "plugins": [
     {
       "name": "junjak-ai-harness",
       "source": "./",
-      "description": "TypeScript-first multi-agent team workflow harness — greenfield project bootstrap (research → scaffold → profile), TDD, agentic + human-QA testing, 3-bucket docs + LLM wiki, YAGNI minimalism, instinct learning, ultracode orchestration",
-      "version": "1.0.0",
+      "description": "TypeScript-first multi-agent team workflow harness — greenfield project bootstrap (research → scaffold → profile), TDD, agentic + human-QA testing, lifecycle-managed 3-bucket docs + LLM wiki, YAGNI minimalism, instinct learning, ultracode orchestration",
+      "version": "1.1.0",
       "category": "workflow",
       "tags": ["team-workflow", "greenfield-bootstrap", "multi-agent", "tdd", "orchestration", "testing", "knowledge-base"]
     }
