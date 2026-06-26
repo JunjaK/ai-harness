@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>secall → brain/harness 흡수 — Plan Diagram</title>
+<style>
+  :root{
+    --bg:#0d1117; --panel:#161b22; --panel2:#1c2330; --border:#30363d;
+    --txt:#e6edf3; --muted:#8b949e; --accent:#58a6ff;
+    --now:#3fb950; --later:#d29922; --skip:#6e7681; --danger:#f85149; --depend:#bc8cff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--txt);
+    font-family:-apple-system,"Segoe UI",Roboto,"Malgun Gothic",sans-serif;
+    line-height:1.55;padding:32px 20px 80px;}
+  .wrap{max-width:1080px;margin:0 auto;}
+  h1{font-size:1.7rem;margin:0 0 4px;}
+  .sub{color:var(--muted);font-size:.9rem;margin-bottom:24px;}
+  h2{font-size:1.05rem;margin:34px 0 14px;padding-bottom:6px;border-bottom:1px solid var(--border);
+    letter-spacing:.02em;}
+  .panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px 18px;}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;}
+  @media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
+  .verdict{background:linear-gradient(135deg,#221a1d,#161b22);border:1px solid rgba(248,81,73,.32);
+    border-radius:10px;padding:16px 18px;margin-bottom:8px;}
+  .verdict b{color:var(--danger);}
+  .tag{display:inline-block;font-size:.7rem;font-weight:700;padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;letter-spacing:.04em;vertical-align:middle;}
+  .t-now{background:rgba(63,185,80,.15);color:var(--now);border:1px solid rgba(63,185,80,.4);}
+  .t-later{background:rgba(210,153,34,.15);color:var(--later);border:1px solid rgba(210,153,34,.4);}
+  .t-skip{background:rgba(110,118,129,.15);color:var(--skip);border:1px solid rgba(110,118,129,.4);}
+  .t-depend{background:rgba(188,140,255,.13);color:var(--depend);border:1px solid rgba(188,140,255,.4);}
+  .card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+  .card .ttl{font-weight:600;margin:6px 0 4px;}
+  .card .why{color:var(--muted);font-size:.85rem;}
+  .card .where{font-size:.8rem;color:var(--accent);margin-top:6px;font-family:ui-monospace,Consolas,monospace;}
+  ul{margin:6px 0;padding-left:18px;} li{margin:3px 0;}
+  .flow{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:.85rem;}
+  .node{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;}
+  .node.src{border-color:rgba(248,81,73,.5);} .node.disc{border-color:rgba(63,185,80,.5);}
+  .node.tgt{border-color:rgba(88,166,255,.5);font-family:ui-monospace,Consolas,monospace;font-size:.8rem;}
+  .arrow{color:var(--muted);font-size:1.1rem;}
+  .mono{font-family:ui-monospace,Consolas,monospace;font-size:.82rem;}
+  .q{background:var(--panel2);border:1px solid var(--border);
+    border-radius:8px;padding:12px 14px;margin-bottom:10px;}
+  .q .qn{font-weight:700;color:var(--accent);}
+  .q .rec{color:var(--now);font-size:.85rem;margin-top:5px;}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:.78rem;color:var(--muted);margin:6px 0 18px;}
+  table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--border);vertical-align:top;}
+  th{color:var(--muted);font-weight:600;}
+  code{background:#0d1117;border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:.8rem;}
+  .pill{font-size:.72rem;color:var(--muted);}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>secall → brain / harness 흡수</h1>
+  <div class="sub">team-brainstorm · PLANNING ONLY · 2026-06-26 · topic <code>brain-memory</code> · 결합/의존 금지 → 기법만 흡수</div>
+
+  <div class="verdict">
+    secall 본체(세션 자동 ingest + <b>LLM 자동 wiki 생성</b>) = 사용자가 이미 거부한 <b>모델 C</b>.
+    secall 자신의 p39 감사가 거부 근거(LLM wiki 정확성 자동검증 불가)를 제공.
+    → <b>시스템 의존 금지.</b> 자동 파이프라인이 신뢰를 얻으려 두른 <b>결정론 안전장치 4개만</b> 이미 spec된
+    <code>/remember</code> + Stop-넛지에 흡수. 신규 스킬/데몬 0.
+  </div>
+
+  <div class="legend">
+    <span><span class="tag t-now">absorb-now</span> 지금</span>
+    <span><span class="tag t-later">absorb-later</span> 나중</span>
+    <span><span class="tag t-skip">skip</span> 안 함</span>
+    <span><span class="tag t-depend">depend-path</span> 의존(거부, register-only)</span>
+  </div>
+
+  <h2>① 중심 비교 — 같은 갭(authoring), 두 철학</h2>
+  <div class="grid2">
+    <div class="panel">
+      <div style="font-weight:600;margin-bottom:6px;">secall — auto-LLM-wiki</div>
+      <ul>
+        <li>매 세션 hook이 LLM으로 wiki <b>자동 생성</b></li>
+        <li>환각 노출 <b style="color:var(--danger)">높음</b>: p39 spot-check 정확성/완전성/톤 <b>자동채점 불가→빈칸</b></li>
+        <li>placeholder가 live wikilink에 → dead link 생성</li>
+        <li>신뢰 = 결정론 lint/provenance/dedup로 <b>사후 방어</b></li>
+        <li style="color:var(--danger)">판정: = 거부된 모델 C · depend 금지</li>
+      </ul>
+    </div>
+    <div class="panel">
+      <div style="font-weight:600;margin-bottom:6px;">사용자 — agent-authored <span class="mono">/remember</span></div>
+      <ul>
+        <li>에이전트가 세션 근거로 <b>실제 사실만</b> 추출</li>
+        <li>환각 노출 <b style="color:var(--now)">낮음</b>: 근거 없으면 폐기(하드라인)</li>
+        <li>사람/에이전트-in-the-loop <b>사전 방어</b></li>
+        <li style="color:var(--now)">판정: 채택 · secall 결정론 레이어만 여기 흡수</li>
+      </ul>
+    </div>
+  </div>
+  <div class="panel" style="margin-top:12px;background:#13202e;">
+    핵심 전략: secall의 <b>자동성은 버리고</b>, 자동 파이프라인이 신뢰를 얻으려 두른 <b>결정론 레이어만</b> 가져온다.
+    이 레이어는 author가 LLM이든 agent든 무관하게 가치 있고, agent-authored 모델에선 환각 방지를 <b>더 강화</b>한다.
+  </div>
+
+  <h2>② 흡수 후보 맵</h2>
+  <div class="grid2">
+    <div>
+      <div class="card">
+        <span class="tag t-now">absorb-now</span> <span class="pill">A · provenance</span>
+        <div class="ttl"><code>sources:</code> 출처 1줄 (세션id/commit/파일)</div>
+        <div class="why">brain이 이미 prose로 commit hash 박는 중 → 정형화는 신규 레이어 아님. content-hash/union-merge는 안 가져옴.</div>
+        <div class="where">→ commands/remember.md (c) + # Memory 포맷</div>
+      </div>
+      <div class="card">
+        <span class="tag t-now">absorb-now</span> <span class="pill">B · source-guard</span>
+        <div class="ttl">사실별 근거 대조 → 미근거 폐기</div>
+        <div class="why">환각 하드라인을 passive 금지 → active 검증 절차로. p39 "원본 미전달→검증불가" finding의 역.</div>
+        <div class="where">→ commands/remember.md (b) · 코드 0</div>
+      </div>
+      <div class="card">
+        <span class="tag t-now">absorb-now</span> <span class="pill">C · 결정론 lint</span>
+        <div class="ttl">orphan/link/frontmatter 구조 검증 (LLM 0)</div>
+        <div class="why">secall L001/L002 + p39 link 교훈의 brain-memory 인스턴스. continuous-learning §7 규율 재사용.</div>
+        <div class="where">→ remember.md 꼬리 + (선택) /brain-lint</div>
+      </div>
+    </div>
+    <div>
+      <div class="card">
+        <span class="tag t-now">absorb-now</span> <span class="pill">#4 · schema-drop</span>
+        <div class="ttl">LLM-edge guard 형태: 타입 강제 + reject-empty</div>
+        <div class="why">secall <code>parse_llm_edges</code>의 형태 이식: 타입 안 맞으면 coerce 말고 drop. = "스키마로 구조 강제".</div>
+        <div class="where">→ commands/remember.md 추출 스텝</div>
+      </div>
+      <div class="card">
+        <span class="tag t-now">absorb-now</span> <span class="pill">#6 · no-silent-fail</span>
+        <div class="ttl">skipped/failed는 표면화 (1줄 count)</div>
+        <div class="why">persona "조용한 실패 = 결함"과 1:1. 메커니즘 없이 보고 습관.</div>
+        <div class="where">→ remember.md + session-stop.sh</div>
+      </div>
+      <div class="card">
+        <span class="tag t-now">absorb-now</span> <span class="pill">#7 · upsert</span>
+        <div class="ttl">stable-key in-place upsert <b>(SHA-256 제외)</b></div>
+        <div class="why">이미 handoff에 있음 — secall <code>indexer.rs</code>가 옳은 규율임을 확인. 해시는 비싼 downstream 없어 무가치.</div>
+        <div class="where">→ commands/remember.md (c)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid3" style="margin-top:6px;">
+    <div class="card"><span class="tag t-later">absorb-later</span>
+      <div class="ttl">D · stale-source pruning</div>
+      <div class="why">출처 소멸 시 삭제 아닌 flag만. provenance(A) 이후. 감사용.</div></div>
+    <div class="card"><span class="tag t-later">absorb-later</span>
+      <div class="ttl">#10 · conflict pre-check</div>
+      <div class="why">sync 시 rebase/merge/unmerged 감지→loud stop. ROI 낮음, 나중 하드닝.</div>
+      <div class="where">→ claude-brain sync.ps1</div></div>
+    <div class="card"><span class="tag t-skip">skip-but-note</span>
+      <div class="ttl">I · insight-report 자기감사</div>
+      <div class="why">continuous-learning learnings/instincts와 90% 중복. file:line 앵커만 미세 개선.</div></div>
+  </div>
+
+  <h2>③ SKIP — heavy dep / 이미 해결 / 이 규모에 YAGNI</h2>
+  <div class="panel">
+    <div class="legend" style="margin:0;">
+      <span class="tag t-skip">벡터/임베딩 (Ollama BGE-M3 + HNSW + ONNX)</span>
+      <span class="tag t-skip">BM25 / FTS5 + Kiwi</span>
+      <span class="tag t-skip">RRF</span>
+      <span class="tag t-skip">graph 엔진</span>
+      <span class="tag t-skip">git-sync (이미 해결)</span>
+      <span class="tag t-skip">job queue / cancel</span>
+      <span class="tag t-skip">multi-agent JSONL ingest</span>
+      <span class="tag t-skip">2계층 raw-vault</span>
+      <span class="tag t-skip">별도 AI review 백엔드</span>
+      <span class="tag t-skip">wiki conflict merge</span>
+    </div>
+    <p style="font-size:.85rem;color:var(--muted);margin:12px 0 0;">
+      근거: brain = <b>148 .md / ~990KB</b> curated markdown, Claude Code가 네이티브 in-context 로드 + recall/git-sync 이미 자동.
+      secall 엔진은 수천 raw JSONL용(SQLite+ONNX+Ollama+HNSW+serve 데몬). <b>3 orders of magnitude + 런타임 모델 자체가 다름.</b>
+    </p>
+    <div class="card" style="margin-top:12px;background:#1b1726;">
+      <span class="tag t-depend">depend-path</span> <span class="pill">register-only</span>
+      <div class="ttl"><code>secall mcp</code>를 그대로 recall 도구로 부착</div>
+      <div class="why">노력 최소 but: Rust+Ollama+ONNX+vault heavy daemon · = 거부된 자동 LLM authoring · Windows HNSW/Kiwi 비활성 ·
+      brain(curated·anti-hallucination) ↔ secall(automatic·lossy-broad) 철학 충돌.
+      → <b>brain authoring 경로엔 절대 금지.</b> raw-transcript 광역 회상이 실제 필요해지면 brain 밖 standalone 으로만.</div>
+    </div>
+  </div>
+
+  <h2>④ 어디에 꽂히나 (흡수 → 대상 파일)</h2>
+  <div class="panel">
+    <div class="flow">
+      <div class="node src">secall 결정론 레이어<br><span class="pill">provenance · guard · lint · upsert · no-silent-fail</span></div>
+      <span class="arrow">→</span>
+      <div class="node disc">기존 brain-memory handoff<br><span class="pill">/remember + Stop 넛지 구현 맵</span></div>
+      <span class="arrow">→</span>
+      <div style="display:flex;flex-direction:column;gap:6px;">
+        <div class="node tgt">ai-harness/commands/remember.md <span class="pill">(신규) A·B·C·#4·#5·#7</span></div>
+        <div class="node tgt">ai-harness/hooks/session-stop.sh <span class="pill">#6 넛지</span></div>
+        <div class="node tgt">(선택) commands/brain-lint.md <span class="pill">C on-demand</span></div>
+        <div class="node tgt">claude-brain/sync.ps1 <span class="pill">#10 later</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>⑤ 사용자 결정 필요 (2-3)</h2>
+  <div class="q">
+    <span class="qn">Q-A (중심) — 임베딩/검색 욕구</span>
+    <div>brain을 <i>검색</i>으로 꺼낼 일이 생기나, 아니면 네이티브 in-context 로드 + 가끔 grep으로 충분한가? raw 세션 transcript ingest 의향은?</div>
+    <div class="rec">추천: 양쪽 다 No → secall search 엔진 전부 미구축. 커지면 ripgrep→FTS5 순, 벡터는 절대 1순위 아님. raw-search 필요 시 secall standalone(brain 밖)으로만 분리.</div>
+  </div>
+  <div class="q">
+    <span class="qn">Q-B — provenance 위치</span>
+    <div>frontmatter <code>sources:</code> 커스텀 키(machine-lintable, 네이티브 파서 호환 미확인) vs 본문 <code>**Source:**</code> 라인(안전, lint 약함). C lint 강도 결정.</div>
+    <div class="rec">추천: 파서 호환 먼저 확인 → 되면 frontmatter, 안 되면 본문 라인.</div>
+  </div>
+  <div class="q">
+    <span class="qn">Q-C — guard/lint 강도·배치</span>
+    <div><code>/remember</code> guard를 secall식 구조 강제(스키마+allowlist+reject-empty)까지 vs prose 지시? lint 위치는?</div>
+    <div class="rec">추천: guard는 구조 강제 채택(하드라인 최저비용 보험). lint는 (a)/remember 내부 + (c)on-demand /brain-lint. Stop 매세션은 노이즈 위험.</div>
+  </div>
+
+  <h2>⑥ Architect 분담 (이번 brainstorm에서 검증됨)</h2>
+  <table>
+    <tr><th>Architect</th><th>Lane</th><th>소유 결정</th></tr>
+    <tr>
+      <td><b>A</b> (FE)</td>
+      <td>consumption / recall / wiki / authoring</td>
+      <td>/remember 작성 절차, provenance 포맷(Q-B), 결정론 lint(C), agent-authored vs auto-ingest 철학</td>
+    </tr>
+    <tr>
+      <td><b>B</b> (BE)</td>
+      <td>ingestion / index / search / graph / sync 엔진</td>
+      <td>임베딩/검색 욕구 콜(Q-A, 추천 skip), upsert/idempotency(#7), no-silent-fail(#6), conflict pre-check(#10)</td>
+    </tr>
+  </table>
+  <p class="pill" style="margin-top:8px;">Architect C(infra/security): NO · UI/UX Master: NO · Orchestration: standard · 구현은 별도 <code>/team-run "brain-memory"</code></p>
+</div>
+</body>
+</html>

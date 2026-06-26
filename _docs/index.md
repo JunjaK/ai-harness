@@ -8,6 +8,7 @@
 |-------|------|--------|------|------|
 | agentic-testing | impl | processing | 2026-06-23 | [active/processing/2026-06-23/2026-06-23-agentic-testing-impl.md](active/processing/2026-06-23/2026-06-23-agentic-testing-impl.md) |
 | agentic-testing | plan | processing | 2026-06-23 | [active/processing/2026-06-23/2026-06-23-agentic-testing-plan.md](active/processing/2026-06-23/2026-06-23-agentic-testing-plan.md) |
+| brain-memory | plan | planning | 2026-06-26 | [active/planning/2026-06-26/2026-06-26-brain-memory-secall-absorption-plan.md](active/planning/2026-06-26/2026-06-26-brain-memory-secall-absorption-plan.md) |
 | doc-storage | plan | processing | 2026-06-23 | [active/processing/2026-06-23/2026-06-23-doc-storage-plan.md](active/processing/2026-06-23/2026-06-23-doc-storage-plan.md) |
 | docs-lifecycle | plan | planning | 2026-06-25 | [active/planning/2026-06-25/2026-06-25-docs-lifecycle-plan.md](active/planning/2026-06-25/2026-06-25-docs-lifecycle-plan.md) |
 | docs-sweep | plan | planning | 2026-06-25 | [active/planning/2026-06-25/2026-06-25-docs-sweep-plan.md](active/planning/2026-06-25/2026-06-25-docs-sweep-plan.md) |
