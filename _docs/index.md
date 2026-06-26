@@ -30,7 +30,7 @@ The authoritative topic list. A doc's `topic` MUST be one of these; add a new en
 | Topic | Meaning |
 |-------|---------|
 | `agentic-testing` | Adapter × mode-aware agentic E2E testing layer |
-| `brain-memory` | brain memory(facts) 기록 트리거 — `/remember` + Stop 넛지, brain-connect 게이트 |
+| `brain-memory` | brain memory(facts) 기록 — harness 미통합 결정(약한 연결 유지); 작성=native, 운반=claude-brain |
 | `doc-storage` | 3-bucket document storage × LLM wiki |
 | `docs-lifecycle` | `_docs` lifecycle v2 (buckets + date/topic foldering + orphan defenses) |
 | `docs-sweep` | `/docs-sweep` periodic active-doc reaping + orphan lint + SessionStart nudge |
