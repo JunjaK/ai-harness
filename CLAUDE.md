@@ -202,6 +202,7 @@ Branch on whether code exists yet:
 | `/checkpoint` | Save/restore work state (NOT Claude Code's built-in `/resume`) |
 | `/test-scenario-doc` | Human wants an on-demand manual QA checklist HTML (human acceptance layer) |
 | `/docs-sweep` | `_docs/active/` is piling up or you want to re-verify orphan invariants — reap stale docs + lint |
+| `/brain-connect [path]` | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness on a machine, or relocate an existing one |
 
 ### Decision Guide
 

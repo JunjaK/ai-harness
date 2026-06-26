@@ -71,6 +71,7 @@ Phase 5: Final Security Review
 | `/checkpoint` | Save / restore work state across sessions, branches, and compactions |
 | `/docs-sweep` | Reap stale `_docs/` and re-verify orphan-document invariants |
 | `/test-scenario-doc` | On-demand human QA checklist HTML (human acceptance layer) |
+| `/brain-connect` | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness, or relocate an existing one |
 
 ## Installation (Plugin)
 
