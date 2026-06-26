@@ -1,3 +1,5 @@
-# Claude Code runtime data (session-state, settings.local.json)
-.claude/
+# Claude Code runtime data (session-state, settings.local.json) — ignore contents,
+# but TRACK shared path-scoped rules (.claude/rules/) so they version + travel with the repo.
+.claude/*
+!.claude/rules/
 .DS_Store
