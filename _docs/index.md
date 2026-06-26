@@ -6,15 +6,15 @@
 
 | Topic | Kind | Status | Date | Path |
 |-------|------|--------|------|------|
-| agentic-testing | impl | processing | 2026-06-23 | [active/processing/2026-06-23/2026-06-23-agentic-testing-impl.md](active/processing/2026-06-23/2026-06-23-agentic-testing-impl.md) |
-| agentic-testing | plan | processing | 2026-06-23 | [active/processing/2026-06-23/2026-06-23-agentic-testing-plan.md](active/processing/2026-06-23/2026-06-23-agentic-testing-plan.md) |
-| doc-storage | plan | processing | 2026-06-23 | [active/processing/2026-06-23/2026-06-23-doc-storage-plan.md](active/processing/2026-06-23/2026-06-23-doc-storage-plan.md) |
-| docs-lifecycle | plan | planning | 2026-06-25 | [active/planning/2026-06-25/2026-06-25-docs-lifecycle-plan.md](active/planning/2026-06-25/2026-06-25-docs-lifecycle-plan.md) |
-| docs-sweep | plan | planning | 2026-06-25 | [active/planning/2026-06-25/2026-06-25-docs-sweep-plan.md](active/planning/2026-06-25/2026-06-25-docs-sweep-plan.md) |
+| agentic-testing | impl | complete | 2026-06-23 | [complete/agentic-testing/2026-06-23-agentic-testing-impl.md](complete/agentic-testing/2026-06-23-agentic-testing-impl.md) |
+| agentic-testing | plan | complete | 2026-06-23 | [complete/agentic-testing/2026-06-23-agentic-testing-plan.md](complete/agentic-testing/2026-06-23-agentic-testing-plan.md) |
+| doc-storage | plan | complete | 2026-06-23 | [complete/doc-storage/2026-06-23-doc-storage.md](complete/doc-storage/2026-06-23-doc-storage.md) |
+| docs-lifecycle | plan | complete | 2026-06-25 | [complete/docs-lifecycle/2026-06-25-docs-lifecycle.md](complete/docs-lifecycle/2026-06-25-docs-lifecycle.md) |
+| docs-sweep | plan | complete | 2026-06-25 | [complete/docs-sweep/2026-06-25-docs-sweep.md](complete/docs-sweep/2026-06-25-docs-sweep.md) |
 | harness-v2 | plan | planning | 2026-04-16 | [active/planning/2026-04-16/2026-04-16-harness-v2-plan.md](active/planning/2026-04-16/2026-04-16-harness-v2-plan.md) |
-| ponytail-yagni | plan | processing | 2026-06-23 | [active/processing/2026-06-23/2026-06-23-ponytail-yagni-plan.md](active/processing/2026-06-23/2026-06-23-ponytail-yagni-plan.md) |
-| team-new | plan | planning | 2026-06-25 | [active/planning/2026-06-25/2026-06-25-team-new-plan.md](active/planning/2026-06-25/2026-06-25-team-new-plan.md) |
-| test-scenario-doc | plan | processing | 2026-06-24 | [active/processing/2026-06-24/2026-06-24-test-scenario-doc-plan.md](active/processing/2026-06-24/2026-06-24-test-scenario-doc-plan.md) |
+| ponytail-yagni | plan | complete | 2026-06-23 | [complete/ponytail-yagni/2026-06-23-ponytail-yagni.md](complete/ponytail-yagni/2026-06-23-ponytail-yagni.md) |
+| team-new | plan | complete | 2026-06-25 | [complete/team-new/2026-06-25-team-new.md](complete/team-new/2026-06-25-team-new.md) |
+| test-scenario-doc | plan | complete | 2026-06-24 | [complete/test-scenario-doc/2026-06-24-test-scenario-doc.md](complete/test-scenario-doc/2026-06-24-test-scenario-doc.md) |
 
 ## Handoffs (flat, keep-latest-per-stream)
 

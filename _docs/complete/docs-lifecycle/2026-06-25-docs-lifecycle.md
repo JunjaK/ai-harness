@@ -1,11 +1,11 @@
 ---
 title: "Plan — docs-lifecycle v2: bucket adoption + date/topic foldering + orphan defenses"
-status: planning
+status: complete
 topic: docs-lifecycle
 kind: plan
 scope: harness
 created: 2026-06-25
-updated: 2026-06-25
+updated: 2026-06-26
 ---
 
 # Plan — docs-lifecycle v2: bucket adoption + date/topic foldering + orphan defenses

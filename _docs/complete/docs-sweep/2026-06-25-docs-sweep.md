@@ -1,12 +1,12 @@
 ---
 title: "Plan — /docs-sweep: periodic active-doc reaping + orphan lint + SessionStart nudge"
-status: planning
+status: complete
 topic: docs-sweep
 kind: plan
 scope: harness
 created: 2026-06-25
-updated: 2026-06-25
-related: [_docs/active/planning/2026-06-25/2026-06-25-docs-lifecycle-plan.md]
+updated: 2026-06-26
+related: [_docs/complete/docs-lifecycle/2026-06-25-docs-lifecycle.md]
 ---
 
 # Plan — /docs-sweep

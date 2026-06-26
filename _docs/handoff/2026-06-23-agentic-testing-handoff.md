@@ -7,10 +7,10 @@ scope: harness
 created: 2026-06-23
 updated: 2026-06-25
 related:
-  - _docs/active/processing/2026-06-23/2026-06-23-agentic-testing-plan.md
-  - _docs/active/processing/2026-06-23/2026-06-23-agentic-testing-impl.md
-  - _docs/active/processing/2026-06-23/2026-06-23-doc-storage-plan.md
-  - _docs/active/processing/2026-06-23/2026-06-23-ponytail-yagni-plan.md
+  - _docs/complete/agentic-testing/2026-06-23-agentic-testing-plan.md
+  - _docs/complete/agentic-testing/2026-06-23-agentic-testing-impl.md
+  - _docs/complete/doc-storage/2026-06-23-doc-storage.md
+  - _docs/complete/ponytail-yagni/2026-06-23-ponytail-yagni.md
 ---
 
 # 세션 Handoff — 하네스 3대 이니셔티브
@@ -53,13 +53,13 @@ related:
 작업트리: clean. 워크트리 분리 없음(전부 main에서 직접 — 사용자 승인).
 
 ## ✅ 완료 — doc-storage (`9ec546b`, `5532f8e`)
-spec: `_docs/active/processing/2026-06-23/2026-06-23-doc-storage-plan.md` (status: processing)
+spec: `_docs/complete/doc-storage/2026-06-23-doc-storage.md` (status: processing)
 - **Phase A**(`9ec546b`): `docs-lifecycle`에 3-버킷 모델 + 포터블 판별기준 + `_note` 거버넌스 / `hooks/post-edit-warn.sh`에 `_note/` 경고 / `project-analyzer`+`team-init` 부트스트랩(`_note/README.md`, `.claude/wiki/{index,log,schema}.md`) / `CLAUDE.md` "Document Storage (3 buckets)"
 - **Phase B**(`5532f8e`): `skills/wiki/SKILL.md`(ingest/query/lint) / `continuous-learning` 연동(learnings→ingest, §7→lint) / `CLAUDE.md`+`README` 등재
 - 검증: ✅ 구조 grep + **hook 실측**(`_note/` 파일 쓰기 시 경고 발화, `_docs/`엔 무음 확인). ⚠️ 런타임 미검증.
 
 ## ✅ 완료 — ponytail (`d6f58e0`)
-spec: `_docs/active/processing/2026-06-23/2026-06-23-ponytail-yagni-plan.md`
+spec: `_docs/complete/ponytail-yagni/2026-06-23-ponytail-yagni.md`
 - `coding-standards` §4 → 7-rung **YAGNI Decision Ladder** + "lazy not negligent" 가드 (단일 출처)
 - 빌드-결정 에이전트가 설계시 적용: `team-architect-fe/be/infra`, `web-architect`, `team-designer` (각 `.md`에 박아 스폰 서브에이전트에 닿음)
 - `plan-review`에 "Over-Engineering / YAGNI" 차원 / `team-tester` Phase 4 `### 6. /ponytail-review` 단계(미설치 시 ABORT+설치안내) / `team-leader` "Minimalism Gate" 종합
