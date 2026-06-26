@@ -21,6 +21,7 @@
 | Topic | Date | Path |
 |-------|------|------|
 | agentic-testing | 2026-06-23 | [handoff/2026-06-23-agentic-testing-handoff.md](handoff/2026-06-23-agentic-testing-handoff.md) |
+| brain-memory | 2026-06-26 | [handoff/2026-06-26-brain-memory-trigger-handoff.md](handoff/2026-06-26-brain-memory-trigger-handoff.md) |
 
 ## Topic vocabulary (SSOT)
 
@@ -29,6 +30,7 @@ The authoritative topic list. A doc's `topic` MUST be one of these; add a new en
 | Topic | Meaning |
 |-------|---------|
 | `agentic-testing` | Adapter × mode-aware agentic E2E testing layer |
+| `brain-memory` | brain memory(facts) 기록 트리거 — `/remember` + Stop 넛지, brain-connect 게이트 |
 | `doc-storage` | 3-bucket document storage × LLM wiki |
 | `docs-lifecycle` | `_docs` lifecycle v2 (buckets + date/topic foldering + orphan defenses) |
 | `docs-sweep` | `/docs-sweep` periodic active-doc reaping + orphan lint + SessionStart nudge |
