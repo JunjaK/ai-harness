@@ -294,7 +294,7 @@ All Opus agents default to `xhigh` effort. Sonnet agents use their model's defau
 |-------|-------|---------|
 | team-workflow | Core | 5-phase orchestration |
 | greenfield-bootstrap | /team-new | Greenfield bootstrap: G0 intake → G1 deep-research → G2 stack decision → G3 user gate → G4 scaffold → G5 seeded profile |
-| plan-review | Phase 1 | Adversarial plan evaluation |
+| plan-review | Phase 1 | Adversarial plan evaluation + pre-plan elicitation (grilling technique) |
 | plan-visualizer | Phase 1+ | HTML plan diagram |
 | docs-lifecycle | All | `_docs/` status↔folder lifecycle + date/topic foldering + reference-safe moves + 3-bucket model + merge sidecar docs into one on completion |
 | handoff | All | Write a handoff (state layer) into `_docs/handoff/` — links the spec, keep-latest-per-stream |
@@ -446,6 +446,15 @@ Agents MAY invoke these built-ins directly when a task matches their trigger. Do
 - **Watch-mode dev servers: stop them during edit sessions.** A hot-reloading dev server recompiles on every file save, spiking CPU/memory while you edit. Stop the watched server during an editing session; restart it only when a step (codegen, smoke test, manual verify) actually needs it.
 - **Shell exit-code hygiene for quiet commands.** A command with no stdout piped into a filter (`… | grep …`) can exit non-zero on empty input — a false failure. Capture the exit code directly (`cmd > out 2>&1; rc=$?`) instead of inferring success through a masking pipe. (PowerShell: `-ErrorAction SilentlyContinue` suppresses error *output* but the cmdlet failure still sets exit 1 — wrap in `try { … -ErrorAction Stop } catch {}` to truly ignore.)
 - **Local-vs-production is the gate for destructive ops**, not the operation type: a destructive command against a verified-local target (localhost) may run without per-command confirmation; any command naming a production/remote endpoint always requires explicit confirmation.
+
+## Versioning & Release
+
+This plugin is distributed via the `JunjaK/ai-harness` GitHub marketplace and is **version-cached** — Claude Code loads the installed plugin from `~/.claude/plugins/cache/...` keyed by version, so **an unchanged version is a no-op even after a marketplace "update."**
+
+- **MUST bump the version on every feature add/change.** Any change to a skill, agent, command, or hook behavior MUST bump `version` in BOTH `.claude-plugin/plugin.json` AND `.claude-plugin/marketplace.json` (semver: feature = minor, fix = patch) in the same change.
+- **MUST update docs in the same change.** Reflect the new/changed capability in `README.md`, the skills/agents/commands tables in this `CLAUDE.md`, and the `description` fields in `plugin.json` / `marketplace.json` when the summary changes.
+- Release commit style: `chore(release): bump plugin + marketplace to vX.Y.Z`.
+- Pure docs/chore changes (no behavior change) are exempt from the version bump.
 
 ## Safety & Security
 

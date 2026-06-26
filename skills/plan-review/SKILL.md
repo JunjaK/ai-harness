@@ -1,6 +1,6 @@
 ---
 name: plan-review
-description: "Critical plan review for evaluating implementation plans, feature proposals, and architectural decisions. Focuses on worst-case analysis, risks, performance bottlenecks, UI/UX concerns, and edge cases. Use during Phase 1 cross-review or before any code is written."
+description: "Critical plan review for evaluating implementation plans, feature proposals, and architectural decisions. Focuses on worst-case analysis, risks, performance bottlenecks, UI/UX concerns, and edge cases. Also drives open plan decisions to resolution via structured one-question-at-a-time elicitation. Use during Phase 1 cross-review or before any code is written."
 ---
 
 # Plan Review
@@ -16,6 +16,19 @@ Critical review of implementation plans — before code is written.
 - **Literal instructions**: Every risk category below MUST be evaluated. Skipped categories MUST state "N/A — [specific reason]".
 - **Minimum findings**: The reviewer MUST surface at least one concern per plan. "Looks good" is not a valid verdict.
 
+## Pre-Plan Elicitation (when the plan is incomplete or has open decisions)
+
+Adversarial review finds the holes; elicitation drives them to resolution. Use this when the plan is too thin to evaluate, carries unresolved design decisions, or a Phase 3 verdict surfaces "Missing from Plan" items that need the user's input. (Technique borrowed from the `grilling` skill in `mattpocock/skills`, MIT.)
+
+Interview the user to close every open decision the plan depends on, under these rules (all MUST):
+
+- **One question at a time.** MUST ask a single question and wait for the answer before the next. Batching questions is bewildering and lowers answer quality.
+- **Walk the design tree in dependency order.** MUST resolve a decision before any decision that depends on it (e.g. settle the data model before the API shape that serializes it). Never ask a downstream question whose framing a pending upstream answer would change.
+- **Recommend an answer every time.** MUST accompany each question with your recommended answer and a one-line rationale, so the user confirms-or-corrects instead of authoring from scratch.
+- **Explore before you ask.** MUST answer from the codebase whenever the repo already settles it (existing patterns, types, config, conventions). Only ask the user what the code cannot tell you.
+
+Stop when every decision the plan depends on has a confirmed answer, then proceed to (or resume) the adversarial review with the gaps closed.
+
 ## Review Process (MUST execute in order)
 
 ### Phase 1: Context Gathering
@@ -25,6 +38,7 @@ Critical review of implementation plans — before code is written.
 3. Read every file named in the plan (full read, not skim)
 4. Read database schema when the plan touches tables/collections
 5. Read API type definitions when the plan touches endpoints
+6. If the plan is too thin to evaluate or leaves design decisions open, run **Pre-Plan Elicitation** (above) first, then continue
 
 ### Phase 2: Risk Analysis
 

@@ -168,7 +168,7 @@ Skills that agents reference during their workflow phases:
 | Skill | Phase | Purpose |
 |-------|-------|---------|
 | `greenfield-bootstrap` | `/team-new` | G0 intake → G1 deep-research → G2 stack decision → G3 user gate → G4 scaffold → G5 seeded profile |
-| `plan-review` | Phase 1 | Critical review of plans before implementation |
+| `plan-review` | Phase 1 | Critical review of plans before implementation + pre-plan elicitation |
 | `coding-standards` | Phase 3 | Universal code quality baseline (strict TS) |
 | `tdd-workflow` | Phase 3 | Red-Green-Refactor TDD cycle (Vitest 4.x) |
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) |
