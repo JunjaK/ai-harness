@@ -180,6 +180,7 @@ Skills that agents reference during their workflow phases:
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
 | `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
+| `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness — persona `@import` + memory junction + opt-in sync hooks; dependency-free, ships a generic connector template |
 
 Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `wiki`.
 

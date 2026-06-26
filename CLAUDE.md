@@ -314,6 +314,7 @@ All Opus agents default to `xhigh` effort. Sonnet agents use their model's defau
 | subagent-orchestration | All | Iterative retrieval, context briefing, phase pipeline |
 | checkpoint | All | Save/restore work state across sessions |
 | project-analyzer | /team-init | Generate project profile (9 files) |
+| brain-connect | Setup (per-machine) | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness: persona `@import` + memory junction + opt-in sync hooks; dependency-free, ships generic connector template |
 
 ---
 
