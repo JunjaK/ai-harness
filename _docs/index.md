@@ -11,7 +11,7 @@
 | doc-storage | plan | complete | 2026-06-23 | [complete/doc-storage/2026-06-23-doc-storage.md](complete/doc-storage/2026-06-23-doc-storage.md) |
 | docs-lifecycle | plan | complete | 2026-06-25 | [complete/docs-lifecycle/2026-06-25-docs-lifecycle.md](complete/docs-lifecycle/2026-06-25-docs-lifecycle.md) |
 | docs-sweep | plan | complete | 2026-06-25 | [complete/docs-sweep/2026-06-25-docs-sweep.md](complete/docs-sweep/2026-06-25-docs-sweep.md) |
-| harness-v2 | plan | planning | 2026-04-16 | [active/planning/2026-04-16/2026-04-16-harness-v2-plan.md](active/planning/2026-04-16/2026-04-16-harness-v2-plan.md) |
+| harness-v2 | plan | complete | 2026-04-16 | [complete/harness-v2/2026-04-16-harness-v2.md](complete/harness-v2/2026-04-16-harness-v2.md) |
 | ponytail-yagni | plan | complete | 2026-06-23 | [complete/ponytail-yagni/2026-06-23-ponytail-yagni.md](complete/ponytail-yagni/2026-06-23-ponytail-yagni.md) |
 | team-new | plan | complete | 2026-06-25 | [complete/team-new/2026-06-25-team-new.md](complete/team-new/2026-06-25-team-new.md) |
 | test-scenario-doc | plan | complete | 2026-06-24 | [complete/test-scenario-doc/2026-06-24-test-scenario-doc.md](complete/test-scenario-doc/2026-06-24-test-scenario-doc.md) |
@@ -20,7 +20,6 @@
 
 | Topic | Date | Path |
 |-------|------|------|
-| agentic-testing | 2026-06-23 | [handoff/2026-06-23-agentic-testing-handoff.md](handoff/2026-06-23-agentic-testing-handoff.md) |
 | brain-memory | 2026-06-26 | [handoff/2026-06-26-brain-memory-trigger-handoff.md](handoff/2026-06-26-brain-memory-trigger-handoff.md) |
 
 ## Topic vocabulary (SSOT)
