@@ -21,6 +21,7 @@
 | Topic | Date | Path |
 |-------|------|------|
 | agentic-testing | 2026-06-23 | [handoff/2026-06-23-agentic-testing-handoff.md](handoff/2026-06-23-agentic-testing-handoff.md) |
+| brain-memory | 2026-06-26 | [handoff/2026-06-26-brain-memory-trigger-handoff.md](handoff/2026-06-26-brain-memory-trigger-handoff.md) |
 
 ## Topic vocabulary (SSOT)
 
