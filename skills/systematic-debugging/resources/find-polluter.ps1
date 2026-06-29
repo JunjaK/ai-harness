@@ -31,6 +31,14 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
+# Parse the test command ONCE into an executable + fixed args. We invoke via the
+# call operator (&) and pass the filename as a separate literal argument, so a
+# maliciously-named test file (backticks, $(...), ;) is never re-parsed as code.
+# (Do NOT use Invoke-Expression here — it would evaluate the filename as script.)
+$cmdTokens = @($TestCommand -split '\s+' | Where-Object { $_ -ne '' })
+$exe = $cmdTokens[0]
+$exeArgs = @($cmdTokens | Select-Object -Skip 1)
+
 Write-Host "🔍 Searching for test that creates: $PollutionCheck"
 Write-Host "Test pattern: $TestPattern"
 Write-Host ""
@@ -55,8 +63,9 @@ foreach ($file in $testFiles) {
 
   Write-Host "[$count/$total] Testing: $($file.FullName)"
 
-  # Run the single test file; ignore its exit status, we only care about pollution.
-  try { Invoke-Expression "$TestCommand `"$($file.FullName)`"" *> $null } catch { }
+  # Run the single test file via the call operator: the path is passed as one
+  # literal argument and never re-parsed. Exit status ignored — we only care about pollution.
+  try { & $exe @exeArgs $file.FullName *> $null } catch { }
 
   if (Test-Path $PollutionCheck) {
     Write-Host ""
@@ -66,8 +75,8 @@ foreach ($file in $testFiles) {
     Write-Host ""
     Write-Host "Pollution details:"
     Get-Item $PollutionCheck | Format-List
-    Write-Host "To investigate:"
-    Write-Host "  $TestCommand `"$($file.FullName)`"   # Run just this test"
+    Write-Host "To investigate, run that one test file with your test runner, e.g.:"
+    Write-Host "  & $exe $($exeArgs -join ' ') '$($file.FullName)'"
     exit 1
   }
 }
