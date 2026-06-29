@@ -118,18 +118,21 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 
 ### Dependencies
 
-| # | Dependency | Required? | Role | Install / Enable |
-|---|------------|-----------|------|------------------|
-| 1 | **Agent Teams** | **Required** for `/team*` | cross-review dialog (`TeamCreate`) | `settings.json` env `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` |
-| 2 | **Ultracode** mode | Optional | when on, the harness uses the Workflow tool for fan-out phases **as much as possible** | runtime ultracode signal, or `settings.json` env `CLAUDE_HARNESS_ULTRACODE=1` |
-| 3 | **impeccable** plugin | **Required install** | UI design — <https://impeccable.style/> | `/plugin marketplace add pbakaus/impeccable` → `/plugin install impeccable@impeccable` |
-| 4 | **ponytail** plugin | **Required install** | YAGNI-style development — <https://github.com/DietrichGebert/ponytail> | `/plugin install ponytail@ponytail` |
-| 5 | **agent-browser** CLI + skill | Optional | preferred on-demand browser driver for E2E / QA / smoke + headless Auth-Vault login — <https://agent-browser.dev/> | `npm i -g agent-browser && agent-browser install` (its skill ships with the CLI) |
+Alongside the env flags above, the harness uses a few external tools. Install them for the full experience — each is described below with what happens when it's absent.
 
-- **impeccable**: the UI/UX agents (`team-uiux-master`, `web-architect`, `web-reviewer`) call it via `Skill(skill="impeccable:impeccable", args="<sub-command> [target]")` — the sub-command goes in `args`, not the namespace.
-- **ponytail**: Phase 4 runs `/ponytail-review` on the diff; the YAGNI decision ladder is also distilled into `coding-standards` §4 for the architect/designer agents at design time.
-- If either plugin is missing, the relevant agent **aborts with an install request** — install both before running the workflow.
-- **agent-browser** (optional, no enable step): when its CLI + skill are present, the `agent-browser-e2e` skill prefers it for on-demand browser work and headless login; if absent, the harness silently falls back to the Playwright `e2e-testing` / `agentic-testing` path. Detection is a one-time gate, not a phase dependency.
+| Tool | Used for | Without it |
+|------|----------|-----------|
+| **impeccable** plugin · [impeccable.style](https://impeccable.style/) | UI/UX design quality — the `team-uiux-master` / `web-architect` / `web-reviewer` agents call it via `Skill("impeccable:impeccable", "<sub-command> [target]")` | those agents pause and ask you to install it |
+| **ponytail** plugin · [repo](https://github.com/DietrichGebert/ponytail) | YAGNI minimalism — Phase 4 runs `/ponytail-review` on the diff | Phase 4 asks you to install it (the decision ladder is also distilled into `coding-standards` §4) |
+| **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | preferred on-demand browser driver for E2E / QA / smoke + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `e2e-testing` / `agentic-testing` path |
+
+```bash
+/plugin marketplace add pbakaus/impeccable && /plugin install impeccable@impeccable
+/plugin install ponytail@ponytail
+npm i -g agent-browser && agent-browser install   # skill ships with the CLI
+```
+
+impeccable and ponytail are expected to be installed before running the workflow; agent-browser is optional but recommended for smoother browser work.
 
 ### First Run
 
@@ -190,8 +193,6 @@ Skills that agents reference during their workflow phases:
 | `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness — persona `@import` + memory junction + opt-in sync hooks; dependency-free, ships a generic connector template |
 
 Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `dispatching-parallel-agents`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `wiki`.
-
-> **Superpowers-free (v1.5.0):** the harness no longer depends on the **superpowers** plugin. Its general methodology skills (`systematic-debugging`, `tdd-workflow`, `verification-loop`, `dispatching-parallel-agents`, `requesting-code-review`, `brainstorm`) were absorbed in v1.5.0 — zero `superpowers:` references, so superpowers may be disabled. It does **still rely on its declared [Dependencies](#dependencies)**: **impeccable** + **ponytail** (required plugins) and **agent-browser** (optional but the preferred browser driver, with a Playwright fallback).
 
 For general API design patterns, use the Claude Code built-in `api-design` skill directly (the harness does not wrap it).
 
