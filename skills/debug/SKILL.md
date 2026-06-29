@@ -1,11 +1,11 @@
 ---
 name: debug
-description: "LSP-driven debugging patterns for TypeScript codebases. Complements the general debugging methodology in superpowers:systematic-debugging. Use in Phase 3-4 escalation scenarios or when investigating unexpected behavior."
+description: "LSP-driven debugging patterns for TypeScript codebases. Complements the general debugging methodology in the harness `systematic-debugging` skill. Use in Phase 3-4 escalation scenarios or when investigating unexpected behavior."
 ---
 
 # Debug (LSP Patterns)
 
-This skill covers **LSP-accelerated debugging patterns** specific to this harness. For the full systematic debugging methodology (reproduce → narrow → hypothesize → test), use `superpowers:systematic-debugging`.
+This skill covers **LSP-accelerated debugging patterns** specific to this harness. For the full systematic debugging methodology (reproduce → narrow → hypothesize → test), use the `systematic-debugging` skill.
 
 ## When to Use This Skill
 
@@ -15,7 +15,7 @@ This skill covers **LSP-accelerated debugging patterns** specific to this harnes
 
 ## Workflow (MUST execute in order)
 
-1. **Reproduce** — Use `superpowers:systematic-debugging` for the reproduction step
+1. **Reproduce** — Use the `systematic-debugging` skill for the reproduction step
 2. **Locate** — Use LSP to find the failing symbol's definition and callers
 3. **Inspect types** — Use `hover` to check inferred types against assumptions
 4. **Trace call paths** — Use `incomingCalls` / `outgoingCalls` to map the flow
@@ -39,7 +39,7 @@ When a bug looks like a **type-system or dependency-injection** failure rather t
 
 ## Root Cause Rules
 
-- Fix the root cause, not the symptom (duplicate from `superpowers:systematic-debugging`)
+- Fix the root cause, not the symptom (duplicate from the `systematic-debugging` skill)
 - After any type-related fix, MUST run the authoritative type-check (project-profile `stack.md` → "Build & Verify") before declaring the fix complete
 - After any refactor, MUST use `findReferences` to confirm no orphaned callers
 
@@ -50,4 +50,4 @@ When a bug looks like a **type-system or dependency-injection** failure rather t
 - Fix requires API/backend changes not in plan → escalate to Team Leader
 - Bug is timing-dependent → add logging, do not guess
 
-For non-TypeScript investigation patterns, fall back to `superpowers:systematic-debugging`.
+For non-TypeScript investigation patterns, fall back to the `systematic-debugging` skill.

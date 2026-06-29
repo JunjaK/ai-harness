@@ -105,6 +105,11 @@ Do NOT run `/team-init` on an empty repo (vacuous profile) — `/team-new` boots
 
 **Routing**: resuming → `/checkpoint`. Empty repo → `/team-new`. First time in an existing project → `/team-init` (MUST precede any `/team*`). Task that modifies 3+ files / is cross-cutting (API+UI+state) / touches auth·payments·sensitive data / is user-facing → `/team` or `/team-run`. Architectural uncertainty → `/team-brainstorm` first. Single-file trivial (typo, config, one-liner) → direct implementation allowed; everything else MUST use the team workflow.
 
+**Brainstorm routing** (any "brainstorm" / ideation / "let's design X" / pre-creative request — route by blast radius, do NOT auto-invoke any external `superpowers:brainstorming`):
+- Multi-file / cross-cutting (API+UI+state) / product feature / auth·payments·sensitive data / genuine architectural uncertainty → **`/team-brainstorm`** (Leader + Architects, cross-review, visual plan).
+- Solo / local / throwaway / this harness / a single bounded change → the **`brainstorm`** skill (lightweight dialogue → `_docs/active/planning/` design, no auto-commit, hands off to the harness pipeline).
+- This is a user instruction and takes precedence over any plugin/hook that would auto-fire a different brainstorming skill.
+
 ---
 
 ## Document Storage (3 buckets)
@@ -146,11 +151,13 @@ Live in `agents/`, invoked by `team-workflow` via the Agent tool (`subagent_type
 | greenfield-bootstrap | /team-new | G0 intake → G1 research → G2 stack decision → G3 gate → G4 scaffold → G5 seeded profile |
 | plan-review | Phase 1 | Adversarial plan evaluation + pre-plan elicitation |
 | plan-visualizer | Phase 1+ | HTML plan diagram |
+| brainstorm | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design, no auto-commit; solo counterpart to `/team-brainstorm` |
 | docs-lifecycle | All | `_docs/` status↔folder lifecycle, date/topic foldering, reference-safe moves, 3-bucket model, merge-on-complete |
 | handoff | All | Write a handoff (state layer) into `_docs/handoff/` — links spec, keep-latest-per-stream |
 | wiki | All | Agent wiki (`.claude/wiki/`) — compounding KB: ingest/query/lint, link-don't-duplicate |
 | coding-standards | Phase 3 | Code quality baseline (strict TS) + §4 YAGNI ladder |
 | tdd-workflow | Phase 3 | Red-Green-Refactor cycle (Vitest 4.x) |
+| systematic-debugging | Phase 3-4 | General debugging methodology (root cause → pattern → hypothesis → fix); `debug` layers TS/LSP on top |
 | debug | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | e2e-testing | Phase 4 | Playwright E2E |
 | agentic-testing | Phase 4.5 | Adapter-based agentic E2E: explore → verify → crystallize deterministic test |
@@ -159,9 +166,11 @@ Live in `agents/`, invoked by `team-workflow` via the Agent tool (`subagent_type
 | verification-loop | Phase 4-5 | 6-phase quality gate + checkpoints + pass@k + baseline/net-new + vacuity guard |
 | contract-sync | Phase 0 / BE→FE | Regenerate generated client → isolate churn → authoritative type-check → cross-check consumption |
 | security-review | Phase 5 | OWASP checklist + Phase 5 audit format |
+| requesting-code-review | Phase 3-5 / on-demand | Dispatch a code-reviewer subagent (crafted context) between tasks / before merge |
 | token-optimization | All | Model routing, effort levels, compaction |
 | continuous-learning | All | Pattern extraction, session state, skill evolution |
 | parallelization | Phase 3+ | Worktree management, cascade method, scaling |
+| dispatching-parallel-agents | Phase 3+ | When to split work into concurrent agents vs keep sequential (independent-domain dispatch) |
 | subagent-orchestration | All | Iterative retrieval, context briefing, phase pipeline |
 | checkpoint | All | Save/restore work state across sessions |
 | project-analyzer | /team-init | Generate project profile (9 files) |
@@ -204,7 +213,7 @@ Team-spawned agents MUST use `mode: "bypassPermissions"`, `isolation: "worktree"
 `.claude/session-state/`: `current.md` (active, write during work) · `last-session.md` (auto-rotated by Stop) · `archive/` (max 20, 7-day TTL) · `checkpoints/` (max 10 + `latest.md`) · `learnings/`.
 
 ### Claude Code Built-ins (rely on, don't duplicate)
-`/effort` (`xhigh` default, `max` for hard debugging) · `/model` (Opus for Phase 1/3, Sonnet for Phase 4 Tester, Haiku for broad search) · `/fast` (faster Opus output, same model) · `/compact` (pre-compact hook auto-checkpoints; MUST NOT run mid-implementation) · `/resume` (≠ our `/checkpoint`) · `/review`+`/security-review` (complement Phase 5) · `/simplify` (after Phase 3) · `/rewind` (when output is structurally wrong) · `/branch`·`/memory`·`/cost`·`/context`. Built-in skills we rely on (do NOT reimplement): `superpowers:systematic-debugging`/`verification-before-completion`/`using-git-worktrees`/`dispatching-parallel-agents`/`test-driven-development`/`requesting-code-review` — invoke directly when a task matches.
+`/effort` (`xhigh` default, `max` for hard debugging) · `/model` (Opus for Phase 1/3, Sonnet for Phase 4 Tester, Haiku for broad search) · `/fast` (faster Opus output, same model) · `/compact` (pre-compact hook auto-checkpoints; MUST NOT run mid-implementation) · `/resume` (≠ our `/checkpoint`) · `/review`+`/security-review` (complement Phase 5) · `/simplify` (after Phase 3) · `/rewind` (when output is structurally wrong) · `/branch`·`/memory`·`/cost`·`/context`. Harness-owned methodology skills (do NOT reimplement; invoke directly when a task matches): `systematic-debugging` (general debugging) · `tdd-workflow` (TDD) · `verification-loop` (verify-before-claim) · `parallelization` + `dispatching-parallel-agents` (worktrees + when to split) · `requesting-code-review` · `brainstorm` (solo design). These were absorbed from the superpowers plugin in v1.5.0 — **the harness no longer depends on superpowers** (zero `superpowers:` references; the plugin may be disabled).
 
 ---
 

@@ -172,8 +172,10 @@ Skills that agents reference during their workflow phases:
 |-------|-------|---------|
 | `greenfield-bootstrap` | `/team-new` | G0 intake → G1 deep-research → G2 stack decision → G3 user gate → G4 scaffold → G5 seeded profile |
 | `plan-review` | Phase 1 | Critical review of plans before implementation + pre-plan elicitation |
+| `brainstorm` | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design (no auto-commit); solo counterpart to `/team-brainstorm` |
 | `coding-standards` | Phase 3 | Universal code quality baseline (strict TS) |
 | `tdd-workflow` | Phase 3 | Red-Green-Refactor TDD cycle (Vitest 4.x) |
+| `systematic-debugging` | Phase 3-4 | General debugging methodology (root cause → pattern → hypothesis → fix); `debug` layers TS/LSP on top |
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
 | `agentic-testing` | Phase 4.5 | Adapter-based agentic E2E — explore goal → verify → crystallize deterministic test |
@@ -182,11 +184,14 @@ Skills that agents reference during their workflow phases:
 | `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
+| `requesting-code-review` | Phase 3-5 / on-demand | Dispatch a code-reviewer subagent (crafted context) between tasks / before a merge gate |
 | `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
 | `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness — persona `@import` + memory junction + opt-in sync hooks; dependency-free, ships a generic connector template |
 
-Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `wiki`.
+Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `dispatching-parallel-agents`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `wiki`.
+
+> **Superpowers-free (v1.5.0):** the harness no longer depends on the **superpowers** plugin. Its general methodology skills (`systematic-debugging`, `tdd-workflow`, `verification-loop`, `dispatching-parallel-agents`, `requesting-code-review`, `brainstorm`) were absorbed in v1.5.0 — zero `superpowers:` references, so superpowers may be disabled. It does **still rely on its declared [Dependencies](#dependencies)**: **impeccable** + **ponytail** (required plugins) and **agent-browser** (optional but the preferred browser driver, with a Playwright fallback).
 
 For general API design patterns, use the Claude Code built-in `api-design` skill directly (the harness does not wrap it).
 
@@ -222,7 +227,7 @@ junjak-ai-harness/
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-└── skills/                      # 24 workflow skills
+└── skills/                      # 28 workflow skills
     ├── team-workflow/
     ├── greenfield-bootstrap/
     ├── project-analyzer/
@@ -235,7 +240,11 @@ junjak-ai-harness/
     ├── agentic-testing/
     ├── test-scenario-doc/
     ├── security-review/
-    └── ... (10 more)
+    ├── systematic-debugging/
+    ├── dispatching-parallel-agents/
+    ├── requesting-code-review/
+    ├── brainstorm/
+    └── ... (14 more)
 ```
 
 ### CLAUDE.md Note
