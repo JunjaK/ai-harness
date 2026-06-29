@@ -152,3 +152,7 @@ export default defineConfig({
   ],
 });
 ```
+
+## See also
+
+- `skills/agent-browser-e2e/SKILL.md` — when the `agent-browser` CLI + skill are installed, prefer it as the on-demand browser driver for E2E/QA/smoke and headless (Auth-Vault) login. This deterministic Playwright layer is the fallback and the crystallization target for verified flows.

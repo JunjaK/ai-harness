@@ -77,6 +77,7 @@ selectMode(ctx):
 Per goal: `id`, `outcome`, `met`, `trustworthy` (ultracode verify), `green`, `specPath|null`, `skipReason|null`. Sections: Verified+crystallized / Verified-not-crystallizable / Unmet (→ human escalation) / Distrusted verdicts.
 
 ## See also (link, do not duplicate)
+- `skills/agent-browser-e2e/SKILL.md` — on-demand `agent-browser` browser-driving + headless Auth Vault login (separate from this phase; the Phase 4.5 web Explorer stays Playwright MCP)
 - `skills/e2e-testing/SKILL.md` — deterministic layer + web emitter conventions
 - `skills/verification-loop/SKILL.md` — vacuity guard (applied to "met" claims)
 - `skills/team-workflow/SKILL.md` — Phase 4.5 + Orchestration Mode

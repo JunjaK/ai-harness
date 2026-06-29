@@ -6,7 +6,7 @@ A reusable Claude Code harness for Claude Opus: greenfield project bootstrap (re
 
 Specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code. Beyond the core team workflow, the harness adds:
 
-- **Testing stack** — unit (Vitest) → deterministic E2E (Playwright) → **agentic E2E** (Phase 4.5: an agent verifies goals and crystallizes deterministic tests) → **human QA** (`/test-scenario-doc`, an interactive checklist).
+- **Testing stack** — unit (Vitest) → deterministic E2E (Playwright) → **agentic E2E** (Phase 4.5: an agent verifies goals and crystallizes deterministic tests) → **human QA** (`/test-scenario-doc`, an interactive checklist). When the [`agent-browser`](https://agent-browser.dev/) CLI + skill are installed, it becomes the **preferred on-demand browser driver** for E2E / QA / smoke — including headless login via its encrypted **Auth Vault** (the password never reaches the LLM) — and otherwise falls back to the Playwright path.
 - **Document storage (3 buckets)** — `_docs/` (project, lifecycle-managed) · `_note/` (human-owned, agent read-only) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge), classified by a portable ownership discriminator.
 - **Code minimalism** — the `ponytail` YAGNI decision ladder, applied at design time and reviewed in Phase 4.
 - **Instinct-based learning** — `continuous-learning` captures atomic, confidence-scored, project-scoped instincts that evolve into skills / commands / agents.
@@ -124,10 +124,12 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 | 2 | **Ultracode** mode | Optional | when on, the harness uses the Workflow tool for fan-out phases **as much as possible** | runtime ultracode signal, or `settings.json` env `CLAUDE_HARNESS_ULTRACODE=1` |
 | 3 | **impeccable** plugin | **Required install** | UI design — <https://impeccable.style/> | `/plugin marketplace add pbakaus/impeccable` → `/plugin install impeccable@impeccable` |
 | 4 | **ponytail** plugin | **Required install** | YAGNI-style development — <https://github.com/DietrichGebert/ponytail> | `/plugin install ponytail@ponytail` |
+| 5 | **agent-browser** CLI + skill | Optional | preferred on-demand browser driver for E2E / QA / smoke + headless Auth-Vault login — <https://agent-browser.dev/> | `npm i -g agent-browser && agent-browser install` (its skill ships with the CLI) |
 
 - **impeccable**: the UI/UX agents (`team-uiux-master`, `web-architect`, `web-reviewer`) call it via `Skill(skill="impeccable:impeccable", args="<sub-command> [target]")` — the sub-command goes in `args`, not the namespace.
 - **ponytail**: Phase 4 runs `/ponytail-review` on the diff; the YAGNI decision ladder is also distilled into `coding-standards` §4 for the architect/designer agents at design time.
 - If either plugin is missing, the relevant agent **aborts with an install request** — install both before running the workflow.
+- **agent-browser** (optional, no enable step): when its CLI + skill are present, the `agent-browser-e2e` skill prefers it for on-demand browser work and headless login; if absent, the harness silently falls back to the Playwright `e2e-testing` / `agentic-testing` path. Detection is a one-time gate, not a phase dependency.
 
 ### First Run
 
@@ -175,6 +177,7 @@ Skills that agents reference during their workflow phases:
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) |
 | `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
 | `agentic-testing` | Phase 4.5 | Adapter-based agentic E2E — explore goal → verify → crystallize deterministic test |
+| `agent-browser-e2e` | On-demand | Prefer the `agent-browser` CLI for E2E/QA/smoke + headless login via its encrypted Auth Vault (no password reaches the LLM) when the CLI + skill are installed; one-time gate, else fall back to Playwright. Not phase-wired |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
 | `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
@@ -219,7 +222,7 @@ junjak-ai-harness/
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-└── skills/                      # 22 workflow skills
+└── skills/                      # 24 workflow skills
     ├── team-workflow/
     ├── greenfield-bootstrap/
     ├── project-analyzer/
