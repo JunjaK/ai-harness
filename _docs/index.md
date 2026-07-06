@@ -21,6 +21,7 @@
 | Topic | Date | Path |
 |-------|------|------|
 | brain-memory | 2026-06-26 | [handoff/2026-06-26-brain-memory-trigger-handoff.md](handoff/2026-06-26-brain-memory-trigger-handoff.md) |
+| scenario-to-e2e | 2026-07-06 | [handoff/2026-07-06-scenario-to-e2e-usage-handoff.md](handoff/2026-07-06-scenario-to-e2e-usage-handoff.md) |
 
 ## Topic vocabulary (SSOT)
 
@@ -35,6 +36,7 @@ The authoritative topic list. A doc's `topic` MUST be one of these; add a new en
 | `docs-sweep` | `/docs-sweep` periodic active-doc reaping + orphan lint + SessionStart nudge |
 | `harness-v2` | Harness v2 evolution |
 | `ponytail-yagni` | ponytail YAGNI decision-ladder integration |
+| `scenario-to-e2e` | test-scenario-doc(SCENARIOS SSOT) → Playwright e2e 생성 스킬 (grounded 실측+green-gate, scaffold 폴백) |
 | `team-new` | `/team-new` greenfield project bootstrap (research → scaffold → profile) |
 | `test-scenario-doc` | Human QA checklist skill + `/test-scenario-doc` command |
 | `project-bootstrap` | **RESERVED** for `/team-new` greenfield bootstrap — feature work MUST NOT reuse |

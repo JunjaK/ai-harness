@@ -118,7 +118,13 @@ Every scaffolded scenario is listed as `unverified` in the report — no silent 
 ## Output
 
 - **Location**: the project's existing E2E dir (read `.claude/project-profile/testing.md` if present),
-  else `tests/e2e/from-scenarios/`. One file per `GROUP`.
+  else `tests/e2e/from-scenarios/`. One file per `GROUP` — **unless** the project splits specs by auth
+  state (next bullet).
+- **Respect the project's existing split conventions — mirror, don't impose.** If the project separates
+  specs by **auth state** (distinct Playwright `projects` with their own `storageState`, e.g.
+  `*.noauth.spec.ts` vs `*.auth.spec.ts`), route each scenario by its `pre` (needs login or not) into the
+  matching project/file. Auth state is **orthogonal** to `GROUP`, so do NOT collapse authed + unauthed
+  scenarios into one file just because they share a group — follow the project's existing split.
 - **Summary report** (print; mirrors the `agentic-testing` output shape). Per scenario:
   `id · spec path · mode(grounded|scaffold) · status(green|failing-bug|fixme|unverified) · note`,
   then counts. Sections: Green / Failing-as-designed (→ human) / Could-not-stabilize / Unverified-scaffold.
