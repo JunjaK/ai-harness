@@ -3,3 +3,6 @@
 .claude/*
 !.claude/rules/
 .DS_Store
+
+# E2E / Playwright run artifacts (screenshots, traces, videos, reports, session tokens) — see e2e-testing Artifact Layout
+_test/

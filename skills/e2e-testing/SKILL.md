@@ -117,17 +117,35 @@ await responsePromise;
 await page.locator('[data-testid="modal"]').waitFor({ state: 'visible' });
 ```
 
-## Artifact Management
+## Artifact Layout (`_test/` — gitignored)
+
+All E2E **run outputs** live under a single project-root `_test/` folder — **gitignored, never committed**
+(leading `_` = harness "special/owned", same family as `_docs`/`_note`). One dated, named folder per run;
+screenshots isolated in their own subfolder.
+
+```
+_test/                                 # GITIGNORED — all E2E run outputs
+  <YYYY-MM-DD>-<test-name>/            # one folder per run/suite (date + what was tested, kebab)
+    screenshots/                       # screenshots ONLY here — never scattered at run root
+    artifacts/                         # Playwright outputDir: traces, videos, failure shots
+    report/                            # HTML report + results.json
+    run.log
+  .auth/                               # shared session/state tokens (cross-run) — also gitignored
+```
+
+**Rules (MUST):**
+- **`_test/` MUST be gitignored.** Before the first run, ensure the project `.gitignore` contains `_test/`
+  (append if missing) — it holds screenshots, traces, videos, reports, and live session tokens.
+- Every run writes under `_test/<YYYY-MM-DD>-<test-name>/`; that run's screenshots go in its `screenshots/`.
+- **`_test/` = throwaway.** It holds run artifacts (from any run) + on-demand/exploratory specs
+  (e.g. `scenario-to-e2e` validation runs). **Durable CI test _code_** (committed suites, `agentic-testing`
+  crystallized specs) lives in the project's real test dir (`tests/`/`e2e/`) — only its *artifacts* land in
+  `_test/`. To keep a generated spec in CI, **promote** it out of `_test/` into the committed test dir.
 
 ```typescript
-// Screenshots
-await page.screenshot({ path: 'artifacts/result.png' });
-await page.screenshot({ path: 'artifacts/full.png', fullPage: true });
-
-// Element screenshot
-await page.locator('[data-testid="chart"]').screenshot({
-  path: 'artifacts/chart.png'
-});
+const RUN = `_test/${process.env.E2E_RUN}`;   // e.g. E2E_RUN=2026-07-06-login-nav, set once per run
+await page.screenshot({ path: `${RUN}/screenshots/dashboard.png` });
+await page.locator('[data-testid="chart"]').screenshot({ path: `${RUN}/screenshots/chart.png` });
 ```
 
 ## Configuration
@@ -136,10 +154,14 @@ await page.locator('[data-testid="chart"]').screenshot({
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: './tests/e2e',                                 // committed spec CODE (NOT _test/)
+  outputDir: `_test/${process.env.E2E_RUN}/artifacts`,    // gitignored run artifacts — see Artifact Layout
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
-  reporter: [['html'], ['json', { outputFile: 'results.json' }]],
+  reporter: [
+    ['html', { outputFolder: `_test/${process.env.E2E_RUN}/report`, open: 'never' }],
+    ['json', { outputFile: `_test/${process.env.E2E_RUN}/report/results.json` }],
+  ],
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',

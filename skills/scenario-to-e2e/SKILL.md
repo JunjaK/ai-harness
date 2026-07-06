@@ -125,6 +125,11 @@ Every scaffolded scenario is listed as `unverified` in the report — no silent 
   `*.noauth.spec.ts` vs `*.auth.spec.ts`), route each scenario by its `pre` (needs login or not) into the
   matching project/file. Auth state is **orthogonal** to `GROUP`, so do NOT collapse authed + unauthed
   scenarios into one file just because they share a group — follow the project's existing split.
+- **Artifacts + default spec location → `_test/` (gitignored).** A validation run's artifacts
+  (screenshots/traces/report) and its generated specs land in `_test/<YYYY-MM-DD>-<test-name>/` per the
+  `e2e-testing` **Artifact Layout** (screenshots in that run's `screenshots/`). These are throwaway —
+  regenerable from the scenario doc (the SSOT). **Promote** a spec into the committed test dir only when you
+  want it in CI. Ensure the project `.gitignore` has `_test/` before running.
 - **Summary report** (print; mirrors the `agentic-testing` output shape). Per scenario:
   `id · spec path · mode(grounded|scaffold) · status(green|failing-bug|fixme|unverified) · note`,
   then counts. Sections: Green / Failing-as-designed (→ human) / Could-not-stabilize / Unverified-scaffold.
