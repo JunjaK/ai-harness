@@ -186,6 +186,7 @@ Skills that agents reference during their workflow phases:
 | `agentic-testing` | Phase 4.5 | Adapter-based agentic E2E — explore goal → verify → crystallize deterministic test |
 | `agent-browser-e2e` | On-demand | Prefer the `agent-browser` CLI for E2E/QA/smoke + headless login via its encrypted Auth Vault (no password reaches the LLM) when the CLI + skill are installed; one-time gate, else fall back to Playwright. Not phase-wired |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
+| `scenario-to-e2e` | On-demand | Turn a `test-scenario-doc` into runnable Playwright specs — the doc's `SCENARIOS` config is SSOT; drives the live app for real selectors, runs + green-gates each spec, falls back to a marked-unverified scaffold. No fabricated selectors |
 | `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
@@ -242,6 +243,7 @@ junjak-ai-harness/
     ├── wiki/
     ├── agentic-testing/
     ├── test-scenario-doc/
+    ├── scenario-to-e2e/
     ├── security-review/
     ├── systematic-debugging/
     ├── dispatching-parallel-agents/

@@ -163,6 +163,7 @@ Live in `agents/`, invoked by `team-workflow` via the Agent tool (`subagent_type
 | agentic-testing | Phase 4.5 | Adapter-based agentic E2E: explore → verify → crystallize deterministic test |
 | agent-browser-e2e | On-demand | Prefer `agent-browser` CLI for E2E/QA/smoke + headless Auth Vault login when CLI+skill installed (1-time gate); else fall back to Playwright. Not phase-wired |
 | test-scenario-doc | Human acceptance | Interactive human QA checklist HTML (`/test-scenario-doc`) |
+| scenario-to-e2e | On-demand | Turn a `test-scenario-doc` (`SCENARIOS` config = SSOT) into Playwright specs — drive live app → real selectors → run + green-gate; scaffold fallback marked unverified. No fabricated selectors, no unverified "done" |
 | verification-loop | Phase 4-5 | 6-phase quality gate + checkpoints + pass@k + baseline/net-new + vacuity guard |
 | contract-sync | Phase 0 / BE→FE | Regenerate generated client → isolate churn → authoritative type-check → cross-check consumption |
 | security-review | Phase 5 | OWASP checklist + Phase 5 audit format |
