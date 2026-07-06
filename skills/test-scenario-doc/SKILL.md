@@ -36,6 +36,11 @@ No build step, no server, no dependencies. Works offline by double-clicking the 
 
 The template ships with a tiny working example so you can see the exact shapes. Mirror them.
 
+**No design review on this file.** The HTML is a fixed, reviewed format — the `impeccable` design hook
+adds nothing here and only creates noise. If the target project runs impeccable (has an `.impeccable/`
+dir), add `"*test-scenario*.html"` to `.impeccable/config.json → detector.ignoreFiles` (create/merge the
+file) so writing the doc stays quiet. This repo already carries that ignore rule.
+
 ## The config data model
 
 ```js
@@ -97,13 +102,23 @@ needs checking: **drop already-passed scenarios**, keep failures/holds for re-ve
 ones for whatever changed. A short "vs previous round" table at the top (what was excluded, what's new)
 helps the tester trust the doc.
 
-## Screenshots (built in — nothing to wire)
+## Screenshots + per-image captions (built in — nothing to wire)
 
 Every scenario card has an image row: **파일 첨부** (file picker, multi-select) and a **paste zone**
 (click it, then Ctrl+V to drop a clipboard screenshot). Images are downscaled (max 1600px, JPEG) and
 stored in `localStorage` with the rest of the state, shown as thumbnails (click to zoom, × to remove).
+
+**Each image has its own caption textarea** beside it (small 60×60 thumb + a multi-line box, so long
+notes fit) — the tester writes what that specific shot points out (e.g. "여기 합계가 0으로 나옴"), so a
+screenshot's meaning travels with it instead of being lost. Keep the two note layers distinct: the
+**per-image caption** = what *this image* shows; the
+**note field next to the verdict** = the scenario's overall context/observation. Both persist to
+`localStorage`; captions also appear under each image in the HTML report and as sub-lines in the
+markdown summary.
+
 The **이미지 포함 결과 HTML** button downloads a standalone report with verdicts, notes, and embedded
-screenshots — that's how a tester shares results, since `localStorage` stays in their browser.
+screenshots (each with its caption) — that's how a tester shares results, since `localStorage` stays in
+their browser.
 
 You don't configure any of this; it's part of the fixed runtime. Just mention it exists when you hand
 over the file.

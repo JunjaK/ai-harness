@@ -1,0 +1,9 @@
+{
+  "detector": {
+    "ignoreFiles": [
+      "skills/test-scenario-doc/**",
+      "*test-scenario*.html",
+      "*test-scenarios*.html"
+    ]
+  }
+}

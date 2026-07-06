@@ -79,11 +79,16 @@
   .ipaste{border:1px dashed #3a4060;border-radius:7px;padding:5px 10px;font-size:11.5px;
     color:var(--muted);cursor:text;background:#0c0f1d;outline:none}
   .ipaste:focus,.ipaste.active{border-color:var(--accent);color:#bfe1ff;border-style:solid}
-  .thumbs{display:flex;gap:8px;flex-wrap:wrap;flex-basis:100%;margin-top:2px}
-  .thumb{position:relative;width:74px;height:56px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#0c0f1d;cursor:zoom-in}
+  .thumbs{display:flex;flex-direction:column;gap:8px;flex-basis:100%;margin-top:2px}
+  .imgcard{display:flex;flex-direction:row;gap:8px;align-items:flex-start;width:100%}
+  .thumb{position:relative;width:60px;height:60px;flex:none;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#0c0f1d;cursor:zoom-in}
   .thumb img{width:100%;height:100%;object-fit:cover;display:block}
   .thumb .rm{position:absolute;top:1px;right:1px;width:16px;height:16px;line-height:14px;text-align:center;
     background:rgba(20,10,12,.85);color:#ff9a9a;border:1px solid #6b2a2a;border-radius:4px;font-size:11px;cursor:pointer}
+  .icap{flex:1;min-width:0;min-height:60px;resize:vertical;background:#0c0f1d;border:1px solid var(--line);
+    border-radius:6px;color:var(--ink);padding:5px 7px;font-size:11.5px;line-height:1.45;font-family:inherit}
+  .icap:focus{border-color:var(--accent);outline:none}
+  .icap::placeholder{color:#5a6180}
   .lightbox{position:fixed;inset:0;z-index:50;background:rgba(6,8,16,.92);display:none;align-items:center;justify-content:center;padding:24px}
   .lightbox.show{display:flex}
   .lightbox img{max-width:96vw;max-height:92vh;border-radius:8px;border:1px solid var(--line)}
@@ -167,7 +172,7 @@ const SETUP_HTML = `
     <tr><td>URL</td><td><code>http://localhost:3000</code></td></tr>
     <tr><td>계정</td><td>test@example.com / (로컬 시드 비밀번호)</td></tr>
   </table>
-  <div class="note blue">입력은 실제 클릭+타이핑. 각 시나리오 하단에서 <b>스크린샷</b>을 파일 첨부 또는 클릭 후 Ctrl+V로 붙여넣을 수 있습니다.</div>
+  <div class="note blue">입력은 실제 클릭+타이핑. 각 시나리오 하단에서 <b>스크린샷</b>을 파일 첨부 또는 클릭 후 Ctrl+V로 붙여넣을 수 있고, <b>이미지마다 캡션</b>(무엇을 지적하는지)을 달 수 있습니다. 시나리오 전체 맥락은 판정 우측 <b>메모</b>에 적으세요.</div>
 `;
 const SCENARIOS = [
   { id:'S1', group:'g1', mode:'S', title:'로그인 → 대시보드 진입', edge:'auth',
@@ -192,6 +197,7 @@ const SCENARIOS = [
     pre:'전제', expect:'기대', failSym:'실패증상', ref:'근거',
     notePlaceholder:'메모 (관측값/이슈)',
     imgLabel:'이미지', imgFile:'파일 첨부', imgPaste:'클릭 후 Ctrl+V로 붙여넣기',
+    imgCaptionPlaceholder:'이 이미지가 지적하는 것 (선택)',
     resetConfirm:'모든 체크/판정/메모/이미지를 초기화할까요?',
     symPass:'✅ 통과', symFail:'❌ 실패', symHold:'⏸ 보류/관찰', symNone:'⬜ 미판정',
     imgCount:(n)=>`[이미지 ${n}장]`,
@@ -218,7 +224,15 @@ const SCENARIOS = [
     try { localStorage.setItem(KEY, JSON.stringify(state)); }
     catch(e){ alert('저장 공간 초과(이미지가 많을 수 있음). 일부 이미지를 줄이거나 제거하세요.\n'+e); }
   }
-  function st(id){ state[id] = state[id] || {steps:{}, verdict:'', note:'', images:[]}; if(!state[id].images) state[id].images=[]; return state[id]; }
+  function st(id){
+    state[id] = state[id] || {steps:{}, verdict:'', note:'', images:[]};
+    if(!state[id].images) state[id].images=[];
+    // normalize each image to {src, caption}; tolerate legacy string entries
+    state[id].images = state[id].images
+      .map(im => typeof im === 'string' ? {src:im, caption:''} : (im && im.src ? {src:im.src, caption:im.caption||''} : null))
+      .filter(Boolean);
+    return state[id];
+  }
   const esc = s => String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   const escAttr = s => String(s==null?'':s).replace(/"/g,'&quot;');
 
@@ -247,6 +261,15 @@ const SCENARIOS = [
   )).join('');
 
   // ── scenario cards ──
+  // one image = thumbnail + its own caption input (what this shot points out)
+  function thumbsHtml(sid){
+    return st(sid).images.map((im,i)=>(
+      `<div class="imgcard">
+        <div class="thumb" data-sid="${sid}" data-i="${i}"><img src="${im.src}" alt=""><span class="rm" data-sid="${sid}" data-i="${i}" title="삭제">×</span></div>
+        <textarea class="icap" data-cap="${sid}" data-i="${i}" rows="2" placeholder="${escAttr(L.imgCaptionPlaceholder)}">${esc(im.caption)}</textarea>
+      </div>`
+    )).join('');
+  }
   function scHtml(s){
     const d = st(s.id);
     const cls = d.verdict==='pass' ? 'done-pass' : d.verdict==='fail' ? 'done-fail' : '';
@@ -255,7 +278,7 @@ const SCENARIOS = [
       return `<li class="${ck}"><span class="n">${i+1}</span><label><input type="checkbox" data-sid="${s.id}" data-idx="${i}" ${ck?'checked':''}><span>${esc(txt)}</span></label></li>`;
     }).join('');
     const rc = v => d.verdict===v ? 'checked' : '';
-    const thumbs = d.images.map((src,i)=>`<div class="thumb" data-sid="${s.id}" data-i="${i}"><img src="${src}" alt=""><span class="rm" data-sid="${s.id}" data-i="${i}" title="삭제">×</span></div>`).join('');
+    const thumbs = thumbsHtml(s.id);
     const meta = []
       .concat(s.pre   ? [`<span class="k">${L.pre}</span><span>${esc(s.pre)}</span>`]:[])
       .concat(s.expect? [`<span class="k expect">${L.expect}</span><span class="expect">${esc(s.expect)}</span>`]:[])
@@ -302,7 +325,7 @@ const SCENARIOS = [
   function renderThumbs(sid){
     const el = document.querySelector(`[data-thumbs="${sid}"]`);
     if(!el) return;
-    el.innerHTML = st(sid).images.map((src,i)=>`<div class="thumb" data-sid="${sid}" data-i="${i}"><img src="${src}" alt=""><span class="rm" data-sid="${sid}" data-i="${i}" title="삭제">×</span></div>`).join('');
+    el.innerHTML = thumbsHtml(sid);
     wireThumbs(el);
   }
 
@@ -325,7 +348,7 @@ const SCENARIOS = [
     };
     reader.readAsDataURL(file);
   }
-  function addImage(sid, dataURL){ st(sid).images.push(dataURL); save(); renderThumbs(sid); }
+  function addImage(sid, dataURL){ st(sid).images.push({src:dataURL, caption:''}); save(); renderThumbs(sid); }
 
   let activePasteSid = null;
   document.addEventListener('paste', e=>{
@@ -347,6 +370,12 @@ const SCENARIOS = [
       e.stopPropagation();
       const {sid,i} = e.target.dataset;
       st(sid).images.splice(Number(i),1); save(); renderThumbs(sid);
+    }));
+    // per-image caption — update in place, no re-render (keeps input focus)
+    scope.querySelectorAll('.icap').forEach(inp=>inp.addEventListener('input', e=>{
+      const {cap,i} = e.target.dataset;
+      const im = st(cap).images[Number(i)];
+      if(im){ im.caption = e.target.value; save(); }
     }));
   }
 
@@ -406,8 +435,9 @@ const SCENARIOS = [
     const lines = [META.exportTitle||'# 테스트 결과', ''];
     SCENARIOS.forEach(s=>{
       const d = state[s.id]||{verdict:'',note:'',images:[]};
-      const imgN = (d.images||[]).length;
-      lines.push(`${s.id} [${sym[d.verdict||'']}] ${s.title}` + (d.note?`  — ${d.note}`:'') + (imgN?`  ${L.imgCount(imgN)}`:''));
+      const imgs = d.images||[];
+      lines.push(`${s.id} [${sym[d.verdict||'']}] ${s.title}` + (d.note?`  — ${d.note}`:'') + (imgs.length?`  ${L.imgCount(imgs.length)}`:''));
+      imgs.forEach((im,idx)=>{ const cap = (typeof im==='string' ? '' : (im.caption||'')).replace(/\s*\n\s*/g,' / ').trim(); if(cap) lines.push(`    · ${L.imgLabel}${idx+1}: ${cap}`); });
     });
     const pass = SCENARIOS.filter(s=>(state[s.id]||{}).verdict==='pass').length;
     const fail = SCENARIOS.filter(s=>(state[s.id]||{}).verdict==='fail').length;
@@ -423,7 +453,14 @@ const SCENARIOS = [
     const title = (META.title||'테스트 결과').replace(/<[^>]+>/g,'');
     const rows = SCENARIOS.map(s=>{
       const d = state[s.id]||{verdict:'',note:'',images:[]};
-      const imgs = (d.images||[]).map(src=>`<img src="${src}" style="max-width:480px;max-height:360px;border:1px solid #2c3147;border-radius:6px;margin:6px 8px 0 0;display:inline-block">`).join('');
+      const imgs = (d.images||[]).map(im=>{
+        const src = typeof im==='string' ? im : im.src;
+        const cap = typeof im==='string' ? '' : (im.caption||'');
+        return `<figure style="display:inline-block;vertical-align:top;margin:6px 10px 0 0;max-width:480px">
+          <img src="${src}" style="max-width:480px;max-height:360px;border:1px solid #2c3147;border-radius:6px;display:block">
+          ${cap?`<figcaption style="color:#9aa3bf;font-size:12px;margin-top:4px;max-width:480px;white-space:pre-wrap">${esc(cap)}</figcaption>`:''}
+        </figure>`;
+      }).join('');
       return `<div style="border:1px solid #2c3147;border-radius:10px;margin:12px 0;padding:12px 14px;background:#171a2b">
         <div style="font-weight:700"><span style="color:#6ea8fe">${esc(s.id)}</span> ${esc(s.title)} <span style="float:right">${sym[d.verdict||'']}</span></div>
         ${s.expect?`<div style="color:#4cd9a0;font-size:12.5px;margin-top:4px">${esc(s.expect)}</div>`:''}
