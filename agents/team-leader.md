@@ -160,6 +160,7 @@ The Team Leader owns the over-engineering judgment across two checkpoints:
 - File assignments MUST NOT overlap between Designers (zero overlap, no exceptions)
 - Plan document MUST be saved to `_docs/active/planning/<created>/<created>-<topic>-plan.md`
 - `_docs/index.md` MUST be updated when adding a new plan
+- `_docs/` lives ONLY in the **primary working tree** — you (orchestrator) own every `git mv` + `index.md` edit. Pass Designers the plan's **absolute primary-tree path** (`$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/_docs/…`); they read/write doc content files there directly (distinct files, no overlap) but never move docs or touch `index.md`. See `parallelization` / `docs-lifecycle` → Concurrency.
 
 ## _docs/ Plan Storage
 

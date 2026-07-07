@@ -85,7 +85,7 @@ Agent(subagent_type="team-architect-infra", prompt="Plan:\n[consolidated plan]\n
 
 ### Step 5: Save Plan to _docs/
 
-Write the consolidated plan to `_docs/active/planning/<created>/<created>-<topic>-plan.md`.
+Write the consolidated plan to `_docs/active/planning/<created>/<created>-<topic>-plan.md` **in the primary working tree** (`_docs/` never lives in a linked worktree — see `parallelization`).
 Update `_docs/index.md` with the new entry.
 
 ```
@@ -135,15 +135,16 @@ Designer 2: [file-c, file-d] → worktree-2
 
 > **Ultracode**: run Designers as a Workflow `parallel()` with `isolation: 'worktree'`, then the sequential merge (Step 3). Max-5-worktree cap + types→backend→frontend→tests merge order still bind. Standard: the `Agent()` calls below.
 
-For each Designer:
+For each Designer — pass the plan doc's **absolute primary-tree path** so the worktree reads it without cd-ing into another tree (`_docs/` lives ONLY in the primary tree; see `parallelization` → "`_docs/` lives in the primary working tree"):
 ```
 Agent(
   subagent_type="team-designer",
-  prompt="Your assignment:\nFiles: [list]\nPlan: [relevant section]\n\nImplement using TDD.",
+  prompt="Your assignment:\nFiles: [list]\nPlan doc (read in full, absolute path): {MAIN}/_docs/active/planning/<created>/<created>-<topic>-plan.md\nPlan (relevant excerpt): [inline]\n\nImplement using TDD. Write any impl notes/findings to {MAIN}/_docs/… by absolute path — NOT into your worktree's _docs/. Leave index.md and status-moves to the orchestrator.",
   isolation="worktree",
   mode="bypassPermissions"
 )
 ```
+where `MAIN=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")` (the primary working tree, resolvable from any worktree).
 
 ### Step 3: Merge Worktrees
 
@@ -154,7 +155,7 @@ Agent(
 
 ### Step 4: Update _docs/
 
-Update `_docs/active/processing/<created>/<created>-<topic>-plan.md` with implementation notes. Transition `planning → processing` per `docs-lifecycle` (move to `active/processing/`, bump `updated`, update `index.md`).
+Update `_docs/active/processing/<created>/<created>-<topic>-plan.md` with implementation notes. Transition `planning → processing` per `docs-lifecycle` (move to `active/processing/`, bump `updated`, update `index.md`). This `git mv` + `index.md` edit is **orchestrator-serialized** — Designers write their own doc content files to the primary tree by absolute path, but only the orchestrator moves docs and touches `index.md` (see `docs-lifecycle` → Concurrency).
 
 ## Phase 4: Verification
 

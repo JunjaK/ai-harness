@@ -13,6 +13,7 @@ Loads when `_docs/`/`_note/` are touched. The 3-bucket model and the `_note/` re
 - Filename `YYYY-MM-DD-<topic>[-<kind>].md` (all hyphens; `<kind>` ∈ brief/research/stack-decision/spec/plan/impl/findings, required when ≥2 docs share topic+date). Topics come from the `index.md` controlled vocabulary (reuse-or-register).
 - Every status move is a **reference-safe transaction** — rewrite cross-bucket links (incl. `.claude/wiki/`), warn on `_note/`.
 - A task's sidecar docs **merge into one** on completion.
+- **Worktree isolation**: `_docs/` lives ONLY in the **primary working tree**; linked worktrees read/write doc **content** files there by absolute path (`$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/_docs`), each owning distinct files — only `index.md` edits + status-moves are orchestrator-serialized. Keeps plans readable from main without cd-ing into a worktree. (Detail: `docs-lifecycle` → Concurrency.)
 - `index.md` is the SSOT (① status list ② handoffs ③ topic vocabulary) — MUST update on any create/move/merge.
 - **Handoffs** live in `_docs/handoff/` (flat, dated `YYYY-MM-DD-<topic>-handoff.md`), link their spec via `related:`, keep only the latest per work-stream (`git rm` superseded). Generate with the `handoff` skill.
 

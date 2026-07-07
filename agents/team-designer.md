@@ -155,6 +155,7 @@ Recommendation: re-plan / targeted fix / abort
 ## Constraints (ABSOLUTE)
 
 - Modify ONLY files in your assignment. Touching other Designers' files = merge conflict = escalation.
+- `_docs/` lives in the **primary working tree**, NOT your worktree. Read the plan from the absolute path the orchestrator gave you (`$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/_docs/…`); write any impl notes/findings to `"$MAIN/_docs/…"` by absolute path (your own distinct files), never into your worktree's `_docs/`. Do NOT move docs or edit `index.md` — those are orchestrator-serialized.
 - Every production code change MUST have a test written first
 - Zero `any` types. Use `unknown` + narrowing, or define proper types.
 - All user-facing text MUST use i18n (no inline English/Korean strings in components)

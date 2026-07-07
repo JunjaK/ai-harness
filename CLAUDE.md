@@ -124,6 +124,8 @@ Classify by **owner** with the discriminator: *"swap this agent CLI for another 
 
 **`_note/` is human-owned, agent read-only** (always-on rule): MUST NOT create/move/merge/reorganize/delete there on your own initiative — modify ONLY on explicit request; otherwise read and leave untouched (exempt from `_docs/` lifecycle/frontmatter).
 
+**`_docs/` is primary-worktree-only** (always-on rule): every `_docs/` file lives in the repo's **primary working tree**, never in a linked worktree's checkout. Worktree agents read/write doc **content** files by the primary tree's absolute path (`$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/_docs`), each owning distinct files; only `index.md` edits + status-moves stay orchestrator-serialized. This keeps plans readable from main without cd-ing into a worktree. (Detail: `docs-lifecycle` → Concurrency; `parallelization`.)
+
 ---
 
 ## Agents
@@ -198,7 +200,7 @@ Team-spawned agents MUST use `mode: "bypassPermissions"`, `isolation: "worktree"
 | `checkpoint` | Auto-save on Stop + Pre-Compact hooks; manual `/checkpoint save [title]` anytime |
 | `verification-loop` | 6-phase gate (build/type/lint/test/security/diff); non-vacuous commands; gate type/lint on net-new vs baseline; pass@1 ≥ 80% tests, pass^3 = 100% security |
 | `contract-sync` | On contract change w/ generated client: regenerate → isolate churn → type-check (net-new) → verify consumption shape, BEFORE verifying client code; backend SSOT, never edit generated |
-| `parallelization` | Max 5 worktrees, zero file overlap, merge order types → backend → frontend → tests |
+| `parallelization` | Max 5 worktrees, zero file overlap, merge order types → backend → frontend → tests; `_docs/` in primary tree only (worktrees read/write by absolute path) |
 | `subagent-orchestration` | 3-cycle retrieval cap; every prompt MUST include What/Why/Where/Context/Constraints/Already-tried |
 
 ### Active Hooks (`hooks/hooks.json`, `${CLAUDE_PLUGIN_ROOT}` paths)

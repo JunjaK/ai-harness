@@ -117,9 +117,16 @@ Any move of doc `X` from `P_old` to `P_new` is **one atomic commit**:
 - **topic-rename / merge** — renaming or merging a vocabulary topic: re-home `complete/<old>/` AND `reference/<old>/` subtrees, rewrite filenames, cross-bucket link rewrite, update the SSOT. If the target topic already exists this becomes a MERGE that honors "loses nothing" (I5). Free-form topic-folder renames outside this transaction are forbidden.
 - **deprecated-revive** — `deprecated/→active/planning/<today>/`: KEEP original `created` (so it does not depend on a possibly-rmdir'd old date folder), add `revived: <today>`, cross-bucket link rewrite.
 
-### Concurrency (orchestrator-serialized)
+### Concurrency — `_docs/` lives in the primary tree
 
-`_docs/` moves are **serialized through the team-leader/orchestrator**. Parallel Phase-3 Designer worktrees write doc **content** only; the orchestrator performs every `git mv` + `index.md` edit + commit **after** worktree merge. `index.md` rows sort by `(topic, date, kind)` to shrink merge-conflict surface. `_docs/index.md` is part of the parallelization **merge-order** as a shared mutable file. Auto-`rmdir` only when the folder is empty and unlocked.
+`_docs/` is a **primary-worktree-only** bucket: every doc file physically lives in the repo's primary working tree, never in a linked worktree's checkout (a doc inside `../proj-feature-a/_docs/…` is unreadable from main until merged — the pain this rule removes). Any worktree agent resolves it by absolute path, cwd-independent:
+
+```bash
+DOCS="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/_docs"
+```
+
+- Worktree agents **read** plans/specs from `"$DOCS/…"`, and **write** their own doc **content** files there directly by absolute path — each owning **distinct** files (no-overlap, same rule as code). Such writes land in the main tree instantly, so a plan is readable from main with no cd and no merge round-trip.
+- **`index.md` edits and status-moves (`git mv`) are serialized through the team-leader/orchestrator** — `index.md` is the one shared mutable doc. The orchestrator performs every `git mv` + `index.md` edit + commit after worktrees finish; rows sort by `(topic, date, kind)` to shrink merge-conflict surface; `_docs/index.md` is part of the parallelization **merge-order** as a shared mutable file. Auto-`rmdir` only when the folder is empty and unlocked.
 
 ## Merge rule (REQUIRED on completion)
 

@@ -39,6 +39,23 @@ Branch every worktree from the **current active HEAD** of the target repo — th
 | **Merge sequentially** after completion | Ordered conflict resolution |
 | **Clean up** after merge | `git worktree remove` to prevent stale trees |
 | **Max 5 active worktrees** | Beyond this, merge overhead exceeds parallelism gains |
+| **`_docs/` stays in the primary tree** (never in a linked worktree's checkout) | Plans stay readable from main without cd-ing into a worktree; no per-worktree doc copies to diverge (see below) |
+
+### `_docs/` lives in the primary working tree
+
+`_docs/` (plans, specs, handoffs) is a **primary-worktree-only** bucket — it MUST NOT live in a linked worktree's checkout. The problem this avoids: a plan written inside `../project-feature-a/_docs/…` is invisible from the main repo until merged, so reading it means cd-ing into that worktree.
+
+Resolve the primary tree's `_docs/` from ANY worktree (cwd-independent — `--git-common-dir` always resolves to `<main>/.git`, so its parent is the main root):
+
+```bash
+MAIN=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
+DOCS="$MAIN/_docs"   # canonical location, reachable by absolute path from every worktree
+```
+
+Rules:
+- **Read** the plan/spec from `"$DOCS/…"` by absolute path — never from your own worktree's `_docs/`. The orchestrator passes this absolute path into each worktree agent's briefing.
+- **Write** doc content (impl notes, findings) directly to `"$DOCS/…"` by absolute path, each worktree owning **distinct** doc files — the same no-file-overlap rule that governs code. A doc written this way lands in the main tree immediately: readable without cd, no merge round-trip.
+- **`index.md` edits and status-moves** (`git mv` between `planning`/`processing`/`complete`/…) stay **orchestrator-serialized** — `index.md` is the one shared mutable doc, so only the orchestrator touches it after worktrees finish. See `docs-lifecycle` → "Concurrency".
 
 ### File Assignment Strategy
 
@@ -208,7 +225,7 @@ Agent({ prompt: "search test utilities", model: "haiku" })
 ## Quick Reference
 
 ```
-Worktrees:     Max 5, no file overlap, merge sequentially
+Worktrees:     Max 5, no file overlap, merge sequentially, _docs/ in primary tree only
 Cascade:       3-4 instances max, sweep left→right, clear scope each
 Scale up:      Independent tasks, background builds, research forks
 Scale down:    Shared state, sequential deps, focused debugging
