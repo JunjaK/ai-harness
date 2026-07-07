@@ -99,11 +99,12 @@ Do NOT run `/team-init` on an empty repo (vacuous profile) — `/team-new` boots
 | `/team <task>` | Full workflow with user in planning |
 | `/team-run <task>` | Full autonomous workflow |
 | `/checkpoint` | Save/restore work state (NOT built-in `/resume`) |
+| `/take-over [topic]` | Resume a handed-off work-stream from `_docs/handoff/` (hydrate spec → verify state → graduate the temp handoff → complete/ or a plan, renamed); NOT `/checkpoint` |
 | `/test-scenario-doc` | On-demand manual QA checklist HTML (human acceptance layer) |
 | `/docs-sweep` | Reap stale `_docs/active/` + re-verify orphan invariants |
 | `/brain-connect [path]` | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory), or relocate one |
 
-**Routing**: resuming → `/checkpoint`. Empty repo → `/team-new`. First time in an existing project → `/team-init` (MUST precede any `/team*`). Task that modifies 3+ files / is cross-cutting (API+UI+state) / touches auth·payments·sensitive data / is user-facing → `/team` or `/team-run`. Architectural uncertainty → `/team-brainstorm` first. Single-file trivial (typo, config, one-liner) → direct implementation allowed; everything else MUST use the team workflow.
+**Routing**: resuming your own interrupted session → `/checkpoint`; taking over a handed-off work-stream (a `_docs/handoff/` doc exists) → `/take-over`. Empty repo → `/team-new`. First time in an existing project → `/team-init` (MUST precede any `/team*`). Task that modifies 3+ files / is cross-cutting (API+UI+state) / touches auth·payments·sensitive data / is user-facing → `/team` or `/team-run`. Architectural uncertainty → `/team-brainstorm` first. Single-file trivial (typo, config, one-liner) → direct implementation allowed; everything else MUST use the team workflow.
 
 **Brainstorm routing** (any "brainstorm" / ideation / "let's design X" / pre-creative request — route by blast radius, do NOT auto-invoke any auto-fired external brainstorming skill):
 - Multi-file / cross-cutting (API+UI+state) / product feature / auth·payments·sensitive data / genuine architectural uncertainty → **`/team-brainstorm`** (Leader + Architects, cross-review, visual plan).
@@ -156,6 +157,7 @@ Live in `agents/`, invoked by `team-workflow` via the Agent tool (`subagent_type
 | brainstorm | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design, no auto-commit; solo counterpart to `/team-brainstorm` |
 | docs-lifecycle | All | `_docs/` status↔folder lifecycle, date/topic foldering, reference-safe moves, 3-bucket model, merge-on-complete |
 | handoff | All | Write a handoff (state layer) into `_docs/handoff/` — links spec, keep-latest-per-stream |
+| take-over | On-demand | Read/resume counterpart to `handoff` — locate handoff → hydrate spec → verify state vs repo → **graduate** the temp handoff into its durable `_docs` home (complete/ or a plan), renamed; never bare-deleted |
 | wiki | All | Agent wiki (`.claude/wiki/`) — compounding KB: ingest/query/lint, link-don't-duplicate |
 | coding-standards | Phase 3 | Code quality baseline (strict TS) + §4 YAGNI ladder |
 | tdd-workflow | Phase 3 | Red-Green-Refactor cycle (Vitest 4.x) |

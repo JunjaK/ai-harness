@@ -195,7 +195,9 @@ Skills that agents reference during their workflow phases:
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
 | `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness — persona `@import` + memory junction + opt-in sync hooks; dependency-free, ships a generic connector template |
 
-Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `dispatching-parallel-agents`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `wiki`.
+Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `dispatching-parallel-agents`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`.
+
+- `handoff` / `take-over` are a **write ↔ read pair**: `handoff` writes the state layer into `_docs/handoff/`; `take-over` (`/take-over`) consumes it — hydrates the linked spec, verifies the claimed state against the repo, then **graduates** the temp handoff into its durable `_docs` home (a `complete/` archive, or a `plan` in `active/`) with the name/kind/status corrected to `_docs` grammar — never a bare delete. Distinct from `/checkpoint` (agent session-state restore).
 
 For general API design patterns, use the Claude Code built-in `api-design` skill directly (the harness does not wrap it).
 
@@ -217,21 +219,23 @@ junjak-ai-harness/
 │   ├── team-agentic-tester.md
 │   ├── web-architect.md
 │   └── web-reviewer.md
-├── commands/                    # 8 slash commands
+├── commands/                    # 10 slash commands
 │   ├── team-new.md              # /team-new
 │   ├── team-init.md             # /team-init
 │   ├── team.md                  # /team
 │   ├── team-run.md              # /team-run
 │   ├── team-brainstorm.md       # /team-brainstorm
 │   ├── checkpoint.md            # /checkpoint
+│   ├── take-over.md             # /take-over
 │   ├── docs-sweep.md            # /docs-sweep
-│   └── test-scenario-doc.md     # /test-scenario-doc
+│   ├── test-scenario-doc.md     # /test-scenario-doc
+│   └── brain-connect.md         # /brain-connect
 ├── hooks/
 │   ├── hooks.json               # Plugin hook registration
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-└── skills/                      # 28 workflow skills
+└── skills/                      # 29 workflow skills
     ├── team-workflow/
     ├── greenfield-bootstrap/
     ├── project-analyzer/
@@ -240,6 +244,7 @@ junjak-ai-harness/
     ├── contract-sync/
     ├── docs-lifecycle/
     ├── handoff/
+    ├── take-over/
     ├── wiki/
     ├── agentic-testing/
     ├── test-scenario-doc/

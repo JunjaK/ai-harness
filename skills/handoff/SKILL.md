@@ -5,7 +5,7 @@ description: "Write a handoff document — a state layer over a spec/plan captur
 
 # Handoff
 
-A handoff is the **state layer** over a spec/plan: not the design (that lives in the spec), but "where the work actually is right now and how to pick it up." It exists so the next agent or session resumes in minutes instead of re-deriving context. Governed by `docs-lifecycle` (the `_docs/handoff/` bucket); this skill is how you write one correctly.
+A handoff is the **state layer** over a spec/plan: not the design (that lives in the spec), but "where the work actually is right now and how to pick it up." It exists so the next agent or session resumes in minutes instead of re-deriving context. Governed by `docs-lifecycle` (the `_docs/handoff/` bucket); this skill is how you write one correctly. The read/resume counterpart is the **`take-over`** skill — it consumes this doc, verifies its state against the repo, and **graduates** it into its durable `_docs` home (a `complete/` archive or a `plan`) on intake. A handoff is a temp carrier — never left to linger, never bare-deleted.
 
 ## When to write one
 
