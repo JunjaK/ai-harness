@@ -196,7 +196,7 @@ Skills that agents reference during their workflow phases:
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
 | `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness — persona `@import` + memory junction + opt-in sync hooks; dependency-free, ships a generic connector template |
 
-Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `dispatching-parallel-agents`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`.
+Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `submodule-worktree`, `dispatching-parallel-agents`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`.
 
 - `handoff` / `take-over` are a **write ↔ read pair**: `handoff` writes the state layer into `_docs/handoff/`; `take-over` (`/take-over`) consumes it — hydrates the linked spec, verifies the claimed state against the repo, then **graduates** the temp handoff into its durable `_docs` home (a `complete/` archive, or a `plan` in `active/`) with the name/kind/status corrected to `_docs` grammar — never a bare delete. Distinct from `/checkpoint` (agent session-state restore).
 

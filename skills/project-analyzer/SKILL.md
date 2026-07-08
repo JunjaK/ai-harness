@@ -30,7 +30,7 @@ Templates for every file below live in `resources/profile-templates.md`. Read th
 Follow template §1. Detect package manager via lockfile priority (bun.lockb → pnpm-lock.yaml → package-lock.json → default Bun).
 
 ### Step 2: Analyze File Structure → `structure.md`
-Follow template §2. Capture directory layout, routing pattern, module organization, naming conventions.
+Follow template §2. Capture directory layout, routing pattern, module organization, naming conventions. If `.gitmodules` exists, also fill the **Submodule Layout** block (code submodules + superproject role + per-submodule worktree carry-list of gitignored env/config) — this is the SSOT the `submodule-worktree` skill reads; omit the block for non-submodule repos.
 
 ### Step 3: Detect Code Style → `code-style.md`
 Follow template §3. Read 5-10 source files to identify patterns. Skip if no consistent pattern emerges and mark N/A. *(Seeded Mode: on a scaffold with <5 source files, derive style from the CLI's formatter config (eslint/prettier/biome) and mark provisional.)*

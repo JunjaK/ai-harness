@@ -11,7 +11,7 @@
       "name": "junjak-ai-harness",
       "source": "./",
       "description": "TypeScript-first multi-agent team workflow harness — greenfield project bootstrap (research → scaffold → profile), TDD, agentic + human-QA testing, lifecycle-managed 3-bucket docs + LLM wiki, YAGNI minimalism, instinct learning, personal-brain pairing, ultracode orchestration",
-      "version": "1.11.0",
+      "version": "1.12.0",
       "category": "workflow",
       "tags": ["team-workflow", "greenfield-bootstrap", "multi-agent", "tdd", "orchestration", "testing", "knowledge-base"]
     }

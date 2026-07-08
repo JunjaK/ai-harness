@@ -200,6 +200,7 @@ Live in `agents/`, invoked by `team-workflow` via the Agent tool (`subagent_type
 | token-optimization | All | Model routing, effort levels, compaction |
 | continuous-learning | All | Pattern extraction, session state, skill evolution |
 | parallelization | Phase 3+ | Worktree management, cascade method, scaling |
+| submodule-worktree | Phase 3+ | Submodule-monorepo worktrees — worktree only code submodules, keep superproject as the single `_docs/` anchor, carry gitignored env/secrets into each worktree, defer pointer bumps |
 | dispatching-parallel-agents | Phase 3+ | When to split work into concurrent agents vs keep sequential (independent-domain dispatch) |
 | subagent-orchestration | All | Iterative retrieval, context briefing, phase pipeline |
 | checkpoint | All | Save/restore work state across sessions |

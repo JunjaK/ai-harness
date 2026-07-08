@@ -28,7 +28,7 @@ Branch every worktree from the **current active HEAD** of the target repo — th
 - **Default**: `git worktree add <path> -b <new> "$(git rev-parse --abbrev-ref HEAD)"`.
 - **Confirm before creating if the base is ambiguous** (detached HEAD, the user mentioned a different base, or you are in a submodule): state the base you will use in one line and proceed only if it matches intent.
 - **Exception**: the user explicitly names a different base — then use it.
-- **Submodules/monorepos**: derive the base from each target repo's own current HEAD, independently.
+- **Submodules/monorepos**: derive the base from each target repo's own current HEAD, independently. When the superproject is a thin shell (docs + submodule pointers) and the real code lives in `fe`/`be` submodules, use **`submodule-worktree`** — worktree only the code submodules, keep the superproject as the single `_docs/` anchor, defer pointer bumps.
 
 ### Worktree Rules
 

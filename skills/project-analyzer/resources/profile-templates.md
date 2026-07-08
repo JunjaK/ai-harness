@@ -66,6 +66,7 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 - Page/route organization pattern
 - Module organization (`_modules/`, `lib/`, `utils/`)
 - Config file locations
+- **Submodules** — if `.gitmodules` exists, run `git submodule status`; record each submodule path + inferred role (FE/BE/shared/…) and whether the superproject is a thin **docs + submodule-pointers shell** (real code lives in submodules). Also record, per code submodule, the **worktree carry-list** — the gitignored runtime files (`.env*`, framework-local config, secrets; detect via `git -C <sub> ls-files --others --ignored --exclude-standard`) a clean worktree checkout would lack — and the **carry-exclude** heavy regenerable dirs. This block is what the `submodule-worktree` skill consumes.
 
 **Template:**
 ```markdown
@@ -73,6 +74,16 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 
 ## Directory Layout
 [actual tree output, depth 3, key directories only]
+
+## Submodule Layout (only if `.gitmodules` present; omit section otherwise)
+- Submodule-monorepo: [yes / no]
+- Superproject role: [docs + submodule pointers shell / holds code too]
+- Code submodules (worktree targets for `submodule-worktree`):
+  - `[path]` → [FE / BE / shared / …]
+  - `[path]` → [FE / BE / shared / …]
+- Worktree carry-list (gitignored runtime files to copy into each new worktree — env/secrets/local config that a clean checkout lacks): [per submodule: e.g. `.env`, `.env.local`, `application-local.yml`, `local.properties`, service-account JSON; "all gitignored except deps/build" if unclear]
+- Worktree carry EXCLUDE (regenerable — reinstall, don't copy): [node_modules, .gradle, build/, target/, .next/, … + any project-specific heavy gitignored dir]
+- Notes: [nested submodules? submodules pinned detached? default integration branch per submodule if known]
 
 ## Routing Pattern
 - Type: [file-based / config-based / code-based]
