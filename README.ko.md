@@ -11,6 +11,7 @@ Claude Opus를 위한 재사용 가능한 Claude Code 하네스입니다. 그린
 - **테스트 스택** — 유닛(Vitest) → 결정론적 E2E(Playwright) → **agentic E2E**(Phase 4.5: 에이전트가 목표를 검증하고 결정론적 테스트로 결정화) → **휴먼 QA**(`/test-scenario-doc`, 인터랙티브 체크리스트). [`agent-browser`](https://agent-browser.dev/) CLI + 스킬이 설치되어 있으면 E2E / QA / smoke를 위한 **우선 온디맨드 브라우저 드라이버**가 되며 — 암호화된 **Auth Vault**를 통한 헤드리스 로그인(비밀번호는 절대 LLM에 도달하지 않음)을 포함합니다 — 설치되어 있지 않으면 Playwright 경로로 폴백합니다.
 - **문서 저장(3개 버킷)** — `_docs/`(프로젝트, 라이프사이클 관리) · `_note/`(사람 소유, 에이전트 읽기 전용) · `.claude/wiki/`(지식을 누적해 나가는 에이전트 관리형 **LLM 위키**)로, 이식 가능한 소유권 판별 기준으로 분류됩니다.
 - **코드 미니멀리즘** — `ponytail` YAGNI 의사결정 사다리를 설계 시점에 적용하고 Phase 4에서 검토합니다.
+- **Renewal Mode Gate** — trivial하지 않은 리팩터링 / 수정 / 재설계는 **A(호환 유지)** 또는 **B(파괴적 리뉴얼)** 선택으로 시작합니다. Mode B는 리스크 블록 + 명시적 승인을 요구하며, 이후 하위호환 스캐폴딩이 다시 스며들지 않도록 완전히 커밋(anti-drift)합니다.
 - **본능 기반 학습** — `continuous-learning`이 원자적이고 확신도가 매겨지며 프로젝트 범위로 한정된 본능을 포착해, 이를 스킬 / 커맨드 / 에이전트로 진화시킵니다.
 - **Ultracode 오케스트레이션** — 활성화되면 fan-out 단계가 Workflow 도구를 통해 실행됩니다.
 
