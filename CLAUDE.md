@@ -98,6 +98,7 @@ Prefer these over web search and over memory even for "well-known" APIs. If MCP 
 When the runtime signals **ultracode** (or `CLAUDE_HARNESS_ULTRACODE=1` override) AND `workflow()` is callable, every process with 2+ independent units, a fan-out-then-barrier shape, or a per-item multi-stage flow MUST run via the Workflow tool — `parallel()` (barriered fan-out), `pipeline()` (per-item), `workflow()` (nest one level) — using the matching pattern (adversarial-verify, perspective-diverse verify, judge-panel, completeness-critic, self-repair) and `schema` whenever a downstream gate consumes a structured field.
 
 - **Named fan-out points**: Phase 1 architecture (FE/BE parallel; cross-review stays `TeamCreate`), Phase 3 Designer-and-merge (worktree-isolated), Phase 4 Tester-per-designer, Phase 4.5 Explorer→Generator pipeline.
+- **Model routing (per `agent()`)**: a workflow `agent()` **inherits the session model** (Opus, in ultracode) when `opts.model` is omitted — MUST NOT leave every stage on Opus. Set `opts.model` + `opts.effort` by task class — read-only locate/scan/extract (code-location analysis, grep/read sweep, gap collection, completeness-critic) → `haiku`+`low`; deterministic transform/verify/review/test/translate/rule-based-classify + **Phase 3 Designer (TDD implement against an approved plan)** → `sonnet`; generative reasoning/architecture/security/judge-synthesis/ambiguous-classify → `opus`+`xhigh` (`max` for hard). **Designer upgrades to Opus** when a worktree spans the full types→BE→FE stack, touches auth/payment/PII, or after a failed Phase 4 cycle. Omit `model` ONLY on the Opus row; `opts.agentType` does NOT guarantee its frontmatter tier applies, so set `opts.model` explicitly. Detail + fan-out table: `token-optimization` §1 "Workflow `agent()` routing".
 - Harness's **max-5-worktree cap** + **types→backend→frontend→tests merge order** OVERRIDE the looser `min(16, cores-2)` Workflow cap for code-writers.
 - **MUST NOT** use Workflow for: a single-agent task; a strictly sequential chain with no per-item streaming benefit; work sharing mutable state; parallel use of the single shared Playwright browser; deterministic state-file bookkeeping.
 - **Outside ultracode**, all of the above MUST use the lightweight `Agent()`/`TeamCreate` path — do NOT introduce a Workflow layer. (Ultracode is a **topology** signal, separate from **effort**.)
@@ -166,7 +167,7 @@ Live in `agents/`, invoked by `team-workflow` via the Agent tool (`subagent_type
 | team-architect-be | Opus | Backend architecture |
 | team-architect-infra | Opus | Infra/security (on-demand + final review) |
 | team-uiux-master | Opus | UI/UX design intelligence |
-| team-designer | Opus | TDD implementation (Red-Green-Refactor) |
+| team-designer | Sonnet | TDD implementation (Red-Green-Refactor); → Opus on full-stack / auth·payment·PII / post-fail retry |
 | team-tester | Sonnet | Unit + E2E test verification |
 | team-agentic-tester | Opus | Phase 4.5 agentic testing (explore-gate + deterministic generator) |
 | web-architect | Opus | Web architecture (components, state, API, perf) |

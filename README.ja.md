@@ -24,7 +24,7 @@ Claude Opus 向けの再利用可能な Claude Code ハーネスです。グリ�
 | Architect B (Backend) | `team-architect-be` | opus | Phase 1（A と並列） |
 | Architect C (Infra/Security) | `team-architect-infra` | opus | Phase 1（オンデマンド）+ Phase 5（常時） |
 | UI/UX Master | `team-uiux-master` | opus | Phase 2（条件付き） |
-| Designer x N | `team-designer` | opus | Phase 3（並列、worktree で分離） |
+| Designer x N | `team-designer` | sonnet | Phase 3（並列、worktree で分離）; フルスタック / auth·payment·PII / 失敗後リトライ時 → opus |
 | Tester x N | `team-tester` | sonnet | Phase 4（並列） |
 | Agentic Tester | `team-agentic-tester` | opus | Phase 4.5（条件付き、Tester の PASS 後） |
 | Web Architect | `web-architect` | opus | Web アーキテクチャ（単独、または FE を補完） |

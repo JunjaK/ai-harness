@@ -13,7 +13,7 @@ Specialized AI agents collaborate through defined phases to implement features, 
 - **Code minimalism** — the `ponytail` YAGNI decision ladder, applied at design time and reviewed in Phase 4.
 - **Renewal Mode Gate** — every non-trivial refactor / fix / redesign starts by choosing **A (compatible)** or **B (destructive renewal)**; Mode B requires a risk block + explicit approval, then a full anti-drift commitment so back-compat scaffolding never creeps back in.
 - **Instinct-based learning** — `continuous-learning` captures atomic, confidence-scored, project-scoped instincts that evolve into skills / commands / agents.
-- **Ultracode orchestration** — when enabled, fan-out phases run via the Workflow tool.
+- **Ultracode orchestration** — when enabled, fan-out phases run via the Workflow tool, with **per-agent model routing** (read-only scan → Haiku, TDD-implement / verify / review / translate → Sonnet, architecture / security → Opus) so a fan-out isn't silently all-Opus.
 
 ### Team Roles
 
@@ -24,7 +24,7 @@ Specialized AI agents collaborate through defined phases to implement features, 
 | Architect B (Backend) | `team-architect-be` | opus | Phase 1 (parallel with A) |
 | Architect C (Infra/Security) | `team-architect-infra` | opus | Phase 1 (on-demand) + Phase 5 (always) |
 | UI/UX Master | `team-uiux-master` | opus | Phase 2 (conditional) |
-| Designer x N | `team-designer` | opus | Phase 3 (parallel, worktree isolated) |
+| Designer x N | `team-designer` | sonnet | Phase 3 (parallel, worktree isolated); → opus on full-stack / auth·payment·PII / post-fail |
 | Tester x N | `team-tester` | sonnet | Phase 4 (parallel) |
 | Agentic Tester | `team-agentic-tester` | opus | Phase 4.5 (conditional, after Tester PASS) |
 | Web Architect | `web-architect` | opus | Web architecture (standalone or complements FE) |

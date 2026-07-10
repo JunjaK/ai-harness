@@ -1,6 +1,6 @@
 ---
 name: token-optimization
-description: "Model routing, effort levels, context efficiency, and compaction strategy for Opus 4.7. Use when spawning agents, selecting models, choosing effort levels, or managing context window pressure."
+description: "Model routing (incl. per-agent Workflow / ultracode routing), effort levels, context efficiency, and compaction strategy. Use when spawning agents, authoring Workflow fan-outs, selecting models, choosing effort levels, or managing context window pressure."
 ---
 
 # Token Optimization
@@ -13,13 +13,13 @@ Select the cheapest model that meets the task's minimum capability:
 
 | Task Complexity | Model | Use when |
 |----------------|-------|----------|
-| File search, exploration, simple edits | Haiku 4.5 | Read-only work, pattern matching, simple string ops |
-| Code implementation, review, testing | Sonnet 4.6 | 90% of coding tasks, default balance |
-| Architecture, security audit, multi-file refactor | Opus 4.7 | 5+ file changes, complex reasoning, critical decisions |
+| File search, exploration, simple edits | Haiku | Read-only work, pattern matching, simple string ops |
+| Code implementation, review, testing | Sonnet | 90% of coding tasks, default balance |
+| Architecture, security audit, multi-file refactor | Opus | 5+ file changes, complex reasoning, critical decisions |
 
-## 2. Effort Level (Opus 4.7)
+## 2. Effort Level (Opus)
 
-Opus 4.7 introduces `xhigh` between `high` and `max`. Claude Code defaults to `xhigh`.
+Current Opus provides `xhigh` between `high` and `max`. Claude Code defaults to `xhigh`.
 
 | Effort | Use when |
 |--------|----------|
@@ -38,6 +38,22 @@ Architecture/planning agents → Opus
 Code review agents → Sonnet
 Security review agents → Opus
 ```
+
+### Workflow `agent()` routing (ultracode)
+
+A Workflow `agent()` **inherits the session model** (Opus, in ultracode) when `opts.model` is omitted — so an un-annotated fan-out silently runs *every* stage on Opus. That is the "everything is Opus" waste (e.g. a 5-agent read-only locale-gap audit at ~150k Opus tokens each). MUST route each `agent()` by task class instead:
+
+| Task class (examples) | `opts.model` | `opts.effort` |
+|----------------------|-------------|--------------|
+| Read-only locate / scan / extract — code-location analysis, grep/read sweep, locale-gap collection, completeness-critic listing | `haiku` | `low` |
+| Deterministic transform / verify / review / test / translate / rule-based classify — Phase 4 Tester, `web-reviewer`, adversarial verify/refute, Phase 4.5 generator (crystallize), i18n translation, **Phase 3 Designer (TDD implement against an approved plan)** | `sonnet` | (default) |
+| Generative reasoning / architecture / security / judge-synthesis / ambiguous classify — Phase 1 architects, cross-review·judge, security audit, Phase 4.5 explorer (explore-gate) | `opus` | `xhigh` (`max` for hard) |
+
+Rules:
+- Omit `opts.model` **only** for the Opus row — inheriting the session model is correct there; every other stage MUST pass an explicit `haiku`/`sonnet`.
+- `opts.agentType` does **not** guarantee that agent's frontmatter tier is applied — set `opts.model` explicitly even when passing `agentType` (e.g. `team-tester` → `sonnet`).
+- Same upgrade/downgrade triggers below still apply per-stage (a "Sonnet" stage that fails twice or turns cross-cutting → upgrade to Opus).
+- **Designer → Opus** specifically when a worktree spans the full types→backend→frontend stack, touches auth/payment/PII, or after a failed Phase 4 cycle; routine single-domain feature implementation stays `sonnet`. (Sonnet 5 covers plan-driven TDD implementation; the design reasoning already happened upstream in Phase 1.)
 
 ### Upgrade Triggers (MUST upgrade when ANY applies)
 
