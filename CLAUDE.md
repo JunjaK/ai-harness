@@ -123,13 +123,14 @@ Do NOT run `/team-init` on an empty repo (vacuous profile) — `/team-new` boots
 | `/team-brainstorm <task>` | Plan-only discussion, no code changes |
 | `/team <task>` | Full workflow with user in planning |
 | `/team-run <task>` | Full autonomous workflow |
+| `/debug [symptom]` | **Solo** systematic debug of a bug/test-failure (Iron Law: root cause before fix); layers the TS/LSP `debug` skill, escalates to `/team` when Fundamental — the non-team-workflow entry point |
 | `/checkpoint` | Save/restore work state (NOT built-in `/resume`) |
 | `/take-over [topic]` | Resume a handed-off work-stream from `_docs/handoff/` (hydrate spec → verify state → graduate the temp handoff → complete/ or a plan, renamed); NOT `/checkpoint` |
 | `/test-scenario-doc` | On-demand manual QA checklist HTML (human acceptance layer) |
 | `/docs-sweep` | Reap stale `_docs/active/` + re-verify orphan invariants |
 | `/brain-connect [path]` | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory), or relocate one |
 
-**Routing**: resuming your own interrupted session → `/checkpoint`; taking over a handed-off work-stream (a `_docs/handoff/` doc exists) → `/take-over`. Empty repo → `/team-new`. First time in an existing project → `/team-init` (MUST precede any `/team*`). Task that modifies 3+ files / is cross-cutting (API+UI+state) / touches auth·payments·sensitive data / is user-facing → `/team` or `/team-run`. Architectural uncertainty → `/team-brainstorm` first. Single-file trivial (typo, config, one-liner) → direct implementation allowed; everything else MUST use the team workflow.
+**Routing**: a bug / test-failure / unexpected behavior you'd otherwise start guessing at, and it's solo-scope (not cross-cutting, root cause within <3 modules, no unplanned BE change) → `/debug` (it escalates to `/team` itself when it turns Fundamental). Resuming your own interrupted session → `/checkpoint`; taking over a handed-off work-stream (a `_docs/handoff/` doc exists) → `/take-over`. Empty repo → `/team-new`. First time in an existing project → `/team-init` (MUST precede any `/team*`). Task that modifies 3+ files / is cross-cutting (API+UI+state) / touches auth·payments·sensitive data / is user-facing → `/team` or `/team-run`. Architectural uncertainty → `/team-brainstorm` first. Single-file trivial (typo, config, one-liner) → direct implementation allowed; everything else MUST use the team workflow.
 
 **Brainstorm routing** (any "brainstorm" / ideation / "let's design X" / pre-creative request — route by blast radius, do NOT auto-invoke any auto-fired external brainstorming skill):
 - Multi-file / cross-cutting (API+UI+state) / product feature / auth·payments·sensitive data / genuine architectural uncertainty → **`/team-brainstorm`** (Leader + Architects, cross-review, visual plan).

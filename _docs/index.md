@@ -8,6 +8,7 @@
 |-------|------|--------|------|------|
 | agentic-testing | impl | complete | 2026-06-23 | [complete/agentic-testing/2026-06-23-agentic-testing-impl.md](complete/agentic-testing/2026-06-23-agentic-testing-impl.md) |
 | agentic-testing | plan | complete | 2026-06-23 | [complete/agentic-testing/2026-06-23-agentic-testing-plan.md](complete/agentic-testing/2026-06-23-agentic-testing-plan.md) |
+| debug-command | findings | complete | 2026-07-10 | [complete/debug-command/2026-07-10-debug-command.md](complete/debug-command/2026-07-10-debug-command.md) |
 | doc-storage | plan | complete | 2026-06-23 | [complete/doc-storage/2026-06-23-doc-storage.md](complete/doc-storage/2026-06-23-doc-storage.md) |
 | docs-lifecycle | plan | complete | 2026-06-25 | [complete/docs-lifecycle/2026-06-25-docs-lifecycle.md](complete/docs-lifecycle/2026-06-25-docs-lifecycle.md) |
 | docs-sweep | plan | complete | 2026-06-25 | [complete/docs-sweep/2026-06-25-docs-sweep.md](complete/docs-sweep/2026-06-25-docs-sweep.md) |
@@ -31,6 +32,7 @@ The authoritative topic list. A doc's `topic` MUST be one of these; add a new en
 |-------|---------|
 | `agentic-testing` | Adapter × mode-aware agentic E2E testing layer |
 | `brain-memory` | brain memory(facts) 기록 — harness 미통합 결정(약한 연결 유지); 작성=native, 운반=claude-brain |
+| `debug-command` | `/debug` 커맨드 (solo systematic-debug 진입점, `/team` 에스컬레이션) + 관련 세션 findings |
 | `doc-storage` | 3-bucket document storage × LLM wiki |
 | `docs-lifecycle` | `_docs` lifecycle v2 (buckets + date/topic foldering + orphan defenses) |
 | `docs-sweep` | `/docs-sweep` periodic active-doc reaping + orphan lint + SessionStart nudge |

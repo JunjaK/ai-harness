@@ -71,6 +71,7 @@ Phase 5: Final Security Review
 | `/team` | Interactive mode — user participates in planning phase |
 | `/team-run` | Autonomous mode — full auto-execution |
 | `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
+| `/debug` | Solo systematic debug of a bug / test failure (Iron Law: root cause before fix); layers the TS/LSP `debug` skill, escalates to `/team` when Fundamental |
 | `/checkpoint` | Save / restore work state across sessions, branches, and compactions |
 | `/docs-sweep` | Reap stale `_docs/` and re-verify orphan-document invariants |
 | `/test-scenario-doc` | On-demand human QA checklist HTML (human acceptance layer) |
@@ -220,12 +221,13 @@ junjak-ai-harness/
 │   ├── team-agentic-tester.md
 │   ├── web-architect.md
 │   └── web-reviewer.md
-├── commands/                    # 10 slash commands
+├── commands/                    # 11 slash commands
 │   ├── team-new.md              # /team-new
 │   ├── team-init.md             # /team-init
 │   ├── team.md                  # /team
 │   ├── team-run.md              # /team-run
 │   ├── team-brainstorm.md       # /team-brainstorm
+│   ├── debug.md                 # /debug
 │   ├── checkpoint.md            # /checkpoint
 │   ├── take-over.md             # /take-over
 │   ├── docs-sweep.md            # /docs-sweep
