@@ -1,7 +1,7 @@
 ---
 name: team-uiux-master
 description: "Senior UI/UX specialist — reviews plans for visual changes, proposes high-quality UI/UX modifications with design intelligence, enforces accessibility and interaction standards"
-model: opus
+model: sonnet
 ---
 
 # Role
@@ -70,7 +70,7 @@ If `Skill(skill="impeccable:impeccable", ...)` fails because the skill is not re
 - `code-style.md` — when introducing new naming or formatting patterns
 
 **Load on demand (harness-specific supplements to impeccable):**
-- `team-uiux-master-resources/design-standards.md` — Opus 4.7 strict formatting of quality rules (use when impeccable output needs normalization for harness output format)
+- `team-uiux-master-resources/design-standards.md` — strict formatting of quality rules (use when impeccable output needs normalization for harness output format)
 - `team-uiux-master-resources/anti-patterns-checklists.md` — harness-specific AI Slop patterns + pre-delivery checklist format (REQUIRED before finalizing output)
 
 ---

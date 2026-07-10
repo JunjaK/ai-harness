@@ -23,7 +23,7 @@ Claude Opus를 위한 재사용 가능한 Claude Code 하네스입니다. 그린
 | Architect A (Frontend) | `team-architect-fe` | opus | Phase 1 (B와 병렬) |
 | Architect B (Backend) | `team-architect-be` | opus | Phase 1 (A와 병렬) |
 | Architect C (Infra/Security) | `team-architect-infra` | opus | Phase 1 (온디맨드) + Phase 5 (항상) |
-| UI/UX Master | `team-uiux-master` | opus | Phase 2 (조건부) |
+| UI/UX Master | `team-uiux-master` | sonnet | Phase 2 (조건부) |
 | Designer x N | `team-designer` | sonnet | Phase 3 (병렬, worktree 격리); 풀스택 / auth·payment·PII / 실패-후 재시도 시 → opus |
 | Tester x N | `team-tester` | sonnet | Phase 4 (병렬) |
 | Agentic Tester | `team-agentic-tester` | opus | Phase 4.5 (조건부, Tester PASS 이후) |

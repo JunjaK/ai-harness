@@ -23,7 +23,7 @@ Specialized AI agents collaborate through defined phases to implement features, 
 | Architect A (Frontend) | `team-architect-fe` | opus | Phase 1 (parallel with B) |
 | Architect B (Backend) | `team-architect-be` | opus | Phase 1 (parallel with A) |
 | Architect C (Infra/Security) | `team-architect-infra` | opus | Phase 1 (on-demand) + Phase 5 (always) |
-| UI/UX Master | `team-uiux-master` | opus | Phase 2 (conditional) |
+| UI/UX Master | `team-uiux-master` | sonnet | Phase 2 (conditional) |
 | Designer x N | `team-designer` | sonnet | Phase 3 (parallel, worktree isolated); → opus on full-stack / auth·payment·PII / post-fail |
 | Tester x N | `team-tester` | sonnet | Phase 4 (parallel) |
 | Agentic Tester | `team-agentic-tester` | opus | Phase 4.5 (conditional, after Tester PASS) |

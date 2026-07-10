@@ -166,7 +166,7 @@ Live in `agents/`, invoked by `team-workflow` via the Agent tool (`subagent_type
 | team-architect-fe | Opus | Frontend architecture |
 | team-architect-be | Opus | Backend architecture |
 | team-architect-infra | Opus | Infra/security (on-demand + final review) |
-| team-uiux-master | Opus | UI/UX design intelligence |
+| team-uiux-master | Sonnet | UI/UX design intelligence |
 | team-designer | Sonnet | TDD implementation (Red-Green-Refactor); → Opus on full-stack / auth·payment·PII / post-fail retry |
 | team-tester | Sonnet | Unit + E2E test verification |
 | team-agentic-tester | Opus | Phase 4.5 agentic testing (explore-gate + deterministic generator) |
