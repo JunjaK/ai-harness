@@ -32,24 +32,24 @@ Apply to all agents, skills, commands, and direct use.
 
 Applies to **all agents, skills, and direct use** at the start of any task that changes EXISTING behavior or structure — refactor, redesign, bugfix-by-rewrite, schema/data/API reshape — EXCEPT a trivial 1-file mechanical edit (typo, config value, one-liner), which skips this gate.
 
-**MUST present both modes as labeled options (A/B) and wait for a choice — MUST NOT silently assume Mode A.**
+**Open with the A/B choice as labeled options and wait for the user to pick** — choosing a mode silently is the failure this gate exists to prevent.
 
 - **A — Compatible**: preserve existing contracts/callers/data shape; additive or backward-compatible changes; migrations keep the old shape working.
 - **B — Destructive Renewal**: discard the old structure and rebuild clean — drop/recreate, remove back-compat scaffolding, rename freely.
 
-When a **destructive signal** is present — local/throwaway/this-harness target, pre-deploy/"clean state", or the user said any of "파괴적으로 가도 됨" / "호환성 맞출 필요 없어" / "다 바꿔도 됨" — MUST recommend **B**. MUST NOT default to A "to be safe": that default is the known failure mode this gate exists to correct.
+**Recommend B when a destructive signal is present** — local/throwaway/this-harness target, pre-deploy/"clean state", or the user said any of "파괴적으로 가도 됨" / "호환성 맞출 필요 없어" / "다 바꿔도 됨". Let the signal pick the default, not caution: reaching for A "to be safe" here is the known failure mode this gate corrects.
 
-**Mode B requires an approval gate.** Before ANY destructive execution, MUST present a **Risk Block** and get explicit user approval:
+**Mode B requires an approval gate.** Before any destructive execution, present a **Risk Block** and get explicit user approval:
 1. **Blast radius** — concrete list of what breaks / what still consumes the old structure.
 2. **Discarded** — exactly what is dropped or lost (tables, columns, files, APIs, records).
 3. **Irreversibility + rollback** — is it reversible? backup/restore path taken before executing.
-4. **Data safety** — prd/stg data → STOP, human executes (assistant writes SQL + local dry-run + verify queries only); local/throwaway → autonomous OK.
-5. **Why renewal > compat here** — the structural reason; absent one, B is not justified → use A.
+4. **Data safety** — prd/stg data → **STOP, human executes** (assistant writes SQL + local dry-run + verify queries only); local/throwaway → autonomous OK.
+5. **Why renewal > compat here** — the structural reason; absent one, use A.
 
-**After B is approved, MUST fully commit (anti-drift):**
-- MUST NOT re-introduce back-compat scaffolding, nullable-for-old-data columns, additive-only migrations, or "keep just in case" fields.
-- MUST NOT defend an invariant that has zero current subjects (e.g. preserving sealed/frozen records when the count is 0).
-- MUST NOT silently downgrade to A. If new evidence makes compatibility genuinely necessary, STOP and re-surface the A/B choice — MUST NOT quietly switch back.
+**Once B is approved, commit fully to the new shape** — a clean result is the whole point of B:
+- Build the new structure outright, leaving out back-compat scaffolding, nullable-for-old-data columns, additive-only migrations, and "keep just in case" fields.
+- Drop invariants that have zero current subjects (e.g. sealed/frozen records when the count is 0) rather than preserving them.
+- Stay on B. If genuinely new evidence makes compatibility necessary, STOP and re-surface the A/B choice openly — a deliberate, visible switch is fine; a quiet drift back is what to avoid.
 
 ---
 
