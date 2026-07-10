@@ -20,6 +20,19 @@ Solo / local / throwaway / this harness / a single bounded change
 
 When unsure which side you're on, ask the user one routing question before designing.
 
+## Unknowns First (name what you don't know)
+
+Before ideating, locate the unknowns — finding them now is cheap; finding them mid-implementation is expensive. Four kinds (the "map vs territory" framing — the map is the prompt/spec, the territory is the real codebase):
+
+| Kind | What it is | How to surface it here |
+|------|-----------|------------------------|
+| Known knowns | what the user already stated | the request itself |
+| Known unknowns | open decisions, known to be open | one-at-a-time elicitation (below) |
+| Unknown knowns | "I'll know it when I see it" taste | propose 2-3 approaches / a throwaway prototype to react to |
+| Unknown unknowns | blind spots not yet nameable | **Blindspot Pass** ↓ |
+
+**Blindspot Pass** — run when entering unfamiliar territory (new area of the codebase, unfamiliar domain/library/tool, first touch of a subsystem): before proposing anything, surface the *user's* unknown-unknowns and teach them — prior art, historical decisions, common potholes, what "good" looks like here. Calibrate on their starting point ("I know nothing about X"). Skip when the territory is already well-known. This is a positive move (discover, then decide), not a gate.
+
 ## Hard Gate
 
 Do NOT write code, scaffold, or take any implementation action until you have presented a design and the user has approved it. This applies regardless of perceived simplicity — the design can be a few sentences for a truly simple change, but you MUST present it and get approval. "Too simple to need a design" is exactly where unexamined assumptions waste the most work.
@@ -28,7 +41,7 @@ Do NOT write code, scaffold, or take any implementation action until you have pr
 
 Create a todo per item and complete in order:
 
-1. **Explore context** — check relevant files, docs, recent commits; for an existing codebase, understand current patterns before proposing changes
+1. **Explore context (+ Blindspot Pass if unfamiliar)** — check relevant files, docs, recent commits; for an existing codebase, understand current patterns before proposing changes. In unfamiliar territory, run a Blindspot Pass (see "Unknowns First") to surface unknown-unknowns before proposing
 2. **Ask clarifying questions** — one at a time; purpose, constraints, success criteria
 3. **Propose 2-3 approaches** — with trade-offs and an explicit recommendation
 4. **Present the design** — in sections scaled to complexity; get approval after each section

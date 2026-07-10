@@ -14,6 +14,7 @@ Specialized AI agents collaborate through defined phases to implement features, 
 - **Renewal Mode Gate** — every non-trivial refactor / fix / redesign starts by choosing **A (compatible)** or **B (destructive renewal)**; Mode B requires a risk block + explicit approval, then a full anti-drift commitment so back-compat scaffolding never creeps back in.
 - **Instinct-based learning** — `continuous-learning` captures atomic, confidence-scored, project-scoped instincts that evolve into skills / commands / agents.
 - **Ultracode orchestration** — when enabled, fan-out phases run via the Workflow tool, with **per-agent model routing** (read-only scan → Haiku, TDD-implement / verify / review / translate → Sonnet, architecture / security → Opus) so a fan-out isn't silently all-Opus.
+- **Unknowns-first collaboration** — `brainstorm` opens with a **Blindspot Pass** (surface unknown-unknowns before designing); `verification-loop` closes with an opt-in **human comprehension quiz** (merge only what you can explain); Designers keep a **Deviations log** when implementation departs from the plan.
 
 ### Team Roles
 

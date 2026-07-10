@@ -1,7 +1,7 @@
 {
   "name": "junjak-ai-harness",
   "description": "TypeScript-first multi-agent team workflow harness for Claude Opus — greenfield project bootstrap (deep-research → scaffold → profile), 5-phase TDD workflow with agentic + human-QA testing layers, lifecycle-managed 3-bucket document storage with an LLM wiki, YAGNI code-minimalism, instinct-based learning, optional personal-brain pairing (cross-machine persona + memory), and ultracode Workflow orchestration",
-  "version": "1.14.1",
+  "version": "1.15.0",
   "author": {
     "name": "Junjak",
     "email": "haring157@gmail.com"

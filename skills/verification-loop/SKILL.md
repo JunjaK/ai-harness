@@ -1,11 +1,11 @@
 ---
 name: verification-loop
-description: "6-phase verification system with checkpoint support and pass@k metrics. Use in Phase 4-5 of team workflow, before creating PRs, or after completing feature implementations. Covers build, type check, lint, test, security scan, diff review, checkpoints, and evaluation metrics."
+description: "6-phase verification system (+ an opt-in human comprehension quiz gate) with checkpoint support and pass@k metrics. Use in Phase 4-5 of team workflow, before creating PRs, or after completing feature implementations. Covers build, type check, lint, test, security scan, diff review, a human-understanding gate, checkpoints, and evaluation metrics."
 ---
 
 # Verification Loop
 
-Systematic quality assurance in 6 sequential phases with checkpoint tracking and pass@k evaluation. Stop on CRITICAL failure.
+Systematic quality assurance in 6 sequential phases (plus an opt-in human comprehension gate) with checkpoint tracking and pass@k evaluation. Stop on CRITICAL failure.
 
 **Package manager**: Commands below use Bun (default). If project has `pnpm-lock.yaml`, translate `bun run` → `pnpm run`, `bunx` → `pnpm exec`. If `package-lock.json`, translate to `npm run` / `npx`.
 
@@ -72,6 +72,13 @@ Review `git diff` for:
 - Missing i18n (hardcoded user-facing text)
 - Type safety issues (`any`, `as` casts)
 - Missing test coverage for new code paths
+
+### Phase 7: Comprehension Quiz (human gate — opt-in)
+Phases 1–6 verify the *machine* is satisfied; this verifies the *human* understands what shipped. For a large or long-horizon change (many files, a new subsystem, an overnight/away run), a green diff is not enough — reading a diff gives only light understanding when behavior depends on existing code paths.
+
+Generate a short quiz on the change — what was done, why, which existing paths it touches, what could break — and have the human answer it. Merge only after they pass. This is the human-understanding counterpart to the machine gates, aligned with "network 200 / UI success ≠ verified": a change no one can explain is a change no one can safely merge.
+
+**Opt-in**: run it before merge on anything you couldn't confidently explain from the diff alone; skip it for small, self-evident changes. Deliver the quiz as an HTML report (context + intuition + what-changed, quiz at the bottom) when the change is big enough to warrant reading.
 
 ## Baseline & Net-New (applies to Phase 2 & 3)
 
@@ -219,3 +226,4 @@ If pass@1 < pass@3, you have flaky tests. Track them:
 - As Phase 4-5 checkpoint in team workflow
 - After resolving escalation issues
 - When comparing quality between checkpoints
+- Before merging a large / long-horizon change you couldn't fully explain from the diff — run Phase 7 (comprehension quiz)

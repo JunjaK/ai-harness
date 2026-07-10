@@ -181,7 +181,7 @@ Live in `agents/`, invoked by `team-workflow` via the Agent tool (`subagent_type
 | greenfield-bootstrap | /team-new | G0 intake → G1 research → G2 stack decision → G3 gate → G4 scaffold → G5 seeded profile |
 | plan-review | Phase 1 | Adversarial plan evaluation + pre-plan elicitation |
 | plan-visualizer | Phase 1+ | HTML plan diagram |
-| brainstorm | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design, no auto-commit; solo counterpart to `/team-brainstorm` |
+| brainstorm | Pre-Phase 1 (solo) | Lightweight solo design dialogue (unknowns-first + Blindspot Pass) → `_docs/` design, no auto-commit; solo counterpart to `/team-brainstorm` |
 | docs-lifecycle | All | `_docs/` status↔folder lifecycle, date/topic foldering, reference-safe moves, 3-bucket model, merge-on-complete |
 | handoff | All | Write a handoff (state layer) into `_docs/handoff/` — links spec, keep-latest-per-stream |
 | take-over | On-demand | Read/resume counterpart to `handoff` — locate handoff → hydrate spec → verify state vs repo → **graduate** the temp handoff into its durable `_docs` home (complete/ or a plan), renamed; never bare-deleted |
@@ -195,7 +195,7 @@ Live in `agents/`, invoked by `team-workflow` via the Agent tool (`subagent_type
 | agent-browser-e2e | On-demand | Prefer `agent-browser` CLI for E2E/QA/smoke + headless Auth Vault login when CLI+skill installed (1-time gate); else fall back to Playwright. Not phase-wired |
 | test-scenario-doc | Human acceptance | Interactive human QA checklist HTML (`/test-scenario-doc`) |
 | scenario-to-e2e | On-demand | Turn a `test-scenario-doc` (`SCENARIOS` config = SSOT) into Playwright specs — drive live app → real selectors → run + green-gate; scaffold fallback marked unverified. No fabricated selectors, no unverified "done" |
-| verification-loop | Phase 4-5 | 6-phase quality gate + checkpoints + pass@k + baseline/net-new + vacuity guard |
+| verification-loop | Phase 4-5 | 6-phase quality gate (+ opt-in human comprehension quiz gate) + checkpoints + pass@k + baseline/net-new + vacuity guard |
 | contract-sync | Phase 0 / BE→FE | Regenerate generated client → isolate churn → authoritative type-check → cross-check consumption |
 | security-review | Phase 5 | OWASP checklist + Phase 5 audit format |
 | requesting-code-review | Phase 3-5 / on-demand | Dispatch a code-reviewer subagent (crafted context) between tasks / before merge |
@@ -228,7 +228,7 @@ Team-spawned agents MUST use `mode: "bypassPermissions"`, `isolation: "worktree"
 | `token-optimization` | Route model by task class; `xhigh` default; MCPs <10, tools <80; compact after milestones only |
 | `continuous-learning` | Write `current.md` during work; extract patterns after milestones; **reuse** at task start (load → route into briefings, promote stable to profile); evolve to skill after 3+ high-confidence learnings |
 | `checkpoint` | Auto-save on Stop + Pre-Compact hooks; manual `/checkpoint save [title]` anytime |
-| `verification-loop` | 6-phase gate (build/type/lint/test/security/diff); non-vacuous commands; gate type/lint on net-new vs baseline; pass@1 ≥ 80% tests, pass^3 = 100% security |
+| `verification-loop` | 6-phase gate (build/type/lint/test/security/diff) + opt-in human comprehension quiz before merge on large changes; non-vacuous commands; gate type/lint on net-new vs baseline; pass@1 ≥ 80% tests, pass^3 = 100% security |
 | `contract-sync` | On contract change w/ generated client: regenerate → isolate churn → type-check (net-new) → verify consumption shape, BEFORE verifying client code; backend SSOT, never edit generated |
 | `parallelization` | Max 5 worktrees, zero file overlap, merge order types → backend → frontend → tests; `_docs/` in primary tree only (worktrees read/write by absolute path) |
 | `subagent-orchestration` | 3-cycle retrieval cap; every prompt MUST include What/Why/Where/Context/Constraints/Already-tried |
