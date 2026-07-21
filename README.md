@@ -1,8 +1,6 @@
 # AI Harness — Multi-Agent Team Workflow
 
-**English** · [한국어](README.ko.md) · [日本語](README.ja.md)
-
-A reusable Claude Code harness for Claude Opus: greenfield project bootstrap (research → scaffold → profile) plus a 5-phase multi-agent team workflow (TDD, escalation loops, worktree parallelization), a full testing stack, a lifecycle-managed document-storage system, code-minimalism discipline, and instinct-based learning.
+A reusable Claude Code harness for Claude Opus: greenfield project bootstrap (research → scaffold → profile) plus a 5-phase multi-agent team workflow (TDD, escalation loops, worktree parallelization), a full testing stack, a lifecycle-managed document-storage system, code-minimalism discipline, and continuous pattern learning.
 
 ## Overview
 
@@ -12,7 +10,7 @@ Specialized AI agents collaborate through defined phases to implement features, 
 - **Document storage (3 buckets)** — `_docs/` (project, lifecycle-managed) · `_note/` (human-owned, agent read-only) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge), classified by a portable ownership discriminator.
 - **Code minimalism** — the `ponytail` YAGNI decision ladder, applied at design time and reviewed in Phase 4.
 - **Renewal Mode Gate** — every non-trivial refactor / fix / redesign starts by choosing **A (compatible)** or **B (destructive renewal)**; Mode B requires a risk block + explicit approval, then a full anti-drift commitment so back-compat scaffolding never creeps back in.
-- **Instinct-based learning** — `continuous-learning` captures atomic, confidence-scored, project-scoped instincts that evolve into skills / commands / agents.
+- **Continuous learning** — `continuous-learning` extracts reusable, validated, non-obvious patterns from sessions, reuses them at task start, and evolves stable ones into skills / commands / agents.
 - **Ultracode orchestration** — when enabled, fan-out phases run via the Workflow tool, with **per-agent model routing** (read-only scan → Haiku, TDD-implement / verify / review / translate → Sonnet, architecture / security → Opus) so a fan-out isn't silently all-Opus.
 - **Unknowns-first collaboration** — `brainstorm` opens with a **Blindspot Pass** (surface unknown-unknowns before designing); `verification-loop` closes with an opt-in **human comprehension quiz** (merge only what you can explain); Designers keep a **Deviations log** when implementation departs from the plan.
 
@@ -74,6 +72,7 @@ Phase 5: Final Security Review
 | `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
 | `/debug` | Solo systematic debug of a bug / test failure (Iron Law: root cause before fix); layers the TS/LSP `debug` skill, escalates to `/team` when Fundamental |
 | `/checkpoint` | Save / restore work state across sessions, branches, and compactions |
+| `/take-over` | Resume a handed-off work-stream from `_docs/handoff/` — hydrate the spec, verify state, graduate the handoff into its durable `_docs` home |
 | `/docs-sweep` | Reap stale `_docs/` and re-verify orphan-document invariants |
 | `/test-scenario-doc` | On-demand human QA checklist HTML (human acceptance layer) |
 | `/brain-connect` | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness, or relocate an existing one |
@@ -129,15 +128,17 @@ Alongside the env flags above, the harness uses a few external tools. Install th
 |------|----------|-----------|
 | **impeccable** plugin · [impeccable.style](https://impeccable.style/) | UI/UX design quality — the `team-uiux-master` / `web-architect` / `web-reviewer` agents call it via `Skill("impeccable:impeccable", "<sub-command> [target]")` | those agents pause and ask you to install it |
 | **ponytail** plugin · [repo](https://github.com/DietrichGebert/ponytail) | YAGNI minimalism — Phase 4 runs `/ponytail-review` on the diff | Phase 4 asks you to install it (the decision ladder is also distilled into `coding-standards` §4) |
+| **superpowers** plugin · [repo](https://github.com/anthropics/claude-plugins-official) | general debugging methodology, code-review dispatch, and parallel-agent dispatch decisions — `/debug` and the `debug` skill invoke `superpowers:systematic-debugging` and layer the harness's TS/LSP patterns + escalation boundary on top | `/debug` aborts and asks you to install it |
 | **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | preferred on-demand browser driver for E2E / QA / smoke + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `e2e-testing` / `agentic-testing` path |
 
 ```bash
 /plugin marketplace add pbakaus/impeccable && /plugin install impeccable@impeccable
 /plugin install ponytail@ponytail
+/plugin install superpowers@claude-plugins-official
 npm i -g agent-browser && agent-browser install   # skill ships with the CLI
 ```
 
-impeccable and ponytail are expected to be installed before running the workflow; agent-browser is optional but recommended for smoother browser work.
+impeccable, ponytail, and superpowers are expected to be installed before running the workflow; agent-browser is optional but recommended for smoother browser work.
 
 ### First Run
 
@@ -183,22 +184,22 @@ Skills that agents reference during their workflow phases:
 | `brainstorm` | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design (no auto-commit); solo counterpart to `/team-brainstorm` |
 | `coding-standards` | Phase 3 | Universal code quality baseline (strict TS) |
 | `tdd-workflow` | Phase 3 | Red-Green-Refactor TDD cycle (Vitest 4.x) |
-| `systematic-debugging` | Phase 3-4 | General debugging methodology (root cause → pattern → hypothesis → fix); `debug` layers TS/LSP on top |
-| `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) |
+| `debug` | Phase 3-4 | LSP-driven debugging patterns (TS), layered on `superpowers:systematic-debugging` |
 | `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
 | `agentic-testing` | Phase 4.5 | Adapter-based agentic E2E — explore goal → verify → crystallize deterministic test |
 | `agent-browser-e2e` | On-demand | Prefer the `agent-browser` CLI for E2E/QA/smoke + headless login via its encrypted Auth Vault (no password reaches the LLM) when the CLI + skill are installed; one-time gate, else fall back to Playwright. Not phase-wired |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
 | `scenario-to-e2e` | On-demand | Turn a `test-scenario-doc` into runnable Playwright specs — the doc's `SCENARIOS` config is SSOT; drives the live app for real selectors, runs + green-gates each spec, falls back to a marked-unverified scaffold. No fabricated selectors |
-| `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) |
+| `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) + reliability gates: tests green in ≥ 80% of runs, security 3/3 clean |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
-| `requesting-code-review` | Phase 3-5 / on-demand | Dispatch a code-reviewer subagent (crafted context) between tasks / before a merge gate |
-| `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) |
+| `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) — fills the self-contained skeleton in `skills/plan-visualizer/resources/template.html` |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
 | `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness — persona `@import` + memory junction + opt-in sync hooks; dependency-free, ships a generic connector template |
 
-Cross-cutting skills (any phase): `token-optimization`, `continuous-learning`, `parallelization`, `submodule-worktree`, `dispatching-parallel-agents`, `subagent-orchestration`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`.
+Cross-cutting skills (any phase): `token-optimization` (model routing, effort levels, compaction — plus §6 **Subagent Orchestration**: the 3-cycle retrieval protocol and the six-element briefing contract), `continuous-learning`, `parallelization`, `submodule-worktree`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`.
+
+General debugging methodology, code-review dispatch, and parallel-agent dispatch decisions come from the **superpowers** plugin (`superpowers:systematic-debugging`, `superpowers:requesting-code-review`, `superpowers:dispatching-parallel-agents`) — the harness layers its own TS/LSP patterns and escalation boundary on top instead of forking them.
 
 - `handoff` / `take-over` are a **write ↔ read pair**: `handoff` writes the state layer into `_docs/handoff/`; `take-over` (`/take-over`) consumes it — hydrates the linked spec, verifies the claimed state against the repo, then **graduates** the temp handoff into its durable `_docs` home (a `complete/` archive, or a `plan` in `active/`) with the name/kind/status corrected to `_docs` grammar — never a bare delete. Distinct from `/checkpoint` (agent session-state restore).
 
@@ -236,10 +237,11 @@ junjak-ai-harness/
 │   └── brain-connect.md         # /brain-connect
 ├── hooks/
 │   ├── hooks.json               # Plugin hook registration
+│   ├── session-start.sh
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-└── skills/                      # 29 workflow skills
+└── skills/                      # 27 workflow skills
     ├── team-workflow/
     ├── greenfield-bootstrap/
     ├── project-analyzer/
@@ -254,16 +256,13 @@ junjak-ai-harness/
     ├── test-scenario-doc/
     ├── scenario-to-e2e/
     ├── security-review/
-    ├── systematic-debugging/
-    ├── dispatching-parallel-agents/
-    ├── requesting-code-review/
     ├── brainstorm/
-    └── ... (14 more)
+    └── ... (12 more)
 ```
 
 ### CLAUDE.md Note
 
-Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this repo root documents the harness's operating principles. Users who want the full ruleset should copy relevant sections into their own project `CLAUDE.md`.
+Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this repo root is the harness's always-on **router**: operating principles, the Renewal Mode Gate, routing rules, and hard-rule digests. It deliberately carries no inventory tables of skills / agents / commands — the runtime injects that metadata from each component's frontmatter automatically, so listing it there would only duplicate and drift. Users who want the full ruleset should copy relevant sections into their own project `CLAUDE.md`.
 
 ## License
 

@@ -19,7 +19,7 @@ This agent delegates to the `impeccable` skill as the canonical source for visua
 
 ### How to invoke
 
-`impeccable` is a **plugin** (`pbakaus/impeccable`) exposing one skill with sub-commands as arguments. Call the `Skill` tool with `skill="impeccable:impeccable"` and `args="<sub-command> [target]"`. The sub-command goes in `args`, NOT in the namespace — `skill="impeccable:shape"` is wrong. (Legacy personal-skill installs use bare `skill="impeccable:impeccable"`.)
+`impeccable` is a **plugin** (`pbakaus/impeccable`) exposing one skill with sub-commands as arguments. Call the `Skill` tool with `skill="impeccable:impeccable"` and `args="<sub-command> [target]"`. The sub-command goes in `args`, NOT in the namespace — `skill="impeccable:shape"` is wrong. (Legacy personal-skill installs use bare `skill="impeccable"`.)
 
 Example: `Skill(skill="impeccable:impeccable", args="shape login form")`
 
@@ -70,8 +70,8 @@ If `Skill(skill="impeccable:impeccable", ...)` fails because the skill is not re
 - `code-style.md` — when introducing new naming or formatting patterns
 
 **Load on demand (harness-specific supplements to impeccable):**
-- `team-uiux-master-resources/design-standards.md` — strict formatting of quality rules (use when impeccable output needs normalization for harness output format)
-- `team-uiux-master-resources/anti-patterns-checklists.md` — harness-specific AI Slop patterns + pre-delivery checklist format (REQUIRED before finalizing output)
+- `skills/team-workflow/resources/uiux/design-standards.md` — strict formatting of quality rules (use when impeccable output needs normalization for harness output format)
+- `skills/team-workflow/resources/uiux/anti-patterns-checklists.md` — harness-specific AI Slop patterns + pre-delivery checklist format (REQUIRED before finalizing output)
 
 ---
 

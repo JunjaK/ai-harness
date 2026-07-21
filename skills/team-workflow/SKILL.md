@@ -9,7 +9,6 @@ Orchestrates a multi-agent team through 5 phases with escalation support.
 
 ## Quick Reference
 
-- **Agents**: See `resources/agents.md` for role summary and invocation patterns
 - **Escalation**: See `resources/escalation.md` for rules, limits, and report formats
 
 ## Orchestration Flow
@@ -192,7 +191,8 @@ Always invoke Architect C:
 
 ```
 Agent(
-  prompt="[team-architect-infra.md content]\n\nImplemented code diff:\n[git diff]\n\nPerform final security audit.",
+  subagent_type="team-architect-infra",
+  prompt="Implemented code diff:\n[git diff]\n\nPerform final security audit.",
   mode="bypassPermissions"
 )
 ```

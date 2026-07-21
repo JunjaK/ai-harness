@@ -1,11 +1,11 @@
 ---
 name: parallelization
-description: "Git worktree management, cascade method for multiple instances, and scaling guidelines. Use when planning parallel agent work, managing worktrees, or deciding when to scale instances."
+description: "Git worktree management and instance scaling guidelines. Use when planning parallel agent work, managing worktrees, or deciding when to scale instances."
 ---
 
 # Parallelization
 
-Scale Claude Code work across multiple agents, worktrees, and instances. Three strategies: worktree isolation, cascade method, instance scaling.
+Scale Claude Code work across multiple agents, worktrees, and instances. Two strategies: worktree isolation, instance scaling.
 
 ## 1. Git Worktree Strategy
 
@@ -79,54 +79,7 @@ When splitting work across worktrees:
 4. Tests last (depends on implementation)
 ```
 
-## 2. Cascade Method
-
-### Overview
-
-Run multiple Claude Code instances in parallel, each focused on a different task. Sweep through them sequentially to maintain oversight.
-
-### Setup
-
-```
-Instance 1 (leftmost) ── Main implementation
-Instance 2             ── Code review / testing
-Instance 3             ── Research / documentation
-Instance 4 (rightmost) ── Independent feature / debugging
-```
-
-### Cascade Rules
-
-| Rule | Details |
-|------|---------|
-| **Max 3-4 concurrent** | Beyond this, context-switching overhead dominates |
-| **No overlapping file edits** | Each instance owns its files exclusively |
-| **Sweep left→right** | Check oldest → newest, handle blocks |
-| **Fork for research** | Questions about codebase → separate instance |
-| **Scope clearly** | Each instance has ONE clear objective |
-
-### Task Distribution
-
-```
-Main instance:     Code changes (owns the implementation)
-Fork 1:            Codebase questions / exploration
-Fork 2:            External API research / documentation
-Fork 3:            Test writing / verification (separate from implementation)
-```
-
-### When Cascade Works
-
-- Truly independent modules
-- Code review alongside feature implementation
-- E2E tests while implementing features
-- Independent data/API integrations
-
-### When Cascade Fails
-
-- Sequential work (Phase B depends on Phase A output)
-- Tightly coupled modules (shared state)
-- Single complex file requiring focused attention
-
-## 3. Instance Scaling Guidelines
+## 2. Instance Scaling Guidelines
 
 ### When to Scale Up
 
@@ -164,7 +117,7 @@ Large feature → Leader + Architects + Designers + Testers
 Only when tasks are truly independent with no shared files
 ```
 
-## 4. Agent Parallelization in Team Workflow
+## 3. Agent Parallelization in Team Workflow
 
 ### Phase 1: Parallel Architecture
 
@@ -192,7 +145,7 @@ Team Leader assigns files:
 └── Tester C ──→ E2E tests for integrated flow
 ```
 
-## 5. Background Process Management
+## 4. Background Process Management
 
 ### Long-Running Tasks
 
@@ -226,7 +179,6 @@ Agent({ prompt: "search test utilities", model: "haiku" })
 
 ```
 Worktrees:     Max 5, no file overlap, merge sequentially, _docs/ in primary tree only
-Cascade:       3-4 instances max, sweep left→right, clear scope each
 Scale up:      Independent tasks, background builds, research forks
 Scale down:    Shared state, sequential deps, focused debugging
 Background:    Builds, tests, pushes → run_in_background: true

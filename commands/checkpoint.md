@@ -1,3 +1,7 @@
+---
+description: "Checkpoint — save or restore work state across sessions, branches, and compactions; the harness work-state command, distinct from Claude Code's built-in /resume."
+---
+
 # Checkpoint — Save and Restore Work State
 
 Save or resume interrupted work via checkpoint files. Supports cross-session, cross-branch, and post-compaction recovery.
@@ -14,48 +18,16 @@ Save or resume interrupted work via checkpoint files. Supports cross-session, cr
 /checkpoint load [id]         # Load a specific checkpoint by timestamp
 ```
 
-## Workflow
+## Routing
 
-### `/checkpoint` (no args) — Load Latest
+Invoke the `checkpoint` skill, which owns the checkpoint format, storage layout, save/restore procedure, and cleanup rules. This command only maps arguments onto that skill's sections:
 
-1. Read `.claude/session-state/checkpoints/latest.md`
-2. If not found, check `.claude/session-state/last-session.md`
-3. If not found, report "No checkpoint available"
-4. Display checkpoint content:
-   - Current branch vs checkpoint branch (warn if different)
-   - Progress (completed / remaining steps)
-   - Key decisions made
-   - Next Steps (actionable items)
-5. Check if plan file exists (from checkpoint's `Plan:` field)
-   - If yes, read the plan for additional context
-6. Ask: "Continue from where you left off?" and proceed with Next Steps
-
-### `/checkpoint save [title]` — Save Checkpoint
-
-1. Gather current state:
-   - `git branch --show-current` → current branch
-   - `git status --short` → modified files
-   - Current task progress (from conversation context)
-2. Write checkpoint to `.claude/session-state/checkpoints/latest.md` using the format from the `checkpoint` skill
-3. Also write timestamped copy: `checkpoint-{YYYYMMDD-HHMM}.md`
-4. Confirm: "Checkpoint saved: {title}"
-
-### `/checkpoint list` — List Checkpoints
-
-1. List all files in `.claude/session-state/checkpoints/`
-2. Parse each file's header (title, branch, timestamp)
-3. Display as table:
-   ```
-   | # | Timestamp        | Title              | Branch       |
-   |---|------------------|--------------------|--------------|
-   | 1 | 2026-04-16 14:30 | Auth implementation | feat/auth   |
-   | 2 | 2026-04-16 11:00 | API design done     | main        |
-   ```
-
-### `/checkpoint load [id]` — Load Specific
-
-1. Match `[id]` against checkpoint timestamps or titles
-2. Load and display (same as `/checkpoint` no-args flow)
+| Argument | Route to `checkpoint` skill |
+|----------|-----------------------------|
+| *(none)* | **Restore Checkpoint** → Load Process, source `latest.md` (fall back to `.claude/session-state/last-session.md`; if neither exists, report "No checkpoint available") |
+| `save [title]` | **Save Checkpoint** → Manual Save, using `[title]` as the checkpoint title |
+| `load [id]` | **Restore Checkpoint** → Load Process, matching `[id]` against checkpoint timestamps or titles |
+| `list` | **Storage** layout → list `.claude/session-state/checkpoints/`, parse each header, display as a table of #, timestamp, title, branch |
 
 ## Auto-Save Triggers
 

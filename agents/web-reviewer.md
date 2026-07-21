@@ -12,8 +12,8 @@ Web Reviewer — validates web implementation quality across 5 dimensions: acces
 
 - **Deterministic scoring**: Every checklist item MUST be marked PASS / FAIL / N/A. No blanks.
 - **Evidence over opinion**: Every FAIL MUST cite a specific file:line or measurable value.
-- **Effort level**: Sonnet 4.6. Keep decisions to checklist execution, not judgment.
-- **Verify web-platform facts, don't recall them**: when a finding depends on browser/Baseline support of a feature, exact Web API behavior, or a Core Web Vitals threshold, confirm via the **MDN MCP** (`mcp__mdn__get-compat` for support/Baseline, `mcp__mdn__get-doc` for behavior) instead of memory — training knowledge has a cutoff and compat data drifts. If the MDN MCP is not connected, mark such an item N/A with "unverified — MDN MCP not available" rather than guessing. (CLAUDE.md §"Authoritative Documentation".)
+- **Effort level**: this agent runs on the Sonnet tier. Keep decisions to checklist execution, not judgment.
+- **Verify web-platform facts, don't recall them**: when a finding depends on browser/Baseline support of a feature, exact Web API behavior, or a Core Web Vitals threshold, confirm via the **MDN MCP** (`get-compat` for support/Baseline, `get-doc` for behavior — whatever namespace they are registered under, it varies by install method) instead of memory — training knowledge has a cutoff and compat data drifts. If the MDN MCP is not connected, mark such an item N/A with "unverified — MDN MCP not available" rather than guessing. (CLAUDE.md §"Authoritative Documentation".)
 
 ## Responsibilities (MUST execute in order)
 
@@ -42,7 +42,7 @@ Delegate audit + critique to impeccable; use our checklists for the remaining ca
 **MUST read:**
 1. `.claude/project-profile/index.md`
 2. Every file changed/created in scope (full read)
-3. `web-reviewer-resources/checklists.md` — full checklists + scoring formula (primary for SEO + AI Slop; supplementary for others)
+3. `skills/team-workflow/resources/web-reviewer/checklists.md` — full checklists + scoring formula (primary for SEO + AI Slop; supplementary for others)
 
 **MUST read when applicable:**
 - `ui-components.md` — when validating component library usage

@@ -56,7 +56,7 @@ Output: fixes applied + suggested new questions/sources to investigate. Append `
 
 ## Relationship to continuous-learning (no overlap)
 
-- **continuous-learning** owns the lifecycle of reusable *patterns/instincts* (HOW to work) — learnings, confidence scoring, skill evolution.
+- **continuous-learning** owns the lifecycle of reusable *patterns* (HOW to work) — learnings, confidence scoring, skill evolution.
 - **wiki** owns the synthesis of *knowledge/facts* (WHAT is true) about a domain/codebase.
 - `learnings/` is **one ingest source** for the wiki. A high-confidence, project-stable learning MAY be promoted to a wiki page (in parallel with §6 profile promotion — routing, not duplication).
 - continuous-learning **§7 governs** wiki maintenance (link-don't-duplicate, same-change-same-update, self-audit = lint).

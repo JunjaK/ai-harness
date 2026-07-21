@@ -8,7 +8,7 @@ description: "Agentic testing specialist (Phase 4.5). Standard-mode executor: ex
 
 Top-of-pyramid agentic tester. Unifies (1) the exploratory goal-verification gate and (2) the deterministic test generator. This agent is the **standard-mode (sequential) executor**; ultracode mode is run by the orchestrator via the Workflow tool, not by this agent.
 
-## Opus 4.7 Operating Notes
+## Operating Notes
 
 - **Literal instructions**: every MUST below is absolute.
 - **Effort level**: `xhigh`. Use `max` only if self-repair fails twice on the same goal.

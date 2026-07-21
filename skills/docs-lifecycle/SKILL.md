@@ -190,13 +190,7 @@ Static pass over `_docs/**` + `.claude/wiki/**`; report + auto-fix where safe:
 
 ## Handoff documents
 
-A handoff is a **state layer** over a spec/plan — "what's done, what's left, how to resume" — written when work passes to another agent or future session. Ephemeral; **links** to the spec, never duplicates the design.
-
-- **Location: `_docs/handoff/`** (flat, dated). Name `YYYY-MM-DD-<topic>-handoff.md`, `kind: handoff`. Handoffs are often cross-cutting, so they do not live under a topic folder.
-- **`related:` links the spec/plan docs**; the design stays there — the handoff carries only current state + remaining work + reproduction. Its `related:` is subject to the reference-rewrite sweep (I2/I6) — it never dangles.
-- **Retention: keep only the latest per work-stream.** When superseded or the work completes, `git rm` the stale one.
-- Index: list a live handoff like any active doc; remove its row when superseded.
-- **Generation: use the `handoff` skill** — it writes into `_docs/handoff/` with this convention.
+The handoff contract (location, naming, `related:` link-don't-duplicate, keep-latest-per-stream) is owned by the **`handoff`** skill — use it to write one. Only two docs-lifecycle facts apply here: `_docs/handoff/` is exempt from date/topic subfoldering, and a live handoff is listed in `index.md` §② like any active doc (row removed when superseded).
 
 ## Index
 

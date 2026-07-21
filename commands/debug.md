@@ -15,7 +15,7 @@ The **solo, direct** entry point for debugging — a deterministic way to force 
 
 ## What It Does
 
-Run the `systematic-debugging` methodology under its **Iron Law — no fixes without root-cause investigation first**, layering the `debug` skill's LSP patterns when the target is TypeScript.
+Run `Skill(skill="superpowers:systematic-debugging")` under its **Iron Law — no fixes without root-cause investigation first**, layering the harness `debug` skill's LSP patterns when the target is TypeScript. `superpowers` is a hard dependency: if the skill is unregistered, ABORT and tell the user to install it.
 
 1. **Frame — no fix yet.** Capture the symptom (from `<symptom>` or context: last error, failing test, recent diff). Establish reproduction; if not reproducible after 3 attempts → request repro steps, do not guess.
 2. **Route by stack.** TS/JS target → also load the `debug` skill (`goToDefinition` / `findReferences` / `incomingCalls`, structural traps); non-TS → the native checker from project-profile `stack.md`.
@@ -51,8 +51,8 @@ Status:     fixed · fixed-unverified · escalated→/team · not-reproduced
 
 ## Related
 
-- `systematic-debugging` skill — the general methodology (Iron Law · 4 phases · red flags) this command fires
-- `debug` skill — the TS/LSP-accelerated layer loaded for TypeScript targets
+- `superpowers:systematic-debugging` skill — the general methodology (Iron Law · 4 phases · red flags) this command fires
+- `debug` skill (harness) — the TS/LSP-accelerated layer loaded for TypeScript targets
 - `tdd-workflow` skill — the failing test the root-cause fix is written against
 - `verification-loop` skill — confirm the fix before claiming success (no self-report trust)
 - `/team` · `/team-run` — escalation target when the bug is a Fundamental Issue (cross-cutting / 3+ modules / BE change)

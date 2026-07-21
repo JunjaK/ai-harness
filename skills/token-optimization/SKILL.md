@@ -1,11 +1,11 @@
 ---
 name: token-optimization
-description: "Model routing (incl. per-agent Workflow / ultracode routing), effort levels, context efficiency, and compaction strategy. Use when spawning agents, authoring Workflow fan-outs, selecting models, choosing effort levels, or managing context window pressure."
+description: "Model routing (incl. per-agent Workflow / ultracode routing), effort levels, context efficiency, compaction strategy, and subagent orchestration (3-cycle retrieval cap + briefing contract). Use when spawning agents, authoring Workflow fan-outs, selecting models, choosing effort levels, or managing context window pressure."
 ---
 
 # Token Optimization
 
-Minimize token spend while maintaining output quality. Four pillars: model routing, effort level selection, context efficiency, strategic compaction.
+Minimize token spend while maintaining output quality. Five pillars: model routing, effort level selection, context efficiency, strategic compaction, subagent orchestration.
 
 ## 1. Model Routing
 
@@ -157,11 +157,46 @@ When tasks are independent, spawn agents simultaneously:
 - Each agent gets its own context window
 - Results return as they complete
 
-## 6. Opus 4.7 Tokenizer Notes
+## 6. Subagent Orchestration
 
-- Same input now consumes 1.0–1.35× tokens compared to Opus 4.6 (depends on content type)
-- Higher effort levels produce more reasoning tokens (especially `max`)
-- Overall efficiency improved per Anthropic's internal evals — but budget audits MUST re-measure against the new baseline
+A subagent receives a literal prompt but none of the semantic context driving it — it doesn't know what you already tried or why the task matters. Two hard rules fix that.
+
+### Iterative Retrieval — 3-cycle cap
+
+Never accept first output. Budget **at most 3 retrieval cycles** per agent, then escalate (do NOT retry a 4th time).
+
+```
+Cycle 1 — Broad retrieval (haiku): initial file/module overview.
+  GATE A: files returned match the task scope?
+  GATE B: output carries enough context to proceed?
+  Both PASS → skip to execution. Either FAILS → Cycle 2.
+
+Cycle 2 — Contextual query (sonnet): ask "given [X], what context do you need?",
+  supply the exact files/snippets named, re-check GATE A + GATE B.
+  Both PASS → Cycle 3. Either still FAILS → ESCALATE (this subagent lacks the information).
+
+Cycle 3 — Refined execution: agent works with focused context; orchestrator validates
+  against the task requirements. Accept, or reject → escalate (reject ≠ retry).
+```
+
+Escalate the model along with the context: haiku (broad search) → sonnet (read/analyze specific files) → opus (multi-file changes with architectural impact).
+
+For TypeScript targets, prefer LSP over grep in Cycle 1-2 (`findReferences`, `goToDefinition`, `documentSymbol`, `workspaceSymbol`); use grep only when the target is a string pattern (comment, string literal, config key), not a symbol.
+
+### Context Briefing Protocol
+
+Every subagent prompt MUST include all six elements:
+
+| Element | Example |
+|---------|---------|
+| **What** | "Fix the token rotation in refreshSession()" |
+| **Why** | "Users are getting logged out because tokens aren't rotating" |
+| **Where** | "auth/session.ts:45, auth/session.test.ts:89" |
+| **Context** | "JWT-based auth with access + refresh tokens" |
+| **Constraints** | "Must maintain backwards compatibility with v2 API" |
+| **Already tried** | "Tried updating expiry — didn't fix root cause" |
+
+Brief like a smart colleague who just walked in: they haven't seen this conversation and can't make judgment calls without it. Banned prompt shapes: "Fix the auth bug" (no context) · "Based on your findings, implement it" (pushes synthesis onto the agent) · "Research and implement" (two tasks — split into two agents) · "Look at the codebase and fix things" (no focus).
 
 ## Quick Reference
 
@@ -172,4 +207,6 @@ Context:      <10 MCPs, <80 tools, slim CLAUDE.md
 Compaction:   After milestones. NEVER mid-task. Save state first.
 Background:   Builds, tests, long searches → run_in_background: true
 Parallel:     Independent tasks in single message
+Retrieval:    3 cycles max — broad → contextual → refined, then escalate
+Briefing:     What, Why, Where, Context, Constraints, Already-tried
 ```

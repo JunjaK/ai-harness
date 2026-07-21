@@ -75,7 +75,7 @@ Next: /team-run <first feature>   — suggested first features: <from the brief'
 ```
 
 ## Escalation
-Per `team-workflow/resources/escalation.md`: per-phase retries ≤ 3; G3 edit loops ≤ 3 then ABORT; report every escalation to the user.
+Per `skills/team-workflow/resources/escalation.md`: per-phase retries ≤ 3; G3 edit loops ≤ 3 then ABORT; report every escalation to the user.
 
 ## Related
 - `resources/scaffold-recipes.md` — per-stack non-interactive scaffold commands + harness layer + no-CLI fallback

@@ -1,11 +1,11 @@
 ---
 name: verification-loop
-description: "6-phase verification system (+ an opt-in human comprehension quiz gate) with checkpoint support and pass@k metrics. Use in Phase 4-5 of team workflow, before creating PRs, or after completing feature implementations. Covers build, type check, lint, test, security scan, diff review, a human-understanding gate, checkpoints, and evaluation metrics."
+description: "6-phase verification system (+ an opt-in human comprehension quiz gate) with checkpoint support and reliability gates. Use in Phase 4-5 of team workflow, before creating PRs, or after completing feature implementations. Covers build, type check, lint, test, security scan, diff review, a human-understanding gate, checkpoints, and reliability gates."
 ---
 
 # Verification Loop
 
-Systematic quality assurance in 6 sequential phases (plus an opt-in human comprehension gate) with checkpoint tracking and pass@k evaluation. Stop on CRITICAL failure.
+Systematic quality assurance in 6 sequential phases (plus an opt-in human comprehension gate) with checkpoint tracking and reliability gates. Stop on CRITICAL failure.
 
 **Package manager**: Commands below use Bun (default). If project has `pnpm-lock.yaml`, translate `bun run` → `pnpm run`, `bunx` → `pnpm exec`. If `package-lock.json`, translate to `npm run` / `npx`.
 
@@ -153,53 +153,14 @@ Save to `.claude/session-state/checkpoints/`:
 
 **Default**: Use continuous for small tasks (< 3 files). Use checkpoints for team workflows.
 
-## Pass@k Evaluation Metrics
+## Reliability Gates
 
-### What is pass@k?
+Two hard thresholds, measured by re-running the loop — no other metric is required:
 
-**pass@k**: At least 1 of k attempts succeeds. Use when any working solution suffices.
-**pass^k**: All k attempts must succeed. Use when consistency is critical.
+- **Tests: ≥ 80% of runs green** (one pass; below that treat the suite as flaky, not the code as broken).
+- **Security scan: 100% of 3 runs clean** — any single failing run blocks the merge.
 
-### Measuring pass@k
-
-After running verification k times (e.g., k=3):
-
-```
-pass@1 = (successes / total_runs)
-pass@3 = 1 - C(n-c, k) / C(n, k)    # where n=total, c=successes
-```
-
-### Practical Application
-
-| Metric | Target | Use Case |
-|--------|--------|----------|
-| pass@1 ≥ 90% | Build, type check, lint | These should almost never fail |
-| pass@1 ≥ 80% | Tests | Allows for some flaky tests |
-| pass@3 ≥ 95% | Full verification loop | At least 1 of 3 runs clean |
-| pass^3 = 100% | Security scan | Every run must pass |
-
-### Tracking Flaky Tests
-
-If pass@1 < pass@3, you have flaky tests. Track them:
-
-```markdown
-## Flaky Test Report
-| Test | pass@1 | pass@3 | Root Cause |
-|------|--------|--------|------------|
-| auth.test.ts:45 | 60% | 95% | Race condition in token refresh |
-| api.test.ts:120 | 80% | 100% | Timeout on slow CI |
-```
-
-**Action**: Quarantine flaky tests (mark as `.skip` or move to separate suite) until root cause is fixed.
-
-### Grader Types
-
-| Grader | Input | Output | When |
-|--------|-------|--------|------|
-| **Binary** | Exit code | pass/fail | Build, lint, type check |
-| **Threshold** | Coverage % | pass if ≥ threshold | Test coverage |
-| **Checklist** | Scan results | pass if all items clear | Security scan |
-| **Subjective** | Diff review | pass/warn/fail | Code quality review |
+A test that passes on retry but not on first run is **flaky**: quarantine it (`.skip` or a separate suite) with the root cause recorded, and fix it — a flaky test never counts as a pass.
 
 ## Output Format
 
@@ -215,7 +176,7 @@ If pass@1 < pass@3, you have flaky tests. Track them:
 
 **Overall: READY / NEEDS FIXES**
 **Checkpoint**: {name} (delta from previous: ...)
-**pass@1**: X% | **pass@3**: Y%
+**Reliability**: tests X/Y runs green · security 3/3 clean
 ```
 
 ## When to Run
