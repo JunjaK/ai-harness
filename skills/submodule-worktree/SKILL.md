@@ -74,7 +74,7 @@ SRC="$SUPER/$SUB"; DST="$SUPER/.worktrees/$SUB-$TASK"
 ```
 
 - **Env/secrets/local config** (`.env`, `.env.*`, `application-local.yml`, `local.properties`, service-account JSON, …) → **copied** by the above (isolated copy, not a symlink, so parallel worktrees don't share mutable state).
-- **Dependencies / build output** (`node_modules`, `.gradle`, `build/`, `target/`, `.next/`) → **NOT** copied; **reinstall/rebuild** in the worktree (`bun install`, `./gradlew …`). Artifacts built against the source path or a different lockfile go stale; symlinking `node_modules` across worktrees is fragile.
+- **Dependencies / build output** (`node_modules`, `.gradle`, `build/`, `target/`, `.next/`) → **NOT** copied. Provision deps via the **fast path** (`parallelization` → "Provision worktree deps" / `/worktree-deps`): the package manager's shared store hard-links a per-worktree `node_modules` — no re-download, parallel-safe. Rebuild build output in place. Copied artifacts go stale against the new path/lockfile; symlinking `node_modules` across worktrees stays **excluded** (cache races + cross-contamination).
 - Carried files **stay gitignored** in the worktree (same repo, same `.gitignore`) — never commit them.
 - The profile's carry-list refines this: it can pin exact paths to copy and extra paths to exclude (e.g. a large gitignored fixtures dir), making the step deterministic instead of heuristic.
 

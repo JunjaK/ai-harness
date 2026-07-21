@@ -27,7 +27,7 @@ Scan the codebase and generate a structured project profile. Team workflow agent
 Templates for every file below live in `resources/profile-templates.md`. Read that file before filling any profile.
 
 ### Step 1: Detect Tech Stack → `stack.md`
-Follow template §1. Detect package manager via lockfile priority (bun.lockb → pnpm-lock.yaml → package-lock.json → default Bun).
+Follow template §1. Detect package manager via lockfile priority (bun.lockb → pnpm-lock.yaml → package-lock.json → default Bun). Record the **Worktree deps fast-path** with its **family**: A·copy-based (node_modules — pnpm/bun shared-store recipe) or B·reference-cache (pub/gradle/maven/go — the native resolve command, no copy). Any manager not covered inline → resolve its family + recipe via **Context7** (`resolve-library-id` → `query-docs`) and record the resolved command (so `/worktree-deps` and Designers don't re-resolve it). For submodule-monorepos, record it **per code submodule** (e.g. `app`→Flutter, `be`→Gradle may differ).
 
 ### Step 2: Analyze File Structure → `structure.md`
 Follow template §2. Capture directory layout, routing pattern, module organization, naming conventions. If `.gitmodules` exists, also fill the **Submodule Layout** block (code submodules + superproject role + per-submodule worktree carry-list of gitignored env/config) — this is the SSOT the `submodule-worktree` skill reads; omit the block for non-submodule repos.

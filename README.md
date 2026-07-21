@@ -72,6 +72,8 @@ Phase 5: Final Security Review
 | `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
 | `/debug` | Solo systematic debug of a bug / test failure (Iron Law: root cause before fix); layers the TS/LSP `debug` skill, escalates to `/team` when Fundamental |
 | `/checkpoint` | Save / restore work state across sessions, branches, and compactions |
+| `/meta-prompt` | Compile a raw context dump into an optimized, self-contained prompt to inject into a fresh session, `/team-run` string, subagent, or another tool |
+| `/worktree-deps` | Provision a worktree's deps via the package manager's shared store (hard-link, no re-download, parallel-safe); pnpm/bun inline, other managers via Context7 — never symlinks `node_modules` |
 | `/take-over` | Resume a handed-off work-stream from `_docs/handoff/` — hydrate the spec, verify state, graduate the handoff into its durable `_docs` home |
 | `/docs-sweep` | Reap stale `_docs/` and re-verify orphan-document invariants |
 | `/test-scenario-doc` | On-demand human QA checklist HTML (human acceptance layer) |
@@ -223,7 +225,7 @@ junjak-ai-harness/
 │   ├── team-agentic-tester.md
 │   ├── web-architect.md
 │   └── web-reviewer.md
-├── commands/                    # 11 slash commands
+├── commands/                    # 13 slash commands
 │   ├── team-new.md              # /team-new
 │   ├── team-init.md             # /team-init
 │   ├── team.md                  # /team
@@ -231,6 +233,8 @@ junjak-ai-harness/
 │   ├── team-brainstorm.md       # /team-brainstorm
 │   ├── debug.md                 # /debug
 │   ├── checkpoint.md            # /checkpoint
+│   ├── meta-prompt.md           # /meta-prompt
+│   ├── worktree-deps.md         # /worktree-deps
 │   ├── take-over.md             # /take-over
 │   ├── docs-sweep.md            # /docs-sweep
 │   ├── test-scenario-doc.md     # /test-scenario-doc

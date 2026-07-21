@@ -57,6 +57,37 @@ Rules:
 - **Write** doc content (impl notes, findings) directly to `"$DOCS/…"` by absolute path, each worktree owning **distinct** doc files — the same no-file-overlap rule that governs code. A doc written this way lands in the main tree immediately: readable without cd, no merge round-trip.
 - **`index.md` edits and status-moves** (`git mv` between `planning`/`processing`/`complete`/…) stay **orchestrator-serialized** — `index.md` is the one shared mutable doc, so only the orchestrator touches it after worktrees finish. See `docs-lifecycle` → "Concurrency".
 
+### Provision worktree deps (fast path — global cache, never symlink)
+
+`git worktree add` gives a clean checkout with **no installed deps** (they're gitignored, not tracked). How to provision them cheaply depends on which of **two families** the ecosystem is in — misread it and you either miss the fast path or hunt for machinery that doesn't exist:
+
+- **A · Copy-based** (`node_modules`: npm/pnpm/bun/yarn) — deps materialize a **per-project** `node_modules`. Fast path = the manager's **shared content-addressable store**, which **hard-links** packages into a per-worktree `node_modules`: no re-download, near-zero extra disk, and each worktree keeps its **own** build caches (`node_modules/.vite`, `.cache`, `.vitest`) so parallel worktrees never race. **Same-filesystem required** — store and worktree must share a filesystem, else the manager silently **copies** and the win is lost.
+- **B · Reference-cache** (Dart pub, Gradle/Maven, Go modules, Cargo) — deps stay in a **global cache** and the resolver references them by absolute path; **nothing is copied per project**. Fast path = just the native **resolve** command against the warm cache. Hard-link / store-dir / same-filesystem concerns are **moot** — there's no per-project dep dir to place. (Measured on a real Flutter worktree: `fvm flutter pub get` = **7s, +68K**, 147/153 packages referenced straight from `~/.pub-cache`, **zero copied**.)
+
+**Never symlink deps across worktrees** (either family) — a shared tree means parallel builds race on shared caches and a dep change in one worktree corrupts the others. Family A's store hard-link and Family B's cache reference both give "no re-download" safely; symlinking stays **excluded**.
+
+**Worked examples — cwd = the target worktree:**
+
+```bash
+# A · pnpm — global store shared by default; hard-links, verifies no drift
+pnpm install --frozen-lockfile --prefer-offline   # drop --frozen-lockfile if this branch changed the lockfile
+# A · bun — global cache (~/.bun/install/cache), hard-links by default
+bun install --frozen-lockfile
+
+# B · Flutter/Dart (SDK often FVM-pinned → prefix `fvm`) — resolves from ~/.pub-cache, no copy
+fvm flutter pub get        # or plain: dart pub get / flutter pub get
+# B · Gradle — resolves from ~/.gradle/caches on build; no separate install step
+./gradlew help             # (or the real build task) warms/uses the shared cache
+```
+
+**Same-filesystem check — Family A only:**
+```bash
+pnpm store path            # store location
+df "$(pnpm store path)" .  # same mount as the worktree? (compare the filesystem column)
+```
+
+**Any manager not shown** (yarn-classic, pip/uv, poetry, …) — do **NOT** guess. Resolve its **family + recipe** via **Context7** (`resolve-library-id` → `query-docs`), apply it, and record the resolved command in the project profile (`.claude/project-profile/stack.md`) so it isn't re-queried. `/worktree-deps` is the on-demand entry point for this whole procedure.
+
 ### File Assignment Strategy
 
 When splitting work across worktrees:

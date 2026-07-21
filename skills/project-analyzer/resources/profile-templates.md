@@ -43,6 +43,7 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 - Build: `[build command]`
 - Test: `[test command]`
 - Install: `[install command]`
+- Worktree deps fast-path: `[fresh-worktree provisioning + family. A·copy-based (node_modules) — pnpm: `pnpm install --frozen-lockfile --prefer-offline`, bun: `bun install --frozen-lockfile` (store↔worktree must be same-filesystem or it copies). B·reference-cache (deps stay in a global cache, nothing copied) — Flutter: `fvm flutter pub get`, Gradle: `./gradlew <task>`. Other managers: the Context7-resolved recipe. Consumed by `/worktree-deps` + `parallelization`.]`
 - Audit: `[audit command]`
 
 ## Build & Verify — AUTHORITATIVE commands (verify these are NOT vacuous)
