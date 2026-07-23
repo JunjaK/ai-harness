@@ -268,6 +268,16 @@ junjak-ai-harness/
 
 Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this repo root is the harness's always-on **router**: operating principles, the Renewal Mode Gate, routing rules, and hard-rule digests. It deliberately carries no inventory tables of skills / agents / commands — the runtime injects that metadata from each component's frontmatter automatically, so listing it there would only duplicate and drift. Users who want the full ruleset should copy relevant sections into their own project `CLAUDE.md`.
 
+## Changelog
+
+Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
+
+**v1.19.0** — Operational discipline from cross-machine usage insights:
+- Windows `Bash`→PowerShell fallback + no GUI-triggering CLI probes.
+- Server/background-process vacuity guard — a "running" claim re-verifies process/port liveness at claim time.
+- Parallel-session commit safety — commit only your own changes, never revert another session's uncommitted work.
+- Destructive ops act only on the exact target requested (no whole-datadir / system-DB wipes).
+
 ## License
 
 MIT
