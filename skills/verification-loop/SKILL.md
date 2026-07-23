@@ -97,6 +97,7 @@ A green result is only trustworthy if the command actually exercised the code. B
 - **Type-check**: a solution-style root `tsconfig.json` (`"files": []`) makes `tsc --noEmit` check nothing. Confirm the command targets the app's real tsconfig (the one with `include`/sources). If a typed framework wrapper exists (`vue-tsc`, `astro check`), the bare `tsc` may under-check.
 - **Tests**: zero tests collected is not a pass. Confirm a non-zero test count ran.
 - **Lint**: zero files linted (bad glob / wrong cwd) is not a pass. Confirm files were actually scanned.
+- **Background process / server**: a start command exiting 0 — or printing `listening on :PORT` — is not proof it stayed up. At the moment you claim "running", re-confirm the process is alive and the port answers (health `curl` / `lsof -i :PORT` / `ps`). A server that crashed just after boot, or a port already released, is not a pass.
 
 Record the **authoritative** command in project-profile `stack.md` so every phase and every agent uses the verified one, never a convenience alias whose behavior is unknown.
 
