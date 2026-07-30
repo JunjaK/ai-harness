@@ -222,10 +222,11 @@ On any escalation, route via `resources/escalation.md`'s transition table — it
 
 ## State Tracking
 
-Run state is **persisted to disk**, not held in orchestrator memory — `.claude/session-state/team-run.json` (schema + storage rules: `checkpoint` skill's team-workflow integration table). This is a read/write contract:
+Run state is **persisted to disk**, not held in orchestrator memory — path `$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/.claude/session-state/team-run.json` (the primary-tree-anchored absolute path — same resolution idiom used for `_docs/` elsewhere in this harness; a linked worktree's relative `.claude/session-state/` is a *different, empty* directory and MUST NOT be used, or the foreign-`runId` guard below never sees the live record). Schema + storage rules: `checkpoint` skill's team-workflow integration table. This is a read/write contract:
 
 - **Read** the file on every phase entry. Never rely on in-context recall for `phase`, `retries`, or `globalCycle`.
 - **Write** the file on every transition (every phase entry/exit and every escalation), applying the counter effect from the matching `escalation.md` transition-table row.
 - **Abort decisions** are made by reading the file's current counters, never from conversation memory.
 - **Missing file at P1** (fresh run): create it — `runId`, `phase: "P1"`, all `retries` zeroed, `globalCycle: 1`.
+- **Missing file at any non-P1 phase entry** (post-`git clean -xdf`, cwd/session change, resumed run): STOP and surface — the counters are unrecoverable. Do NOT recreate with zeroed counters; that silently resets the very abort caps this file exists to enforce.
 - **Foreign `runId` found on read, with `phase ∉ {DONE, ABORT}`**: STOP and surface to the user (a live parallel run or a crashed one) — do NOT silently overwrite. Per this repo's parallel-session safety rule (root `CLAUDE.md` → "Parallel sessions share the working tree — commit only what you changed, never revert what you didn't").

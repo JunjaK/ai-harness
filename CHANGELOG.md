@@ -11,7 +11,7 @@ Graph-format orchestration (LangGraph *technique*, not runtime): persisted run-s
 ### Added
 - **Phase transition table** (`escalation.md`) — the ~20-row normative SSOT (guard / classification / target phase / counter effect / abort threshold) covering every escalation edge across all 5 phases + Phase 4.5, plus explicit counter-semantics rules (`retries.pN` vs `globalCycle` increment/reset behavior).
 - **`.claude/session-state/team-run.json` read/write contract** (`team-workflow/SKILL.md` → "State Tracking") — persists `runId`/`phase`/`retries`/`globalCycle`/`escalations[]`/`designerAssignments[]` to disk so retry/abort caps are enforceable across compaction and session boundaries, not just held in orchestrator context. Read on every phase entry, written on every transition; a foreign `runId` still in flight STOPs and surfaces instead of silently overwriting (parallel-session safety).
-- `pre-compact.sh` reminds the post-compaction session to re-read `team-run.json` (no new persistence logic — the file already survives compaction via the filesystem).
+- `pre-compact.sh` reminds the post-compaction session to re-read `team-run.json` on **auto**-compaction (the hook's existing matcher scope; not triggered by a manual `/compact`) — no new persistence logic, the file already survives compaction via the filesystem.
 - `checkpoint` skill documents `team-run.json`'s placement (beside `checkpoints/`), orchestrator-only + primary-tree-only scope, and exemption from `session-stop.sh` rotation.
 
 ### Changed
