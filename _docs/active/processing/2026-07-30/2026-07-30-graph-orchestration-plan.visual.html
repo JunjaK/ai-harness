@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Graph-Format Orchestration (Option B) — Team Plan</title>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #1a1a2e;
+      --border: #2a2a4a;
+      --text: #e0e0e0;
+      --text-muted: #888;
+      --leader: #ffd700;
+      --arch-fe: #7fff7f;
+      --arch-be: #7fbfff;
+      --arch-infra: #ff7f7f;
+      --uiux: #ff7fff;
+      --designer: #ffbf7f;
+      --tester: #7fffff;
+      --phase-planning: #ffd700;
+      --phase-uiux: #ff7fff;
+      --phase-impl: #ffbf7f;
+      --phase-verify: #7fffff;
+      --phase-security: #ff7f7f;
+      --escalation: #ff4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 40px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header { margin-bottom: 32px; }
+    .header h1 { font-size: 28px; margin-bottom: 8px; }
+    .status-badge {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .section { margin-bottom: 32px; }
+    .section h2 {
+      font-size: 18px;
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+    }
+    .section h3 {
+      font-size: 13px;
+      margin: 16px 0 8px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .team-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .role-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px;
+      text-align: center;
+    }
+    .role-card.inactive { opacity: 0.4; }
+    .role-note { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+
+    .phase-flow {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      padding: 20px 0;
+    }
+    .phase-node {
+      padding: 12px 20px;
+      border-radius: 8px;
+      border: 2px solid;
+      font-size: 13px;
+      font-weight: bold;
+    }
+    .phase-arrow { color: var(--text-muted); font-size: 20px; }
+    .phase-node.conditional { border-style: dashed; }
+    .phase-node.gate {
+      border-radius: 4px;
+      border-style: dashed;
+    }
+    .phase-node.done { border-color: #4dff4d; color: #4dff4d; }
+
+    .esc-list { list-style: none; }
+    .esc-list li {
+      font-size: 12px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .esc-list li span.arrow { color: var(--escalation); font-weight: bold; }
+
+    .file-table { width: 100%; border-collapse: collapse; }
+    .file-table th, .file-table td {
+      padding: 8px 12px;
+      border: 1px solid var(--border);
+      text-align: left;
+      font-size: 13px;
+    }
+    .file-table th { background: var(--surface); }
+
+    .risk-item {
+      padding: 12px;
+      margin-bottom: 8px;
+      border-radius: 6px;
+      border-left: 4px solid;
+    }
+    .risk-critical { border-color: #ff4444; background: #1a0a0a; }
+    .risk-high { border-color: #ff8844; background: #1a1a0a; }
+    .risk-medium { border-color: #ffcc44; background: #1a1a0a; }
+    .risk-item b { color: var(--text); }
+    .risk-item .evidence { font-size: 11px; color: var(--text-muted); font-family: monospace; }
+
+    .dep-graph {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      min-height: 120px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px;
+    }
+    .dep-node {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 6px;
+      margin: 4px;
+      font-size: 12px;
+      border: 1px solid;
+    }
+    .dep-arrow { color: var(--text-muted); font-size: 14px; }
+
+    .meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 40px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>Graph-Format Orchestration (Option B)</h1>
+    <span class="status-badge" style="background: var(--phase-planning); color: #000;">
+      PLANNING
+    </span>
+    <p style="margin-top: 8px; color: var(--text-muted);">
+      Persist run-state (F1/F2) + collapse escalation rules into one transition-table SSOT (F3) + fix the already-stale phase-graph diagrams (F4). Rejected: an executable LangGraph-style runtime (Option C) — the orchestrator reads markdown, not a process.
+    </p>
+  </div>
+
+  <!-- Section 1: Team Composition -->
+  <div class="section">
+    <h2>Team Composition</h2>
+    <div class="team-grid">
+      <div class="role-card" style="border-color: var(--leader);">
+        <div style="font-size: 24px;">👑</div>
+        <div style="color: var(--leader); font-weight: bold;">Leader</div>
+        <div style="font-size: 11px; color: var(--text-muted);">Plan + Escalation routing</div>
+      </div>
+      <div class="role-card inactive" style="border-color: var(--arch-fe);">
+        <div style="font-size: 24px;">🎨</div>
+        <div style="color: var(--arch-fe); font-weight: bold;">Arch A (FE)</div>
+        <div class="role-note">skipped — no FE surface</div>
+      </div>
+      <div class="role-card inactive" style="border-color: var(--arch-be);">
+        <div style="font-size: 24px;">⚙️</div>
+        <div style="color: var(--arch-be); font-weight: bold;">Arch B (BE)</div>
+        <div class="role-note">skipped — no BE surface</div>
+      </div>
+      <div class="role-card" style="border-color: var(--arch-infra); opacity: 0.7;">
+        <div style="font-size: 24px;">🛡️</div>
+        <div style="color: var(--arch-infra); font-weight: bold;">Arch C (Infra)</div>
+        <div class="role-note">Phase 1: no triggers · Phase 5: mandatory if /team-run</div>
+      </div>
+      <div class="role-card inactive" style="border-color: var(--uiux);">
+        <div style="font-size: 24px;">✨</div>
+        <div style="color: var(--uiux); font-weight: bold;">UI/UX Master</div>
+        <div class="role-note">skipped — no UI surface</div>
+      </div>
+      <div class="role-card" style="border-color: var(--designer);">
+        <div style="font-size: 24px;">🔨</div>
+        <div style="color: var(--designer); font-weight: bold;">Designer × 1</div>
+        <div class="role-note">1, not formula's 2 — escalation.md must land before its 5 pointer files</div>
+      </div>
+      <div class="role-card" style="border-color: var(--tester);">
+        <div style="font-size: 24px;">🧪</div>
+        <div style="color: var(--tester); font-weight: bold;">Tester × 1</div>
+        <div class="role-note">no runtime code — 3 acceptance checks, not a unit suite</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section 2: Phase Flow -->
+  <div class="section">
+    <h2>Workflow Phases — target graph after T2 (fixes the mermaid's missing P4.5 node)</h2>
+    <div class="phase-flow">
+      <div class="phase-node" style="border-color: var(--phase-planning); color: var(--phase-planning);">P1 Planning</div>
+      <span class="phase-arrow">→</span>
+      <div class="phase-node conditional" style="border-color: var(--phase-uiux); color: var(--phase-uiux);">P2 UI/UX</div>
+      <span class="phase-arrow">→</span>
+      <div class="phase-node gate" style="border-color: var(--leader); color: var(--leader);">GATE</div>
+      <span class="phase-arrow">→</span>
+      <div class="phase-node" style="border-color: var(--phase-impl); color: var(--phase-impl);">P3 Implementation</div>
+      <span class="phase-arrow">→</span>
+      <div class="phase-node" style="border-color: var(--phase-verify); color: var(--phase-verify);">P4 Verification</div>
+      <span class="phase-arrow">→</span>
+      <div class="phase-node conditional" style="border-color: var(--phase-verify); color: var(--phase-verify);">P4.5 Agentic Testing</div>
+      <span class="phase-arrow">→</span>
+      <div class="phase-node" style="border-color: var(--phase-security); color: var(--phase-security);">P5 Security</div>
+      <span class="phase-arrow">→</span>
+      <div class="phase-node done">DONE</div>
+    </div>
+    <h3>Escalation edges (from the new transition table, T1)</h3>
+    <ul class="esc-list">
+      <li><span class="arrow">P2 →</span> P1 · Fundamental (UI/UX conflicts with plan) · globalCycle++ · ≥3 → ABORT</li>
+      <li><span class="arrow">GATE →</span> P1 · Fundamental (Leader rejects) · globalCycle++ · ≥3 → ABORT</li>
+      <li><span class="arrow">P3 →</span> P3 · Simple Fix (conjunctive gate) · retries.p3++ · ≥3 → force Fundamental</li>
+      <li><span class="arrow">P3 →</span> P1 · Fundamental (any condition true, or ambiguous) · globalCycle++ · ≥3 → ABORT</li>
+      <li><span class="arrow">P4 →</span> P3 · Fundamental (implementation violates plan) · retries.p3 preserved, never reset</li>
+      <li><span class="arrow">P4 →</span> P1 · Fundamental (plan itself wrong) · globalCycle++ · ≥3 → ABORT</li>
+      <li><span class="arrow">P4.5 →</span> P3 / P1 · Fundamental (goal unmet / verdict distrusted) · per target</li>
+      <li><span class="arrow">P5 →</span> P3 · Simple Fix (code-local security issue) · retries.p5++ · ≥3 → ABORT</li>
+      <li><span class="arrow">P5 →</span> P1 · Fundamental (architectural security issue) · globalCycle++ · ≥3 → ABORT</li>
+      <li><span class="arrow">any →</span> ABORT · blocking external dep, or user cancels</li>
+    </ul>
+  </div>
+
+  <!-- Section 3: File Assignment -->
+  <div class="section">
+    <h2>File Assignment</h2>
+    <table class="file-table">
+      <thead><tr><th>Designer</th><th>Files</th><th>Scope</th></tr></thead>
+      <tbody>
+        <tr>
+          <td style="color: var(--designer); font-weight: bold;">Designer 1</td>
+          <td>
+            skills/team-workflow/resources/escalation.md (T1)<br>
+            skills/team-workflow/SKILL.md (T2)<br>
+            agents/team-designer.md (T3)<br>
+            agents/team-tester.md (T4)<br>
+            agents/team-leader.md (T5)<br>
+            skills/checkpoint/SKILL.md (T6)<br>
+            README.md (T7)<br>
+            hooks/pre-compact.sh (T8)
+          </td>
+          <td>T1–T8: rewrite escalation.md as the sole transition-table SSOT, wire team-run.json read/write into the orchestrator + hook, delete the two agents' divergent local classification lists, fix the stale mermaid, trim README, bump version (T9).</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Section 4: Dependency Graph -->
+  <div class="section">
+    <h2>Dependencies — who points at the new SSOT</h2>
+    <div class="dep-graph">
+      <div class="dep-node" style="border-color: #ffd24d; color: #ffd24d;">escalation.md (rules SSOT)</div>
+      <span class="dep-arrow">←pointer←</span>
+      <div class="dep-node" style="border-color: var(--designer); color: var(--designer);">team-designer.md</div>
+      <div class="dep-node" style="border-color: var(--tester); color: var(--tester);">team-tester.md</div>
+      <div class="dep-node" style="border-color: var(--leader); color: var(--leader);">team-leader.md</div>
+      <br>
+      <div class="dep-node" style="border-color: #ffd24d; color: #ffd24d;">SKILL.md mermaid (visual SSOT)</div>
+      <span class="dep-arrow">←link←</span>
+      <div class="dep-node" style="border-color: var(--text-muted); color: var(--text);">README.md (trimmed index)</div>
+      <br>
+      <div class="dep-node" style="border-color: #ffd24d; color: #ffd24d;">.claude/session-state/team-run.json (run-state)</div>
+      <span class="dep-arrow">read/write↔</span>
+      <div class="dep-node" style="border-color: var(--phase-planning); color: var(--phase-planning);">orchestrator (SKILL.md State Tracking)</div>
+      <span class="dep-arrow">+1 line→</span>
+      <div class="dep-node" style="border-color: var(--text-muted); color: var(--text);">hooks/pre-compact.sh</div>
+    </div>
+  </div>
+
+  <!-- Section 5: Risk / Defect Summary -->
+  <div class="section">
+    <h2>Defects Being Fixed (diagnosis, not a plan-review pass)</h2>
+    <div class="risk-item risk-critical">
+      <b>F1 — Counter amnesia.</b> retryCounts/globalCycles exist only in orchestrator context; wiped by compaction. Fixed by team-run.json persistence (T2, T6).
+      <div class="evidence">team-workflow/SKILL.md:211-218 · checkpoint/SKILL.md:12-43 (no counter fields)</div>
+    </div>
+    <div class="risk-item risk-critical">
+      <b>F3 — Divergent duplication of the classification guard.</b> The conjunctive gate + ambiguous-tie-breaker exist only in escalation.md; the agents that actually classify carry incomplete example-only lists. Fixed by deleting the local copies (T3, T4).
+      <div class="evidence">escalation.md:5-40 vs team-designer.md:130-143, team-tester.md:108-119</div>
+    </div>
+    <div class="risk-item risk-high">
+      <b>F2 — Counters unproducible.</b> Report format demands fields the emitting agents never had. Fixed by splitting Agent-emitted vs Orchestrator-filled fields (T1) — NOT by adding Global cycle to the agent side (a Designer cannot know orchestrator state).
+      <div class="evidence">escalation.md:69-82 vs team-designer.md:145-155, team-tester.md:121-131</div>
+    </div>
+    <div class="risk-item risk-high">
+      <b>F4 — Phase graph drawn 4×, executed 0×, already stale.</b> The mermaid has no Phase 4.5 node; the README ASCII does — empirical proof of drift. Fixed by one visual SSOT (mermaid, corrected) + one rules SSOT (table) + a trimmed README pointer.
+      <div class="evidence">SKILL.md:16-33 (no P4.5) vs README.md:34-56 (has P4.5) vs escalation.md:43-58 (deleted)</div>
+    </div>
+    <div class="risk-item risk-medium">
+      <b>F5 — Untyped phase handoffs. Deferred, not in scope.</b> Registered as a separate future task.
+      <div class="evidence">SKILL.md:168 vs agentic-testing/SKILL.md:77</div>
+    </div>
+    <div class="risk-item risk-medium">
+      <b>Option C — executable graph in the Workflow tool. Rejected for now.</b> A second executable copy of one control flow would double the exact SSOT problem F3 proves this repo already fails to manage. Re-evaluate only if this plan ships, Workflow becomes universally callable, and a real ultracode run shows a failure this plan didn't catch.
+    </div>
+  </div>
+
+  <div class="meta">
+    Generated by AI Harness Team Workflow (/team-brainstorm) · 2026-07-30
+  </div>
+</body>
+</html>
