@@ -13,23 +13,37 @@ Orchestrates a multi-agent team through 5 phases with escalation support.
 
 ## Orchestration Flow
 
+This is the **visual** rendering of the phase graph — its node set MUST equal `resources/escalation.md`'s transition table `From` ∪ `To` state set (that table is the **rules** SSOT; if the two disagree, the table wins).
+
 ```mermaid
 graph TD
   START[Task received] --> P1[Phase 1: Planning]
-  P1 --> P2{UI/UX changes?}
-  P2 -->|yes| P2A[Phase 2: UI/UX Review]
-  P2 -->|no| GATE
-  P2A --> GATE[Leader Approval Gate]
+  P1 -->|UI/UX trigger matched| P2[Phase 2: UI/UX Review]
+  P1 -->|no UI/UX trigger| GATE[Leader Approval Gate]
+  P2 -->|no conflict| GATE
+  P2 -->|conflict: Fundamental| P1
+  P2 -->|conflict, globalCycle cap| ABORT[Workflow Aborted]
   GATE -->|approve| P3[Phase 3: Implementation TDD]
-  GATE -->|reject| P1
-  P3 --> P4[Phase 4: Verification]
-  P4 --> P5[Phase 5: Final Security Review]
+  GATE -->|reject: Fundamental| P1
+  GATE -->|reject, globalCycle cap| ABORT
+  P3 -->|Simple Fix, retry| P3
+  P3 -->|Fundamental, or ambiguous| P1
+  P3 -->|Fundamental, globalCycle cap| ABORT
+  P3 -->|all Designers merged| P4[Phase 4: Verification]
+  P4 -->|Simple Fix, retry| P4
+  P4 -->|Fundamental: impl violates plan| P3
+  P4 -->|Fundamental: plan itself wrong| P1
+  P4 -->|plan-wrong, globalCycle cap| ABORT
+  P4 -.->|blocking external dep / user cancels| ABORT
+  P4 -->|PASS + user-facing flow changed| P4.5[Phase 4.5: Agentic Testing]
+  P4 -->|PASS, no user-facing change| P5[Phase 5: Final Security Review]
+  P4.5 -->|goals met, specs green| P5
+  P4.5 -->|unmet/distrusted: Fundamental| P3
+  P4.5 -->|unmet/distrusted: Fundamental| P1
   P5 -->|SHIP| DONE[Complete]
-  P5 -->|issues| ESC{Escalation}
-  P4 -->|fundamental| ESC
-  P3 -->|fundamental| ESC
-  P2A -->|conflict| ESC
-  ESC --> P1
+  P5 -->|Simple Fix: security, code-local| P3
+  P5 -->|Fundamental: security, architectural| P1
+  P5 -->|architectural, globalCycle cap| ABORT
 ```
 
 ## Pre-Flight: Project Profile Check
@@ -202,17 +216,14 @@ Agent(
 
 ## Escalation Handling
 
-On any escalation:
-1. Report to user: `⚠ ESCALATION: [source] → [target]. Reason: [reason]`
-2. Check retry counts (max 3 per phase, max 3 global cycles)
-3. If limits exceeded: ABORT and report to user
-4. Otherwise: re-enter target phase with escalation context
+On any escalation, route via `resources/escalation.md`'s transition table — it is the single source of truth for classification, target phase, counter effects, and abort thresholds. Do not re-derive these rules inline here.
 
 ## State Tracking
 
-The orchestrator maintains:
-- `currentPhase`: 1-5
-- `retryCounts`: { phase1: N, phase2: N, phase3: N, phase4: N, phase5: N }
-- `globalCycles`: N (times returned to Phase 1)
-- `designerAssignments`: [{ designer: N, files: [...], worktree: path }]
-- `escalationLog`: [{ from, to, reason, timestamp }]
+Run state is **persisted to disk**, not held in orchestrator memory — `.claude/session-state/team-run.json` (schema + storage rules: `checkpoint` skill's team-workflow integration table). This is a read/write contract:
+
+- **Read** the file on every phase entry. Never rely on in-context recall for `phase`, `retries`, or `globalCycle`.
+- **Write** the file on every transition (every phase entry/exit and every escalation), applying the counter effect from the matching `escalation.md` transition-table row.
+- **Abort decisions** are made by reading the file's current counters, never from conversation memory.
+- **Missing file at P1** (fresh run): create it — `runId`, `phase: "P1"`, all `retries` zeroed, `globalCycle: 1`.
+- **Foreign `runId` found on read, with `phase ∉ {DONE, ABORT}`**: STOP and surface to the user (a live parallel run or a crashed one) — do NOT silently overwrite. Per this repo's parallel-session safety rule (root `CLAUDE.md` → "Parallel sessions share the working tree — commit only what you changed, never revert what you didn't").
