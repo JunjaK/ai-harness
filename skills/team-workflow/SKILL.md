@@ -26,11 +26,11 @@ graph TD
   GATE -->|approve| P3[Phase 3: Implementation TDD]
   GATE -->|reject: Fundamental| P1
   GATE -->|reject, globalCycle cap| ABORT
-  P3 -->|Simple Fix, retry| P3
+  P3 -->|in-phase retry gate| P3
   P3 -->|Fundamental, or ambiguous| P1
   P3 -->|Fundamental, globalCycle cap| ABORT
   P3 -->|all Designers merged| P4[Phase 4: Verification]
-  P4 -->|Simple Fix, retry| P4
+  P4 -->|in-phase retry gate| P4
   P4 -->|Fundamental: impl violates plan| P3
   P4 -->|Fundamental: plan itself wrong| P1
   P4 -->|plan-wrong, globalCycle cap| ABORT
@@ -41,7 +41,7 @@ graph TD
   P4.5 -->|unmet/distrusted: Fundamental| P3
   P4.5 -->|unmet/distrusted: Fundamental| P1
   P5 -->|SHIP| DONE[Complete]
-  P5 -->|Simple Fix: security, code-local| P3
+  P5 -->|in-phase retry gate: security, code-local| P3
   P5 -->|Fundamental: security, architectural| P1
   P5 -->|architectural, globalCycle cap| ABORT
 ```
