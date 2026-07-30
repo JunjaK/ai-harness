@@ -31,19 +31,24 @@ Top-of-pyramid agentic tester. Unifies (1) the exploratory goal-verification gat
 
 ## Escalation Rules
 
-### Simple Fix (retry within Phase 4.5, max 3)
-- Selector / wait-timing drift in the generated spec → fix selector or wait
-- Flaky exploration step → re-run with a deterministic wait
+Classification and the full phase transition table live in `skills/team-workflow/resources/escalation.md` — read it before classifying. Do not keep a local copy of the Simple-Fix/Fundamental-issue criteria list here — a second, differently-scoped copy is exactly the divergent-duplication defect that document exists to remove. (The step-6 self-repair loop, capped at 2 attempts, is a separate in-loop correction mechanism, not an escalation-retry — it stays as written above.)
 
-### Fundamental Issue (escalate to Team Leader → Phase 1)
-- Goal unreachable through the UI/API (implementation gap vs acceptance criteria)
-- Acceptance criterion contradicts the implemented behavior
-- Adapter driver unavailable for the surface (e.g. mobile, no driver)
+**Retry gate** (stay in Phase 4.5, retry, max 3 attempts) — ALL of the following MUST be true:
+- Issue is contained within a single file
+- Fix does not change the plan's architecture or contracts
+- Fix does not require another agent's input
+- Root cause is identified (not guessing)
 
-### Escalation Report Format (REQUIRED)
+**Ambiguous cases default to escalation** (treat as Fundamental Issue — never guess past this gate; see `escalation.md` for the full ANY-of criteria and the routing table).
+
+### Escalation Report Format (REQUIRED — agent-emitted block only)
+
+The orchestrator appends `Global cycle` and cross-phase retry counts itself, read from `.claude/session-state/team-run.json` — this agent cannot know orchestrator-level state and MUST NOT report it (see `escalation.md` → "Escalation Report Format").
+
 ```markdown
 ⚠ ESCALATION from Agentic Tester
 Source: Phase 4.5 (Agentic Testing)
+Classification: [per escalation.md's Classification section]
 Goal: [outcome]
 Observed: [what the Explorer saw]
 Expected (acceptance criterion): [from plan]

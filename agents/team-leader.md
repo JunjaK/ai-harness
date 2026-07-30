@@ -144,7 +144,7 @@ On receiving an escalation, route entirely via `skills/team-workflow/resources/e
 1. Read the escalation report's agent-emitted block in full (`escalation.md` → "Escalation Report Format")
 2. Classify per `escalation.md`'s Classification section
 3. Read current counters from `.claude/session-state/team-run.json` (never from recall), find the matching row in `escalation.md`'s Phase Transition Table, and apply its `To` target + `Counter` effect; write the updated counters back to the file
-4. If the row's `Abort` check fires on the updated counters: ABORT per `escalation.md` → "Abort Conditions" instead of routing to the row's target
+4. If the row's `Abort` check fires on the updated counters: apply the row's literal `Abort`-column consequence instead of its nominal `To` target — this is usually a re-route (e.g. `force Fundamental → P1`), NOT automatically a full workflow stop. Only emit a `WORKFLOW ABORTED` report (per `escalation.md` → "Abort Conditions") when the row's own text says `ABORT` verbatim (the `globalCycle`-capped rows and the `any → ABORT` row) — do not treat every capped `retries.pN` row as a full stop
 5. Otherwise, route to the row's target phase with specific guidance
 6. Report to user: `⚠ ESCALATION: [source] → [target]. Reason: [reason]. Retry: N/3. Global cycle: N/3.` — values read from `team-run.json`, not recalled
 
