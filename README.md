@@ -56,7 +56,7 @@ Classification (simple fix vs fundamental issue), routing, retry/global-cycle ca
 | `/take-over` | Resume a handed-off work-stream from `_docs/handoff/` — hydrate the spec, verify state, graduate the handoff into its durable `_docs` home |
 | `/docs-sweep` | Reap stale `_docs/` and re-verify orphan-document invariants |
 | `/test-scenario-doc` | On-demand human QA checklist HTML (human acceptance layer) |
-| `/brain-connect` | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness, or relocate an existing one |
+| `/brain-connect` | Pair an optional personal **brain** SSOT (cross-machine persona, global `CLAUDE.md`, personal global skills, auto-memory, recommended-settings manifest) with the harness, or relocate an existing one |
 
 ## Installation (Plugin)
 
@@ -176,7 +176,7 @@ Skills that agents reference during their workflow phases:
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
 | `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) — fills the self-contained skeleton in `skills/plan-visualizer/resources/template.html` |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
-| `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT (cross-machine persona + auto-memory) with the harness — persona `@import` + memory junction + opt-in sync hooks; dependency-free, ships a generic connector template |
+| `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT with the harness — links global `CLAUDE.md`, `persona.md`, per-skill global skills, commands and auto-memory, plus a merged recommended-settings manifest and opt-in sync hooks; dependency-free, ships a generic connector template for both shells |
 
 Cross-cutting skills (any phase): `token-optimization` (model routing, effort levels, compaction — plus §6 **Subagent Orchestration**: the 3-cycle retrieval protocol and the six-element briefing contract), `continuous-learning`, `parallelization`, `submodule-worktree`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`.
 
@@ -251,11 +251,13 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
 
-**v1.21.0** — Graph-format orchestration: persisted run-state + one normative escalation transition table, replacing four divergent copies of the same rules/graph.
-- `escalation.md`'s ~20-row phase transition table (guard/classification/target/counter/abort) is now the sole rules SSOT; the ASCII path-tree and per-agent classification lists are gone.
-- `.claude/session-state/team-run.json` persists run state (`phase`/`retries`/`globalCycle`/etc.) to disk with a read-on-entry/write-on-transition contract, so retry/abort caps survive compaction and session boundaries.
-- `SKILL.md`'s mermaid node set is now provably identical to the transition table's, with Phase 4.5 finally present in both.
-- Escalation reports split into an agent-emitted block and an orchestrator-filled block (`Global cycle` is no longer something an agent reports).
+**v1.22.0** — `brain-connect` now covers the whole cross-machine surface: global `CLAUDE.md`, personal global skills, and a merged settings manifest — not just persona + memory.
+- Brain contract grew from 3 rows to 7: `CLAUDE.md`, per-skill `skills/<name>/`, and `settings.recommended.json` join persona, commands, memory and sync.
+- **One link per skill, never the whole `skills/` dir** — third-party tools install relative-symlinked skills there, and linking the directory hides them.
+- **`settings.json` is merged from an enumerated manifest, never synced whole** — machine-specific `hooks` / `statusLine` / `permissions.allow` and all `skip*` prompt flags stay local; `enabledPlugins` ships paired with `extraKnownMarketplaces` or the toggle is vacuous.
+- Persona import goes relative (`@persona.md` + a `persona.md` link beside `CLAUDE.md`), so no machine path survives in synced content.
+- Connector template completed for both shells: new `setup.sh`, `sync.sh`, `apply-settings.sh`/`.ps1`, example manifest; `relocate.ps1` reduced to its one remaining job (sync-hook paths) by delegating links to `setup.ps1`.
+- Verify section warns that `grep -r` traverses **zero** files once skills are symlinks — a false green; use `-R`.
 
 ## License
 

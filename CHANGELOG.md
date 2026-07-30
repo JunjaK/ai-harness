@@ -4,6 +4,28 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.22.0 — 2026-07-30
+
+`brain-connect` covered only persona + auto-memory, so anything else kept per-machine — a global `CLAUDE.md`, personal global skills — silently diverged: an edit on one machine simply never reached the other. The contract now spans the whole cross-machine surface.
+
+### Added
+- **Brain contract rows for `CLAUDE.md`, `skills/<name>/`, and `settings.recommended.json`** — 7 rows total (was 3), each still optional and skipped when the brain lacks it.
+- **`settings.recommended.json` + `apply-settings.sh` / `apply-settings.ps1`** — an enumerated allowlist of machine-neutral keys, merged recursively into the local `settings.json` (manifest wins). Keys absent from the manifest are left untouched, which is what preserves machine-specific `hooks`. The `.sh` uses `jq`; the `.ps1` merges natively (no jq dependency).
+- **`template/setup.sh` and `template/sync.sh`** — the macOS/Linux halves of the connector, which previously existed only as prose telling you to port the PowerShell yourself.
+- **Asymmetry as a trigger condition** — "fixed on one machine, missing on the other" now routes to this skill, since that asymmetry means the artifact lives outside the brain.
+
+### Changed
+- **One link per skill, never the whole `skills/` dir.** `~/.claude/skills/` is shared ground: other tools install skills there as relative symlinks into their own store, so linking the directory hides them and moving it into the brain breaks their targets and auto-commits another tool's files. Same reasoning as the namespaced `commands/brain` link.
+- **Persona import is relative** — `@persona.md` inside the brain's `CLAUDE.md`, plus a `persona.md` link beside the linked `CLAUDE.md`. No machine path survives in synced content, and the import resolves whichever base dir Claude Code uses for a symlinked memory file.
+- **`relocate.ps1` reduced to one job.** Links re-point themselves via `setup.ps1`'s `Link-Brain`, so relocation is now only about the sync-hook commands in `settings.json` — the one place a stale absolute brain path can survive, since hook commands are never synced.
+- **Directory vs file link is explicit.** Directories use junctions (no privilege); files (`CLAUDE.md`, `persona.md`) need symlinks, so Windows needs Developer Mode. Hardlinks are rejected outright: `git pull` replaces the file inode and would silently orphan one while it still looks valid.
+- **Verify section demands evidence.** Adds the `grep -r` trap — once skills are symlinks, `-r` traverses **zero** files and reports 0 hits for any pattern, a false green; use `-R` and assert the traversed-file count is non-zero. A clean `git status --porcelain` proves the push happened, not that the content arrived; only diffing the file on the other machine does.
+
+### Fixed
+- **`enabledPlugins` without `extraKnownMarketplaces` is vacuous** — toggling a plugin for a marketplace the machine never registered does nothing. The manifest guidance now ships the pair.
+- **`~/.claude.json` explicitly banned from any brain** — per-project state, MCP disable lists and `numStartups` are machine-specific startup bookkeeping that conflicts endlessly when shared.
+- **Pre-push audit made a MUST** — `sync push` is `git add -A` + auto-commit + auto-push, so content is published unreviewed; credential-scan it and confirm the remote is private *before* moving anything in.
+
 ## v1.21.0 — 2026-07-30
 
 Graph-format orchestration (LangGraph *technique*, not runtime): persisted run-state + one normative escalation transition table, replacing four divergent copies of the same rules/graph.

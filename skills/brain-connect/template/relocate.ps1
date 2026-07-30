@@ -1,9 +1,19 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-  Re-point ALL brain wiring (persona @import, memory junction, sync hooks) to THIS script's own
-  location. Run once from the brain's NEW location after moving/cloning it to a new path or remote.
-  Idempotent; backs up CLAUDE.md and settings.json; validates settings.json JSON.
+  Re-point ALL brain wiring to THIS script's own location. Run once from the brain's NEW location
+  after moving/cloning it to a new path or remote.
+.DESCRIPTION
+  Two parts:
+    1. Links (CLAUDE.md, persona.md, skills, commands, memory) — delegated to setup.ps1, whose
+       Link-Brain already deletes a link whose target has moved and recreates it at $PSScriptRoot.
+    2. The sync hooks in ~/.claude/settings.json — the ONLY place a stale absolute brain path can
+       survive, because hook commands are machine-specific and never synced. Re-pointed in place
+       (setup.ps1 -RegisterHooks would append a second hook rather than fix the old one).
+
+  A brain whose CLAUDE.md still uses an ABSOLUTE persona @import (the pre-link shape) needs that
+  line changed to the relative "@persona.md" once — after that no machine path lives in synced
+  content, and relocation is purely a link + hook operation.
 .EXAMPLE
   pwsh -File relocate.ps1 -ProjectPath "C:\Users\me\dev\app" -ProjectName "app"
 #>
@@ -11,50 +21,14 @@
 param([string]$ProjectPath = "$env:USERPROFILE\dev\app", [string]$ProjectName = 'app')
 $ErrorActionPreference = 'Stop'
 $new = $PSScriptRoot
-$newFwd = $new -replace '\\', '/'
 $claude = Join-Path $env:USERPROFILE '.claude'
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 Write-Host "relocate brain wiring -> $new"
 
-# 1) persona @import in ~/.claude/CLAUDE.md
-$md = Join-Path $claude 'CLAUDE.md'
-if (Test-Path $md) {
-    Copy-Item $md "$md.bak-$stamp"
-    $c = [IO.File]::ReadAllText($md)
-    $c2 = [regex]::Replace($c, '@[^\r\n]*?/persona\.md', "@$newFwd/persona.md")
-    if ($c2 -ne $c) { [IO.File]::WriteAllText($md, $c2); Write-Host "  + @import -> @$newFwd/persona.md" }
-    else { Write-Host "  = @import already correct (or absent)" }
-}
+# 1) all links
+& (Join-Path $new 'setup.ps1') -ProjectPath $ProjectPath -ProjectName $ProjectName
 
-# 2) memory junction
-$key = ($ProjectPath -replace '[:\\/]', '-')
-$link = Join-Path $claude "projects\$key\memory"
-$target = Join-Path $new "memory\$ProjectName"
-New-Item -ItemType Directory -Path $target -Force | Out-Null
-$cur = Get-Item $link -ErrorAction SilentlyContinue
-if ($cur -and $cur.LinkType -eq 'Junction') {
-    if ($cur.Target -ne $target) {
-        $cur.Delete()                                   # removes the junction link only, not target contents
-        New-Item -ItemType Junction -Path $link -Target $target | Out-Null
-        Write-Host "  + junction re-pointed -> $target"
-    }
-    else { Write-Host "  = junction already correct" }
-}
-elseif ($cur) {
-    Get-ChildItem $link -File -EA SilentlyContinue | ForEach-Object {
-        $d = Join-Path $target $_.Name; if (-not (Test-Path $d)) { Copy-Item $_.FullName $d }
-    }
-    Rename-Item $link "memory.pre-brain-$stamp"
-    New-Item -ItemType Junction -Path $link -Target $target | Out-Null
-    Write-Host "  + junction created (migrated) -> $target"
-}
-else {
-    New-Item -ItemType Directory -Path (Split-Path $link -Parent) -Force | Out-Null
-    New-Item -ItemType Junction -Path $link -Target $target | Out-Null
-    Write-Host "  + junction created -> $target"
-}
-
-# 3) sync hooks in ~/.claude/settings.json  (matches any prior brain location)
+# 2) sync hook paths in settings.json
 $s = Join-Path $claude 'settings.json'
 if (Test-Path $s) {
     Copy-Item $s "$s.bak-$stamp"
@@ -63,7 +37,7 @@ if (Test-Path $s) {
     foreach ($evt in 'SessionStart', 'SessionEnd') {
         foreach ($m in @($j.hooks.$evt)) {
             foreach ($h in @($m.hooks)) {
-                if ($h.command -match '[\\/]sync\.ps1') {
+                if ($h.command -match 'sync\.ps1') {
                     $repl = [regex]::Replace($h.command, '(?i)[A-Za-z]:[\\/][^"]*?[\\/]sync\.ps1', ($new + '\sync.ps1'))
                     if ($repl -ne $h.command) { $h.command = $repl; $changed = $true }
                 }
@@ -73,8 +47,8 @@ if (Test-Path $s) {
     if ($changed) {
         $j | ConvertTo-Json -Depth 100 | Set-Content $s -Encoding UTF8
         try { Get-Content $s -Raw | ConvertFrom-Json | Out-Null; Write-Host "  + sync hooks re-pointed [backup: settings.json.bak-$stamp]" }
-        catch { Copy-Item "$s.bak-$stamp" $s -Force; Write-Host "  ! invalid JSON -> restored backup" }
+        catch { Copy-Item "$s.bak-$stamp" $s -Force; Write-Host '  ! invalid JSON -> restored backup' }
     }
-    else { Write-Host "  = sync hooks already correct (or none)" }
+    else { Write-Host '  = sync hooks already correct (or none)' }
 }
-Write-Host "done. old location is now unreferenced (safe to delete)."
+Write-Host 'done. old location is now unreferenced (safe to delete).'

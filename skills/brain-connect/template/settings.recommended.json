@@ -1,0 +1,25 @@
+{
+  "permissions": {
+    "defaultMode": "auto"
+  },
+  "model": "opus[1m]",
+  "effortLevel": "high",
+  "skillOverrides": {
+    "some-skill-you-keep-off": "off"
+  },
+  "enabledPlugins": {
+    "superpowers@claude-plugins-official": true,
+    "context7@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "example-marketplace": {
+      "source": {
+        "source": "github",
+        "repo": "owner/repo"
+      },
+      "autoUpdate": true
+    }
+  },
+  "theme": "dark",
+  "tui": "fullscreen"
+}

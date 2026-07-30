@@ -1,13 +1,27 @@
 #!/usr/bin/env pwsh
 <#
 .SYNOPSIS
-  Wire this machine to a personal "brain" repo: persona @-import + memory junction + (opt) auto-sync hooks.
+  Wire this machine to a personal "brain" repo: global CLAUDE.md + persona + skills + commands +
+  memory links, and (opt) auto-sync hooks.
 .DESCRIPTION
-  Generic connector — copy into your brain repo and run from there (it uses its own location, $PSScriptRoot).
-  Idempotent. Run once per machine. Computes THIS machine's project key automatically,
-  so work/home (different usernames/paths) each map their own key -> the same shared brain.
-  The brain may expose: persona.md (optional), memory/<ProjectName>/ (optional),
-  sync.ps1 (optional, required only for -RegisterHooks). See ../SKILL.md for the brain contract.
+  Generic connector — copy into your brain repo and run from there (it uses its own location,
+  $PSScriptRoot). Idempotent. Computes THIS machine's project key automatically, so work/home
+  (different usernames/paths) each map their own key -> the same shared brain.
+
+  Every layer is OPTIONAL; a layer the brain does not provide is skipped:
+    <brain>\CLAUDE.md       -> ~\.claude\CLAUDE.md
+    <brain>\persona.md      -> ~\.claude\persona.md
+    <brain>\skills\<name>\  -> ~\.claude\skills\<name>          (one link per skill)
+    <brain>\commands\       -> ~\.claude\commands\brain         (namespaced)
+    <brain>\memory\<name>\  -> ~\.claude\projects\<key>\memory
+    <brain>\sync.ps1        -> SessionStart/SessionEnd hooks    (needs -RegisterHooks)
+  See ..\SKILL.md for the brain contract.
+
+  File links are SymbolicLinks, which on Windows require Developer Mode (Settings > System >
+  For developers) or one elevated run. Hardlinks are deliberately NOT used: `git pull` replaces
+  the file inode, which would silently orphan a hardlink.
+
+  Recommended settings.json keys are NOT applied here — run apply-settings.ps1 for that.
 .EXAMPLE
   pwsh -File setup.ps1 -ProjectPath "C:\Users\me\dev\app" -ProjectName "app" -RegisterHooks
 #>
@@ -23,50 +37,67 @@ $claude = Join-Path $env:USERPROFILE '.claude'
 $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 Write-Host "brain setup  (brain=$brain)"
 
-# 1) Persona @-import into ~/.claude/CLAUDE.md  (skip if the brain has no persona.md)
-$claudeMd = Join-Path $claude 'CLAUDE.md'
-$personaPath = Join-Path $brain 'persona.md'
-if (Test-Path $personaPath) {
-    $importLine = "@$($brain -replace '\\','/')/persona.md"
-    if (-not (Test-Path $claudeMd)) { New-Item -ItemType File -Path $claudeMd -Force | Out-Null }
-    $md = (Get-Content $claudeMd -Raw -ErrorAction SilentlyContinue)
-    if ($null -eq $md -or $md -notmatch [regex]::Escape($importLine)) {
-        Add-Content -Path $claudeMd -Value "`n$importLine`n"
-        Write-Host "  + persona import added to CLAUDE.md"
+# Idempotent junction (directories) / symlink (files). Moves any real item aside, never deletes it.
+function Link-Brain($src, $dst) {
+    $type = if (Test-Path $src -PathType Container) { 'Junction' } else { 'SymbolicLink' }
+    $cur = Get-Item $dst -Force -ErrorAction SilentlyContinue
+    if ($cur -and $cur.LinkType) {
+        if ($cur.Target -eq $src) { Write-Host "  = $dst"; return }
+        $cur.Delete()   # removes the link only, never the target's contents
     }
-    else { Write-Host "  = persona import already present" }
+    elseif ($cur) {
+        Rename-Item $dst "$($cur.Name).pre-brain-$stamp"
+        Write-Host "  ~ moved aside -> $($cur.Name).pre-brain-$stamp"
+    }
+    New-Item -ItemType Directory -Path (Split-Path $dst -Parent) -Force | Out-Null
+    try { New-Item -ItemType $type -Path $dst -Target $src -ErrorAction Stop | Out-Null }
+    catch {
+        throw ("cannot create $type at $dst -- file symlinks need Developer Mode " +
+            "(Settings > System > For developers) or one elevated run. Original: $_")
+    }
+    Write-Host "  + $dst -> $src"
 }
-else { Write-Host "  - no persona.md in brain -> skipping @import" }
 
-# 2) Memory junction (per-environment mapping: local key -> shared repo)
+# 1) Global rules + persona. If the brain ships BOTH, keep the import inside its CLAUDE.md
+#    RELATIVE ("@persona.md") and link persona.md next to CLAUDE.md: the relative form then
+#    resolves under either base dir Claude Code might use, and carries no machine path.
+if (Test-Path (Join-Path $brain 'CLAUDE.md')) { Link-Brain (Join-Path $brain 'CLAUDE.md') (Join-Path $claude 'CLAUDE.md') }
+else { Write-Host '  - no CLAUDE.md in brain -> skipped' }
+if (Test-Path (Join-Path $brain 'persona.md')) { Link-Brain (Join-Path $brain 'persona.md') (Join-Path $claude 'persona.md') }
+else { Write-Host '  - no persona.md in brain -> skipped' }
+
+# 2) Brain-owned global skills -- ONE LINK PER SKILL, never the whole skills\ dir: third-party
+#    skills live in ~\.claude\skills too, and linking the directory itself would hide them.
+if (Test-Path (Join-Path $brain 'skills')) {
+    Get-ChildItem (Join-Path $brain 'skills') -Directory | ForEach-Object {
+        Link-Brain $_.FullName (Join-Path $claude "skills\$($_.Name)")
+    }
+}
+else { Write-Host '  - no skills\ in brain -> skipped' }
+
+# 2b) Brain-owned commands, namespaced so it never clobbers user-level commands
+$cmdSrc = Join-Path $brain 'commands'
+if (Test-Path $cmdSrc) { Link-Brain $cmdSrc (Join-Path $claude 'commands\brain') }
+
+# 3) Per-project auto-memory. Claude Code keys per-project state by absolute path, so each machine
+#    has a different key -- the junction IS the per-machine mapping onto one shared dir.
 $key = ($ProjectPath -replace '[:\\/]', '-')
 $memLink = Join-Path $claude "projects\$key\memory"
 $memTarget = Join-Path $brain "memory\$ProjectName"
 New-Item -ItemType Directory -Path $memTarget -Force | Out-Null
-New-Item -ItemType Directory -Path (Split-Path $memLink -Parent) -Force | Out-Null
-
-$existing = Get-Item $memLink -ErrorAction SilentlyContinue
-if ($existing -and $existing.LinkType -eq 'Junction') {
-    Write-Host "  = memory already junctioned ($key)"
-}
-elseif ($existing) {
+$memCur = Get-Item $memLink -Force -ErrorAction SilentlyContinue
+if ($memCur -and -not $memCur.LinkType) {
     Get-ChildItem $memLink -File -ErrorAction SilentlyContinue | ForEach-Object {
         $dst = Join-Path $memTarget $_.Name
-        if (-not (Test-Path $dst)) { Copy-Item $_.FullName $dst }
+        if (-not (Test-Path $dst)) { Copy-Item $_.FullName $dst; Write-Host "  ~ migrated memory file: $($_.Name)" }
     }
-    Rename-Item $memLink "memory.pre-brain-$stamp"
-    New-Item -ItemType Junction -Path $memLink -Target $memTarget | Out-Null
-    Write-Host "  + migrated + junctioned memory ($key)  [backup: memory.pre-brain-$stamp]"
 }
-else {
-    New-Item -ItemType Junction -Path $memLink -Target $memTarget | Out-Null
-    Write-Host "  + junctioned memory ($key)"
-}
+Link-Brain $memTarget $memLink
 
-# 3) Auto-sync hooks (opt-in; backs up + validates settings.json). Requires brain/sync.ps1.
+# 4) Auto-sync hooks (opt-in; backs up + validates settings.json). Requires brain\sync.ps1.
 if ($RegisterHooks) {
     if (-not (Test-Path (Join-Path $brain 'sync.ps1'))) {
-        Write-Host "  ! -RegisterHooks given but brain has no sync.ps1 -> skipping hooks"
+        Write-Host '  ! -RegisterHooks given but brain has no sync.ps1 -> skipping hooks'
     }
     else {
         $settings = Join-Path $claude 'settings.json'
@@ -94,8 +125,8 @@ if ($RegisterHooks) {
         }
         catch {
             Copy-Item "$settings.bak-$stamp" $settings -Force
-            Write-Host "  ! hook registration produced invalid JSON -> restored backup"
+            Write-Host '  ! hook registration produced invalid JSON -> restored backup'
         }
     }
 }
-Write-Host 'done.'
+Write-Host 'done.  next: pwsh -File apply-settings.ps1   (recommended settings.json keys)'
