@@ -45,16 +45,19 @@ Persist work state for cross-session recovery. Checkpoints capture everything ne
 ## Storage
 
 ```
-.claude/session-state/checkpoints/
-├── latest.md                          # Always the most recent (overwritten)
-├── checkpoint-20260416-1430.md        # Timestamped archive
-├── checkpoint-20260416-1100.md        # Older checkpoint
-└── ...
+.claude/session-state/
+├── team-run.json                      # Orchestrator run-state record (see below)
+└── checkpoints/
+    ├── latest.md                      # Always the most recent (overwritten)
+    ├── checkpoint-20260416-1430.md    # Timestamped archive
+    ├── checkpoint-20260416-1100.md    # Older checkpoint
+    └── ...
 ```
 
 - `latest.md` is always overwritten with the newest checkpoint
 - Timestamped copies are kept for history (max 10, oldest auto-cleaned)
 - Checkpoints from team workflow phases are prefixed: `phase1-baseline.md`, `phase3-worktree-auth.md`
+- `team-run.json` lives beside `checkpoints/`, not inside it. It is **orchestrator-only** (Designers/Testers never write it) and **primary-tree-only** (linked worktrees have their own gitignored `.claude/` and never hold the live record). It is **exempt from `session-stop.sh` rotation** — that hook only touches `current.md`/`last-session.md`/`archive/`; a run's state must survive a session Stop event mid-workflow, not get archived away with it.
 
 ## Save Checkpoint
 
@@ -127,6 +130,7 @@ Options:
 | All worktrees merged | `phase3-integration.md` | Merged state + any conflicts resolved |
 | Verification pass (Phase 4) | `phase4-verified.md` | Full verification results |
 | Before PR (Phase 5) | `phase5-final-gate.md` | Security review + ship decision |
+| **Every** phase transition | `.claude/session-state/team-run.json` (not a checkpoint file — a live record) | `runId`, `phase`, `retries`, `globalCycle`, `escalations[]`, `designerAssignments[]` — written on **every** transition, not just per-phase-completion. Schema + read/write contract: `team-workflow/SKILL.md` → "State Tracking"; routing rules that produce these writes: `team-workflow/resources/escalation.md` |
 
 ## Quick Reference
 
