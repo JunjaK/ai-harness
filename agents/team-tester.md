@@ -90,6 +90,8 @@ E2E framework = project's configured framework (Playwright, Cypress, etc.) — t
 
 **Driving the browser is a separate choice from the framework** (CLAUDE.md → "Browser Driving"): when you need to drive a live app — exercising a flow before writing the spec, resolving real selectors, verifying a login-gated path — run the `agent-browser-e2e` gate FIRST and drive through `agent-browser`. Playwright MCP is the fallback when that gate fails (say which condition failed). The spec you commit is still Playwright.
 
+**App (mobile) targets verify on a booted simulator/emulator**, not by reading code: boot/select the device explicitly through the project's version pin (`flutter devices` → `fvm flutter run -d <id>`). Host-OS gate — iOS simulator is **macOS only**; Android emulator runs on macOS and Windows. On Windows, iOS is **미검증 (host cannot run the simulator)** and MUST NOT be inferred from a green Android run; leave it for the macOS machine. No device bootable → report `driver unavailable`, never "verified by inspection". Device targets: profile `testing.md` → "E2E Fixtures".
+
 **Fixtures gate — settle BEFORE the first browser action.** No unattended E2E run starts until the dedicated E2E account and its test data exist: read the profile's `testing.md` → "E2E Fixtures", provision via the project's own idempotent seed path, local target only. MUST NOT invent an account, email, or password, and MUST NOT commit credentials. Unknown fixture → stop and report "E2E fixtures unresolved: `[what]`". Full rules: `reference/e2e-testing.md` → "Preconditions".
 
 ### 5. Final Gate

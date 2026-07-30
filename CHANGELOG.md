@@ -4,6 +4,19 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.24.0 — 2026-07-30
+
+App UI work had no stated verification surface, so "looks right in the code" could pass as done — and nothing recorded that half of it is impossible to check on a Windows host.
+
+### Added
+- **Mobile verification runs on a booted simulator/emulator, with an explicit host-OS gate.** App UI changes are verified on a real device surface, never by inspection: boot/select the device explicitly through the project's version pin (`flutter devices` → `fvm flutter run -d <id>` where `.fvmrc` exists), and name the device in the report.
+  - **macOS** — iOS Simulator (Xcode) **and** Android Emulator.
+  - **Windows / Linux** — Android Emulator only; the iOS Simulator requires Xcode, which is macOS-only.
+  - On Windows an iOS result is therefore **structurally unverifiable**: report it as `미검증 (iOS: host cannot run the simulator)` and leave it for the macOS machine. MUST NOT infer iOS behavior from a green Android run — permissions, safe-area/notch insets, keyboard behavior, deep links, sign-in providers, file pickers, and push are exactly where that inference breaks.
+  - No device bootable → `driver unavailable` and stop; falling back to static reasoning and calling it verified is the failure this gate prevents.
+  - Wired into the surfaces that ship: `agentic-testing` (Phase 4.5 mobile adapter row + a dedicated section), `team-tester` (Phase 4), and `/debug` Phase 4.
+- **`testing.md` gained device rows** — iOS simulator / Android AVD targets, the launch command and its version pin, and the host-OS gate — so each app project records its own device targets at `/team-init` time.
+
 ## v1.23.0 — 2026-07-30
 
 A `/doctor` audit of 345 session transcripts found three things this harness asserted that the data does not support: `TeamCreate` was **never called once** while `team-workflow` ran 25 times; six "skills" were cited 60 times without a single dispatch; and `agent-browser` was used only when explicitly named while every other browser task drifted to Playwright MCP or `claude-in-chrome`. All three were caused by this repo's own text, and all three are now aligned with what actually runs.

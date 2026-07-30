@@ -24,11 +24,24 @@ Resolve the adapter from `testing.md`'s "Agentic Testing Adapter" (derived from 
 |---|---|---|---|---|
 | **web/TS (base)** | `agent-browser` (default — run the `agent-browser-e2e` gate first); Playwright MCP (`mcp__plugin_playwright_playwright__*`) when the gate fails | `.spec.ts` ← `reference/e2e-testing.md` | Playwright MCP = one shared browser → **serialize Explorer**; agent-browser concurrency per its own core guide | ready |
 | **Spring/Kotlin (backend API)** | HTTP calls | `WebTestClient`/`@SpringBootTest` + Testcontainers ← `springboot-tdd`·`kotlin-testing` | stateless → **true parallel** (per-worker DB isolation) | ready |
-| **Flutter/Dart (mobile UI)** | maestro · Patrol · mobile MCP | `integration_test` · maestro yaml | single device → **serialize per device** | **driver-gated** |
+| **Flutter/Dart (mobile UI)** | maestro · Patrol · mobile MCP — **on a booted simulator/emulator** (see gate below) | `integration_test` · maestro yaml | single device → **serialize per device** | **driver-gated** |
 | Cross-journey (Flutter→Spring) | UI drive + backend assert | both layers | depends on above | later |
 
 - **Driver unavailable** (e.g. mobile, no maestro/Patrol/MCP): do NOT run the goal — report `driver unavailable` (no silent skip).
 - CLI execution model is a non-goal (article reliability). MCP-first.
+
+### Mobile: simulator/emulator is the verification surface, and the host OS gates it
+
+App UI work is verified on a **booted simulator/emulator**, never by reading code and asserting it "should work". Boot the device (or confirm one is already running) and select it explicitly before the first goal — for Flutter that means `flutter devices` → `flutter run -d <device-id>`, through the project's version pin (`fvm flutter …` when `.fvmrc` exists).
+
+| Host OS | iOS | Android |
+|---|---|---|
+| **macOS** | ✅ iOS Simulator (Xcode) | ✅ Android Emulator |
+| **Windows / Linux** | ❌ **impossible** — the iOS Simulator requires Xcode, which is macOS-only | ✅ Android Emulator |
+
+**On Windows, an iOS claim is structurally unverifiable.** MUST NOT infer iOS behavior from a green Android run, and MUST NOT report iOS as `됐다`: report it as **미검증 (iOS: host cannot run the simulator)** and leave it for the macOS machine. Platform-divergent surfaces — permissions, safe-area/notch insets, keyboard behavior, deep links, sign-in providers, file pickers, push — are exactly where that inference breaks.
+
+Per-project device targets live in the profile's `testing.md` → "E2E Fixtures". No device bootable → report `driver unavailable` and stop; do not fall back to static reasoning and call it verified.
 
 ## Goal derivation
 

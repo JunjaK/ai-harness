@@ -264,14 +264,11 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
 
-**v1.23.0** — a `/doctor` audit of 345 transcripts killed three claims the data never supported.
-- **`TeamCreate` dependency removed entirely** — never called once, while `/team-run` shipped 18 runs through `Agent()`. No experimental flag is required anymore, and the greenfield scaffolder stops writing one into new projects.
-- **Phase 1 cross-review = two parallel objection passes** (each architect gets the counterpart plan, returns objections only; Leader mediates). Ultracode runs them as a `parallel()` judge panel.
-- **27 → 21 skills**: `coding-standards`, `tdd-workflow`, `e2e-testing`, `verification-loop`, `plan-review`, `token-optimization` become `reference/*.md` documents — zero dispatches ever, every reference was a §-citation, so ~48k chars of body was authored and never loaded.
-- **`agent-browser` is the default browser driver** — it had described itself as "on-demand, NOT phase-wired", so agents correctly used it only when named while browser work drifted to Playwright MCP or the previously-unranked `claude-in-chrome`. Precedence now rides the skill **description** (which ships to every project, unlike this repo's `CLAUDE.md`): agent-browser → Playwright MCP on gate failure → `claude-in-chrome` for the user's own Chrome profile only. Playwright still owns the committed `.spec.ts` suite.
-- **Unattended E2E must have its account + test data seeded first** — project's own idempotent seed path, verified-local target, no invented credentials, prd/stg human-executed. Unresolved fixture stops the run instead of reporting missing-data failures as feature failures. New `testing.md` → "E2E Fixtures" profile block captures those values at `/team-init` time.
-- **`/debug` Phase 4 inlines its gate** rather than naming skills nobody loaded.
-- **`unknown` is a last resort, not the fix for `any`** — resolves rules-vs-global instructions that contradicted each other on every `.ts` read.
+**v1.24.0** — app UI work now names its verification surface, and the host OS gates it.
+- **Mobile verification runs on a booted simulator/emulator**, never by code inspection — boot/select the device explicitly through the project's version pin (`fvm flutter run -d <id>`) and name it in the report.
+- **macOS runs iOS + Android; Windows/Linux run Android only** (the iOS Simulator needs Xcode). On Windows an iOS result is `미검증`, never inferred from a green Android run — permissions, safe-area insets, keyboard, deep links, sign-in, file pickers and push are where that inference breaks.
+- No device bootable → `driver unavailable` and stop, rather than reasoning statically and calling it verified.
+- New `testing.md` device rows record each app project's simulator/AVD targets, launch command, and version pin at `/team-init` time.
 
 ## License
 

@@ -255,6 +255,9 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 - Target env: <local only — name the local DB/port> · prd/stg = human-executed, never automated
 - Shared-resource caution: <e.g. one local DB shared by several app instances → coordinate before seeding>
 - Teardown: <idempotent re-run | explicit cleanup command | none needed>
+- Device targets (app projects only): <iOS simulator name/version | Android emulator AVD name | N/A — web>
+- Launch command: <e.g. `fvm flutter run -d <device-id>`> · version pin: <`.fvmrc` / `mise.toml` / none>
+- Host-OS gate: iOS simulator = **macOS only**; Android emulator = macOS + Windows. On Windows an iOS result is 미검증, never assumed from Android
 
 > If any row above is unknown or NONE FOUND, record it as `[FILL: …]` — an agent MUST NOT invent an
 > account, password, or seed command. See `reference/e2e-testing.md` → "Preconditions".
