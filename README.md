@@ -272,11 +272,9 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
 
-**v1.19.0** — Operational discipline from cross-machine usage insights:
-- Windows `Bash`→PowerShell fallback + no GUI-triggering CLI probes.
-- Server/background-process vacuity guard — a "running" claim re-verifies process/port liveness at claim time.
-- Parallel-session commit safety — commit only your own changes, never revert another session's uncommitted work.
-- Destructive ops act only on the exact target requested (no whole-datadir / system-DB wipes).
+**v1.20.0** — Test scope defaults to changed-files-only:
+- Phase 4 test gates (`verification-loop`, `team-tester`) default to `vitest run --changed` / `playwright test --only-changed` instead of the full suite.
+- Full suite runs only when the user explicitly requests it in the current request; `team-workflow` wires the pre-task base ref into the Tester prompt for the default scoped run.
 
 ## License
 

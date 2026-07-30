@@ -162,10 +162,12 @@ Update `_docs/active/processing/<created>/<created>-<topic>-plan.md` with implem
 
 > **Ultracode**: run one Tester per Designer as a Workflow `parallel()` fan-out. Standard: the `Agent()` call below.
 
+Testing is scoped to this task's changes by default (see `verification-loop` §Phase 4 and `team-tester` Steps 1/5) — pass the base ref (the pre-task HEAD the worktrees branched from, per Phase 3 Step 3) so Tester can compute the diff. Only add the full-run line when the user's current request explicitly asked for a full/total test run; omit it entirely otherwise so Tester defaults to scoped.
+
 ```
 Agent(
   subagent_type="team-tester",
-  prompt="Implementation reports:\n[reports]\n\nPlan:\n[plan]\n\nVerify all tests pass.",
+  prompt="Implementation reports:\n[reports]\n\nPlan:\n[plan]\n\nBase ref (scope tests to changes since this commit): [base-ref]\n\n[User explicitly requested a FULL/total test run this time — run the complete suite. Omit this line entirely for the default scoped run.]\n\nVerify all tests pass.",
   mode="bypassPermissions"
 )
 ```

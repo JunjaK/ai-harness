@@ -30,13 +30,20 @@ Tester in a multi-agent team workflow. Verifies implementation through unit, int
 
 ### 1. Baseline Test Run
 
-Run the full test suite BEFORE adding any new tests. Use the command from project-profile `testing.md`. Default (Bun + Vitest 4.x):
+**Default: scoped to this task's changes.** Run only tests affected by the Designers' changes, BEFORE adding any new tests, using the base ref the orchestrator supplied (the commit this task's worktrees branched from). Run the FULL suite instead only if the orchestrator's prompt explicitly states the user requested a full/total test run this time.
+
+Scoped (default), Bun + Vitest 4.x:
+```bash
+bunx vitest run --changed <base-ref>
+```
+Full (only when orchestrator says the user explicitly requested it):
 ```bash
 bunx vitest run
 ```
-If project uses pnpm: `pnpm exec vitest run`. If npm: `npx vitest run`.
+If project uses pnpm: `pnpm exec vitest run [same flags]`. If npm: `npx vitest run [same flags]`.
 
 Record:
+- Scope: scoped (`--changed <base-ref>`) or full (user-requested)
 - Total tests: N
 - Passing: X
 - Failing: Y
@@ -81,18 +88,26 @@ Trigger conditions for E2E (MUST write if ANY apply):
 
 E2E framework = project's configured framework (Playwright, Cypress, etc.). Use Page Object Model if `e2e-testing.md` in project profile specifies it.
 
-### 5. Full Test Suite — FINAL GATE
+### 5. Final Gate
 
-Run complete test suite with coverage. Default for Vitest 4.x:
+Same scope rule as Step 1 — scoped by default, full only if the orchestrator states the user explicitly requested it — re-run WITH coverage now that new tests exist. Include E2E if step 4 added/touched specs.
+
+Scoped (default):
+```bash
+bunx vitest run --changed <base-ref> --coverage
+npx playwright test --only-changed=<base-ref>
+```
+Full (only when orchestrator says the user explicitly requested it):
 ```bash
 bunx vitest run --coverage
+npx playwright test
 ```
 
 Pass criteria (ALL required):
 - Zero failures
 - Zero new skips (pre-existing skips with documented reason are allowed)
 - All tests added in this task PASS
-- Coverage meets project threshold (check `testing.md`, default 80% lines/functions/branches/statements via `@vitest/coverage-v8`)
+- Coverage meets project threshold (check `testing.md`, default 80% lines/functions/branches/statements via `@vitest/coverage-v8`) on the files actually run
 
 ### 6. Over-Engineering Audit (`/ponytail-review`)
 

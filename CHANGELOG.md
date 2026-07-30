@@ -4,6 +4,11 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.20.0 — 2026-07-30
+
+### Changed
+- **Test scope default flips to scoped-by-changes** (`verification-loop`, `team-tester`, `team-workflow`): Phase 4 test gates (baseline + final gate) now default to `vitest run --changed` / `playwright test --only-changed` instead of the full suite — on a large repo, running everything on every verification pass was the dominant CPU cost. The full suite runs only when the user explicitly asks for it in the current request ("run the full suite", "전체 테스트"); team-workflow's orchestrator wires the pre-task base ref into the Tester prompt so the scoped diff is computable, and omits the full-run line by default so Tester falls back to scoped.
+
 ## v1.19.0 — 2026-07-23
 
 ### Added — Operational Discipline (from cross-machine usage insights)

@@ -51,12 +51,24 @@ Run the project's authoritative linter (from project-profile; `bunx eslint .` / 
 **Common failures**: Unused imports, formatting issues, rule violations
 
 ### Phase 4: Tests
-Run the full test suite. Use command from project-profile `testing.md`. Default for Vitest 4.x:
+**Default: scoped to this task's changes, not the full suite.** On a large repo, an unscoped run on every verification pass is the dominant CPU/time cost. Vitest and Playwright both detect affected tests via git + the import graph natively — use that instead of a custom scope calculation. Run the full suite only when the user explicitly asks for it in the current request (e.g. "run the full suite", "전체 테스트 돌려줘", "total test").
+
+Use command from project-profile `testing.md`. Default for Vitest 4.x / Playwright, scoped:
+```bash
+bunx vitest run --changed --coverage 2>&1
+npx playwright test --only-changed 2>&1
+```
+`--changed`/`--only-changed` compare against uncommitted changes by default; pass an explicit ref (`--changed origin/main`, `--only-changed=origin/main`) when the change is already fully committed (e.g. reviewing a finished branch).
+
+User explicitly requested a full run → drop the flag:
 ```bash
 bunx vitest run --coverage 2>&1
+npx playwright test 2>&1
 ```
-**Pass**: All tests pass, coverage ≥ 80% (lines, functions, branches, statements)
+
+**Pass**: All tests run (scoped or full, per above) pass, coverage ≥ 80% (lines, functions, branches, statements) on the files actually run
 **Common failures**: Broken assertions, missing mocks, flaky tests
+**Caveat**: both flags are heuristics over the import graph (static imports only; `--changed` needs `forceRerunTriggers` for config-driven reruns, `--only-changed` won't see dynamically-loaded fixtures). Not a substitute for an occasional full run — that's what the explicit-request escape hatch is for, not an automatic periodic one.
 
 ### Phase 5: Security Scan
 Check changed files for:
