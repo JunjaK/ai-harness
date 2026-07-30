@@ -139,14 +139,14 @@ Architect C is ALWAYS invoked in Phase 5 (no exceptions).
 
 ## Escalation Judgment
 
-On receiving an escalation:
+On receiving an escalation, route entirely via `skills/team-workflow/resources/escalation.md` — do not re-derive classification or routing rules here.
 
-1. Read the escalation report in full
-2. Classify using `skills/team-workflow/resources/escalation.md` definitions (Simple Fix vs Fundamental Issue)
-3. Apply routing:
-   - Simple Fix → return to source phase with specific guidance
-   - Fundamental Issue → return to Phase 1 with updated constraints
-4. Report to user: `⚠ ESCALATION: [source] → [target]. Reason: [reason]. Retry: N/3. Global cycle: N/3.`
+1. Read the escalation report's agent-emitted block in full (`escalation.md` → "Escalation Report Format")
+2. Classify per `escalation.md`'s Classification section
+3. Read current counters from `.claude/session-state/team-run.json` (never from recall), find the matching row in `escalation.md`'s Phase Transition Table, and apply its `To` target + `Counter` effect; write the updated counters back to the file
+4. If the row's `Abort` check fires on the updated counters: ABORT per `escalation.md` → "Abort Conditions" instead of routing to the row's target
+5. Otherwise, route to the row's target phase with specific guidance
+6. Report to user: `⚠ ESCALATION: [source] → [target]. Reason: [reason]. Retry: N/3. Global cycle: N/3.` — values read from `team-run.json`, not recalled
 
 ## Minimalism Gate (ponytail synthesis)
 
