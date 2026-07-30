@@ -60,7 +60,7 @@ Before starting any phase, verify `.claude/project-profile/index.md` exists.
 
 selectMode: **ULTRACODE** iff `workflow()` is callable AND ultracode is active (runtime signal or `CLAUDE_HARNESS_ULTRACODE=1`) AND the step has 2+ independent units; else **STANDARD**. Record the mode in the plan's Orchestration field. Workflow unavailable → STANDARD (hard fallback). See CLAUDE.md "Ultracode Orchestration" for fan-out points and guards.
 
-- **STANDARD**: spawn agents via `Agent()` / `TeamCreate` (the steps below, as written).
+- **STANDARD**: spawn agents via `Agent()` (the steps below, as written).
 - **ULTRACODE**: run the named fan-outs (Phase 1 architects, Phase 3 designers+merge, Phase 4 testers, Phase 4.5 agentic pipeline) via the Workflow tool — `parallel()` / `pipeline()`. Keep the max-5-worktree cap + types→backend→frontend→tests merge order; serialize the shared Playwright MCP browser.
 
 ## Phase 1: Planning
@@ -75,7 +75,7 @@ For `/team-run` mode: Include instruction "Make all decisions autonomously."
 
 ### Step 2: Spawn Architects A + B (parallel)
 
-> **Ultracode**: run FE/BE as a Workflow `parallel()` fan-out (cross-review in Step 3 stays `TeamCreate`). Standard: the `Agent()` calls below.
+> **Ultracode**: run FE/BE as a Workflow `parallel()` fan-out, and Step 3's two objection passes as a second `parallel()` barrier before the Leader synthesizes (the judge-panel pattern). Standard: the `Agent()` calls below.
 
 After Leader produces rough plan, spawn both architects in parallel:
 
@@ -84,10 +84,18 @@ Agent(subagent_type="team-architect-fe", prompt="Leader Plan:\n[plan]\n\nCreate 
 Agent(subagent_type="team-architect-be", prompt="Leader Plan:\n[plan]\n\nCreate detailed backend plan.")
 ```
 
-### Step 3: Cross-Review
+### Step 3: Cross-Review (two objection passes, no dialog primitive)
 
-Use TeamCreate to create a dialog between Leader + Arch A + Arch B.
-Each reviews the other's plan. Leader mediates and finalizes.
+Feed each architect the counterpart plan and collect objections only — never a rewrite:
+
+```
+Agent(subagent_type="team-architect-fe", prompt="Your plan:\n[FE plan]\n\nCounterpart backend plan:\n[BE plan]\n\nList ONLY: contract mismatches, ordering conflicts, and assumptions the other plan breaks. No rewrite, no restatement.")
+Agent(subagent_type="team-architect-be", prompt="Your plan:\n[BE plan]\n\nCounterpart frontend plan:\n[FE plan]\n\nList ONLY: contract mismatches, ordering conflicts, and assumptions the other plan breaks. No rewrite, no restatement.")
+```
+
+Leader consumes both objection lists, mediates, finalizes. A conflict neither side concedes →
+Leader decides and records the reason in the plan doc. Both passes run in parallel; they are
+independent (neither reads the other's objections).
 
 ### Step 4: Optional Arch C
 

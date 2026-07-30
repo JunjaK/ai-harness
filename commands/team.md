@@ -20,7 +20,7 @@ If no task description provided, ask the user for one.
 2. **Phase 1 — Planning** (user involved):
    - Spawn Team Leader with instruction to ask user about ambiguous decisions
    - Spawn Architects A + B in parallel
-   - Cross-review via TeamCreate dialog
+   - Cross-review: two parallel objection passes (each architect gets the counterpart plan), Leader mediates
    - Optional: Spawn Architect C if infra/security concerns
    - Save plan to project docs
    - Present plan to user for review

@@ -21,7 +21,12 @@ Run `Skill(skill="superpowers:systematic-debugging")` under its **Iron Law — n
 2. **Route by stack.** TS/JS target → also load the `debug` skill (`goToDefinition` / `findReferences` / `incomingCalls`, structural traps); non-TS → the native checker from project-profile `stack.md`.
 3. **Investigate (Phase 1-2).** Read errors completely, check recent changes (`git diff`), instrument component boundaries in multi-layer systems, trace the bad value **backward** to its origin, find a working reference and list every difference.
 4. **Hypothesize + test (Phase 3).** One hypothesis stated as "X is root cause because Y" → smallest possible change → one variable at a time. Fails → new hypothesis, never stack fixes.
-5. **Fix + verify (Phase 4).** Failing test first (`tdd-workflow`) → single root-cause fix (no "while I'm here") → confirm via `verification-loop`. A network 200 / green UI is **not** proof — verify DB-level persistence where the change touches data (value survives a refresh).
+5. **Fix + verify (Phase 4).** In order, no skipping:
+   - **Failing test first** — write the test that reproduces the bug and watch it FAIL before touching the fix. A test written after the fix proves nothing.
+   - **Single root-cause fix** — no "while I'm here". Guard at the shared function every caller routes through, not at the one path the report named.
+   - **Verify by running, not by claiming** — the failing test now passes AND the authoritative type-check/lint/test commands from project-profile `stack.md` are green. Report `됐다 / 됐는데 미검증 / 안 됨` distinctly; never log unverified as done.
+   - **A network 200 / green UI is not proof** — where the change touches data, confirm DB-level persistence (the value survives a refresh).
+   - Full gate sequence + baseline-vs-net-new rules: `reference/verification-loop.md`; TDD cycle detail: `reference/tdd-workflow.md`.
 6. **Escalate at the boundary (see below).** When the bug crosses solo scope, STOP and route up.
 
 Effort: start `xhigh`; escalate `/effort max` only after `xhigh` fails twice on the **same** bug.
@@ -53,8 +58,8 @@ Status:     fixed · fixed-unverified · escalated→/team · not-reproduced
 
 - `superpowers:systematic-debugging` skill — the general methodology (Iron Law · 4 phases · red flags) this command fires
 - `debug` skill (harness) — the TS/LSP-accelerated layer loaded for TypeScript targets
-- `tdd-workflow` skill — the failing test the root-cause fix is written against
-- `verification-loop` skill — confirm the fix before claiming success (no self-report trust)
+- `reference/tdd-workflow.md` — the failing test the root-cause fix is written against (document, not a skill: Read it)
+- `reference/verification-loop.md` — confirm the fix before claiming success (no self-report trust)
 - `/team` · `/team-run` — escalation target when the bug is a Fundamental Issue (cross-cutting / 3+ modules / BE change)
 
 ARGUMENTS: $ARGUMENTS

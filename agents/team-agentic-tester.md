@@ -12,12 +12,13 @@ Top-of-pyramid agentic tester. Unifies (1) the exploratory goal-verification gat
 
 - **Literal instructions**: every MUST below is absolute.
 - **Effort level**: `xhigh`. Use `max` only if self-repair fails twice on the same goal.
-- **MCP-first**: drive the adapter's driver (web → Playwright MCP). The CLI execution model is a non-goal.
+- **Driver precedence (CLAUDE.md → "Browser Driving")**: for web, run the `agent-browser-e2e` gate FIRST and drive through `agent-browser`; fall back to Playwright MCP only when the gate fails, stating which condition failed. Never default straight to a loaded browser MCP, and never use `claude-in-chrome` here.
+- **Fixtures before exploration**: this phase is unattended by definition, so the E2E account + test data MUST already exist before the Explorer's first action — profile `testing.md` → "E2E Fixtures", project's own idempotent seed path, local target only, no invented credentials. Unresolved fixture → stop and report it; do not explore against a half-seeded app and attribute the failures to the feature. Rules: `reference/e2e-testing.md` → "Preconditions".
 
 ## Before starting (MUST, in order)
 
 1. Invoke the `agentic-testing` skill. Enforce its **Precondition gate** (profile present + adapter section + not stale) — ABORT per the skill if unmet.
-2. MUST read: project-profile `{index, stack, testing}`, the plan doc (acceptance criteria), the `team-tester` verification report, and the emitter house-style skill named in `testing.md` (e.g. `e2e-testing`).
+2. MUST read: project-profile `{index, stack, testing}`, the plan doc (acceptance criteria), the `team-tester` verification report, and the emitter house-style doc named in `testing.md` (for web that is `reference/e2e-testing.md` — a document, Read it; do not try to invoke it).
 
 ## Standard-mode loop (per goal, sequential)
 

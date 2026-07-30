@@ -42,7 +42,9 @@ Applies to all agents, skills, and direct use at the start of any task that chan
 | UI/UX design quality | `impeccable` plugin + the uiux/web agent definitions |
 | Code minimalism (YAGNI) | `coding-standards` §4 + build-agent defs + Phase 4 `/ponytail-review` |
 | Escalation criteria + retry caps | `skills/team-workflow/resources/escalation.md` (per-phase retries max 3; global re-plan cycles max 3 → ABORT) |
-| TDD, verification, parallelization, contract-sync, … | the matching skill (loads on invoke) |
+| Parallelization, contract-sync, docs-lifecycle, checkpoint, … | the matching skill (loads on invoke) |
+
+**`reference/<name>.md` are documents, not skills** — `coding-standards`, `tdd-workflow`, `e2e-testing`, `verification-loop`, `plan-review`, `token-optimization`. A citation like "(`verification-loop` §Baseline & Net-New)" means **Read that file**; MUST NOT pass these names to the Skill tool. Rules that must fire unconditionally are inlined at their call sites.
 
 `.claude/rules/` is repo-local and path-scoped; it does not travel with the plugin. **Non-TS projects**: use the native checker from `stack.md` (`pyright`/`mypy`/`go vet`…); `verification-loop` Phase 2 adapts.
 
@@ -60,14 +62,7 @@ Detect in order: **Bun** (`bun.lockb`/`bun.lock`) → **pnpm** (`pnpm-lock.yaml`
 
 ## Authoritative Documentation (MCP)
 
-Advisory — informs correctness, doesn't block a phase. MUST NOT trust training memory for version-sensitive or external-API facts: consult the MCP if connected, else mark the assumption unverified. Prefer these over web search and over memory even for "well-known" APIs. Tool namespaces vary by install method — resolve the registered name at call time rather than hard-coding it.
-
-- **Context7** (`resolve-library-id` → `query-docs`) — library/framework/SDK APIs, config, version-migration, CLI.
-- **MDN** (`search`/`get-doc`/`get-compat`) — browser compat, Baseline, Web APIs, CSS/JS support, CWV.
-
-## Required: Agent Teams
-
-`/team`, `/team-run`, `/team-brainstorm` depend on `TeamCreate`. Enable in `settings.json` → `"env": { "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1" }`; unset = those commands won't function.
+Advisory — informs correctness, doesn't block a phase. MUST NOT trust training memory for version-sensitive or external-API facts: consult the MCP if connected, else mark the assumption unverified — over web search and over memory, even for "well-known" APIs. **Context7** for library/SDK APIs, config, migrations, CLI; **MDN** for browser compat, Baseline, Web APIs, CWV. Namespaces vary by install — resolve the registered name at call time.
 
 ## Ultracode Orchestration
 
@@ -76,7 +71,7 @@ When the runtime signals **ultracode** (or `CLAUDE_HARNESS_ULTRACODE=1`) AND `wo
 - **Model routing per `agent()`**: an omitted `opts.model` inherits the session model (Opus), so leaving every stage on Opus is the default failure. Set `opts.model` + `opts.effort` by task class. Routing table + named fan-out points: `token-optimization` §1.
 - Harness's **max-5-worktree cap** + **types→backend→frontend→tests merge order** OVERRIDE the looser `min(16, cores-2)` Workflow cap for code-writers.
 - **MUST NOT** use Workflow for: a single-agent task; a strictly sequential chain with no per-item streaming benefit; work sharing mutable state; parallel use of the single shared Playwright browser; deterministic state-file bookkeeping.
-- **Outside ultracode**, all of the above MUST use the lightweight `Agent()`/`TeamCreate` path — do NOT introduce a Workflow layer. Ultracode is a **topology** signal, separate from **effort**.
+- **Outside ultracode**, all of the above MUST use the lightweight `Agent()` path — do NOT introduce a Workflow layer. Ultracode is a **topology** signal, separate from **effort**.
 
 ---
 

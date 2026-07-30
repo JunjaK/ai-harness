@@ -32,7 +32,7 @@ Two outputs:
 
 ## G2 — Architecture & stack decision
 
-Spawn `team-architect-fe` + `team-architect-be` in parallel (consume brief + research). They propose: concrete stack (exact versions from research), project structure, state management, API layer, testing/tooling, deploy target. Cross-review via `TeamCreate` (leader + FE + BE; add `team-architect-infra` if auth/payments/deploy flagged). Leader consolidates →
+Spawn `team-architect-fe` + `team-architect-be` in parallel (consume brief + research). They propose: concrete stack (exact versions from research), project structure, state management, API layer, testing/tooling, deploy target. Cross-review: give each architect the counterpart proposal and collect objections only, in parallel (add `team-architect-infra` if auth/payments/deploy flagged). Leader consolidates →
 
 **stack-decision doc** `_docs/active/planning/<today>/<today>-project-bootstrap-stack-decision.md` (kind `stack-decision`) — MUST contain:
 - chosen framework + package manager (bun default)

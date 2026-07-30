@@ -6,7 +6,7 @@ A reusable Claude Code harness for Claude Opus: greenfield project bootstrap (re
 
 Specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code. Beyond the core team workflow, the harness adds:
 
-- **Testing stack** — unit (Vitest) → deterministic E2E (Playwright) → **agentic E2E** (Phase 4.5: an agent verifies goals and crystallizes deterministic tests) → **human QA** (`/test-scenario-doc`, an interactive checklist). When the [`agent-browser`](https://agent-browser.dev/) CLI + skill are installed, it becomes the **preferred on-demand browser driver** for E2E / QA / smoke — including headless login via its encrypted **Auth Vault** (the password never reaches the LLM) — and otherwise falls back to the Playwright path.
+- **Testing stack** — unit (Vitest) → deterministic E2E (Playwright) → **agentic E2E** (Phase 4.5: an agent verifies goals and crystallizes deterministic tests) → **human QA** (`/test-scenario-doc`, an interactive checklist). When the [`agent-browser`](https://agent-browser.dev/) CLI + skill are installed, it becomes the **default browser driver** for every browser-driving task — E2E / QA / smoke / exploration, Phase 4 driving and Phase 4.5 exploration included — including headless login via its encrypted **Auth Vault** (the password never reaches the LLM) — and otherwise falls back to the Playwright path.
 - **Document storage (3 buckets)** — `_docs/` (project, lifecycle-managed) · `_note/` (human-owned, agent read-only) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge), classified by a portable ownership discriminator.
 - **Code minimalism** — the `ponytail` YAGNI decision ladder, applied at design time and reviewed in Phase 4.
 - **Renewal Mode Gate** — every non-trivial refactor / fix / redesign starts by choosing **A (compatible)** or **B (destructive renewal)**; Mode B requires a risk block + explicit approval, then a full anti-drift commitment so back-compat scaffolding never creeps back in.
@@ -77,7 +77,6 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 ```json
 {
   "env": {
-    "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
   },
   "permissions": {
@@ -97,7 +96,8 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 }
 ```
 
-> `CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` is **required** — `/team`, `/team-run`, `/team-brainstorm` depend on `TeamCreate` for cross-review.
+> No experimental flag is required. `/team`, `/team-run`, `/team-brainstorm` orchestrate entirely
+> through `Agent()` subagents; cross-review runs as two parallel objection passes, not a team dialog.
 >
 > `CLAUDE_HARNESS_ULTRACODE=1` is **optional** — an explicit override that forces ultracode orchestration (Workflow-tool fan-outs) in headless / non-Claude-Code contexts where the runtime ultracode signal is absent. See CLAUDE.md "Ultracode Orchestration".
 
@@ -110,7 +110,7 @@ Alongside the env flags above, the harness uses a few external tools. Install th
 | **impeccable** plugin · [impeccable.style](https://impeccable.style/) | UI/UX design quality — the `team-uiux-master` / `web-architect` / `web-reviewer` agents call it via `Skill("impeccable:impeccable", "<sub-command> [target]")` | those agents pause and ask you to install it |
 | **ponytail** plugin · [repo](https://github.com/DietrichGebert/ponytail) | YAGNI minimalism — Phase 4 runs `/ponytail-review` on the diff | Phase 4 asks you to install it (the decision ladder is also distilled into `coding-standards` §4) |
 | **superpowers** plugin · [repo](https://github.com/anthropics/claude-plugins-official) | general debugging methodology, code-review dispatch, and parallel-agent dispatch decisions — `/debug` and the `debug` skill invoke `superpowers:systematic-debugging` and layer the harness's TS/LSP patterns + escalation boundary on top | `/debug` aborts and asks you to install it |
-| **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | preferred on-demand browser driver for E2E / QA / smoke + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `e2e-testing` / `agentic-testing` path |
+| **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | **default** browser driver for E2E / QA / smoke / exploration (requested or not) + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `reference/e2e-testing.md` / `agentic-testing` path — never to `claude-in-chrome` |
 
 ```bash
 /plugin marketplace add pbakaus/impeccable && /plugin install impeccable@impeccable
@@ -119,7 +119,7 @@ Alongside the env flags above, the harness uses a few external tools. Install th
 npm i -g agent-browser && agent-browser install   # skill ships with the CLI
 ```
 
-impeccable, ponytail, and superpowers are expected to be installed before running the workflow; agent-browser is optional but recommended for smoother browser work.
+impeccable, ponytail, and superpowers are expected to be installed before running the workflow; agent-browser is optional, but when installed it is the default browser driver (CLAUDE.md → "Browser Driving").
 
 ### First Run
 
@@ -161,24 +161,32 @@ Skills that agents reference during their workflow phases:
 | Skill | Phase | Purpose |
 |-------|-------|---------|
 | `greenfield-bootstrap` | `/team-new` | G0 intake → G1 deep-research → G2 stack decision → G3 user gate → G4 scaffold → G5 seeded profile |
-| `plan-review` | Phase 1 | Critical review of plans before implementation + pre-plan elicitation |
 | `brainstorm` | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design (no auto-commit); solo counterpart to `/team-brainstorm` |
-| `coding-standards` | Phase 3 | Universal code quality baseline (strict TS) |
-| `tdd-workflow` | Phase 3 | Red-Green-Refactor TDD cycle (Vitest 4.x) |
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS), layered on `superpowers:systematic-debugging` |
-| `e2e-testing` | Phase 4 | Playwright E2E patterns for Testers |
 | `agentic-testing` | Phase 4.5 | Adapter-based agentic E2E — explore goal → verify → crystallize deterministic test |
-| `agent-browser-e2e` | On-demand | Prefer the `agent-browser` CLI for E2E/QA/smoke + headless login via its encrypted Auth Vault (no password reaches the LLM) when the CLI + skill are installed; one-time gate, else fall back to Playwright. Not phase-wired |
+| `agent-browser-e2e` | **Default driver — any browser-driving task, Phase 4 driving + Phase 4.5 exploration included** | `agent-browser` is the first choice for E2E/QA/smoke/exploration/selector resolution, requested or not, plus headless login via its encrypted Auth Vault (no password reaches the LLM). One-time gate (CLI present + skill available), else fall back to Playwright — never silently, and never to `claude-in-chrome`. Playwright still owns the committed `.spec.ts` suite |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
 | `scenario-to-e2e` | On-demand | Turn a `test-scenario-doc` into runnable Playwright specs — the doc's `SCENARIOS` config is SSOT; drives the live app for real selectors, runs + green-gates each spec, falls back to a marked-unverified scaffold. No fabricated selectors |
-| `verification-loop` | Phase 4-5 | 6-phase quality gate (build, type, lint, test, security, diff) + reliability gates: tests green in ≥ 80% of runs, security 3/3 clean |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
 | `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) — fills the self-contained skeleton in `skills/plan-visualizer/resources/template.html` |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
 | `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT with the harness — links global `CLAUDE.md`, `persona.md`, per-skill global skills, commands and auto-memory, plus a merged recommended-settings manifest and opt-in sync hooks; dependency-free, ships a generic connector template for both shells |
 
-Cross-cutting skills (any phase): `token-optimization` (model routing, effort levels, compaction — plus §6 **Subagent Orchestration**: the 3-cycle retrieval protocol and the six-element briefing contract), `continuous-learning`, `parallelization`, `submodule-worktree`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`.
+Cross-cutting skills (any phase): `continuous-learning`, `parallelization`, `submodule-worktree`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`.
+
+### Reference documents (`reference/*.md`) — read, don't invoke
+
+Methodology bodies that agents cite by section rather than dispatch. They carry no skill frontmatter cost and are **not** invocable with the Skill tool: a citation like "(`verification-loop` §Baseline & Net-New)" means read `reference/verification-loop.md`. Rules that must fire unconditionally are inlined at their call sites instead.
+
+| Document | Used by | Contents |
+|----------|---------|----------|
+| `reference/coding-standards.md` | Architects, Designers (Phase 1/3) | Universal code quality baseline (strict TS); §4 = YAGNI decision ladder |
+| `reference/tdd-workflow.md` | Designers (Phase 3), `/debug` | Red-Green-Refactor cycle (Vitest 4.x) |
+| `reference/e2e-testing.md` | Testers (Phase 4) | Playwright E2E patterns, Page Object Model, flaky-test strategy |
+| `reference/verification-loop.md` | Testers, Leader (Phase 4-5) | 6-phase quality gate (build, type, lint, test, security, diff) + baseline-vs-net-new rules, reliability gates (tests green in ≥ 80% of runs, security 3/3 clean), opt-in human comprehension quiz |
+| `reference/plan-review.md` | Leader (Phase 1) | Critical plan review + pre-plan elicitation |
+| `reference/token-optimization.md` | Any orchestrator | Model routing (incl. per-`agent()` Workflow routing), effort levels, compaction; §6 = 3-cycle retrieval protocol + six-element briefing contract |
 
 General debugging methodology, code-review dispatch, and parallel-agent dispatch decisions come from the **superpowers** plugin (`superpowers:systematic-debugging`, `superpowers:requesting-code-review`, `superpowers:dispatching-parallel-agents`) — the harness layers its own TS/LSP patterns and escalation boundary on top instead of forking them.
 
@@ -224,12 +232,17 @@ junjak-ai-harness/
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-└── skills/                      # 27 workflow skills
+├── reference/                   # 6 methodology documents — read, never invoked
+│   ├── coding-standards.md
+│   ├── tdd-workflow.md
+│   ├── e2e-testing.md
+│   ├── verification-loop.md
+│   ├── plan-review.md
+│   └── token-optimization.md
+└── skills/                      # 21 workflow skills
     ├── team-workflow/
     ├── greenfield-bootstrap/
     ├── project-analyzer/
-    ├── tdd-workflow/
-    ├── verification-loop/
     ├── contract-sync/
     ├── docs-lifecycle/
     ├── handoff/
@@ -240,7 +253,7 @@ junjak-ai-harness/
     ├── scenario-to-e2e/
     ├── security-review/
     ├── brainstorm/
-    └── ... (12 more)
+    └── ... (8 more)
 ```
 
 ### CLAUDE.md Note
@@ -251,13 +264,14 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
 
-**v1.22.0** — `brain-connect` now covers the whole cross-machine surface: global `CLAUDE.md`, personal global skills, and a merged settings manifest — not just persona + memory.
-- Brain contract grew from 3 rows to 7: `CLAUDE.md`, per-skill `skills/<name>/`, and `settings.recommended.json` join persona, commands, memory and sync.
-- **One link per skill, never the whole `skills/` dir** — third-party tools install relative-symlinked skills there, and linking the directory hides them.
-- **`settings.json` is merged from an enumerated manifest, never synced whole** — machine-specific `hooks` / `statusLine` / `permissions.allow` and all `skip*` prompt flags stay local; `enabledPlugins` ships paired with `extraKnownMarketplaces` or the toggle is vacuous.
-- Persona import goes relative (`@persona.md` + a `persona.md` link beside `CLAUDE.md`), so no machine path survives in synced content.
-- Connector template completed for both shells: new `setup.sh`, `sync.sh`, `apply-settings.sh`/`.ps1`, example manifest; `relocate.ps1` reduced to its one remaining job (sync-hook paths) by delegating links to `setup.ps1`.
-- Verify section warns that `grep -r` traverses **zero** files once skills are symlinks — a false green; use `-R`.
+**v1.23.0** — a `/doctor` audit of 345 transcripts killed three claims the data never supported.
+- **`TeamCreate` dependency removed entirely** — never called once, while `/team-run` shipped 18 runs through `Agent()`. No experimental flag is required anymore, and the greenfield scaffolder stops writing one into new projects.
+- **Phase 1 cross-review = two parallel objection passes** (each architect gets the counterpart plan, returns objections only; Leader mediates). Ultracode runs them as a `parallel()` judge panel.
+- **27 → 21 skills**: `coding-standards`, `tdd-workflow`, `e2e-testing`, `verification-loop`, `plan-review`, `token-optimization` become `reference/*.md` documents — zero dispatches ever, every reference was a §-citation, so ~48k chars of body was authored and never loaded.
+- **`agent-browser` is the default browser driver** — it had described itself as "on-demand, NOT phase-wired", so agents correctly used it only when named while browser work drifted to Playwright MCP or the previously-unranked `claude-in-chrome`. Precedence now rides the skill **description** (which ships to every project, unlike this repo's `CLAUDE.md`): agent-browser → Playwright MCP on gate failure → `claude-in-chrome` for the user's own Chrome profile only. Playwright still owns the committed `.spec.ts` suite.
+- **Unattended E2E must have its account + test data seeded first** — project's own idempotent seed path, verified-local target, no invented credentials, prd/stg human-executed. Unresolved fixture stops the run instead of reporting missing-data failures as feature failures. New `testing.md` → "E2E Fixtures" profile block captures those values at `/team-init` time.
+- **`/debug` Phase 4 inlines its gate** rather than naming skills nobody loaded.
+- **`unknown` is a last resort, not the fix for `any`** — resolves rules-vs-global instructions that contradicted each other on every `.ts` read.
 
 ## License
 

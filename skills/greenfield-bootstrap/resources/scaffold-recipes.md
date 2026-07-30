@@ -37,7 +37,7 @@ When the chosen stack has no non-interactive scaffolder (backend-only, or a CLI 
 2. **Directories** — the structure from the stack-decision doc (e.g. `_modules/` for page logic per the harness page-structure rule).
 3. **Testing** — Vitest 4.x (unit) + Playwright (E2E) config + scripts.
 4. **Lint/format** — extend, don't clobber, the scaffold's eslint/prettier/biome config.
-5. **`settings.json`** — `{"env": {"CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1"}}` (required for the team commands).
+5. **`settings.json`** — no harness-required env flag; add only what the scaffold itself needs. The team commands orchestrate through `Agent()` and need no experimental flag.
 6. **Git** — if the scaffolder ran `git init`/committed, add the harness layer as a **second** commit (don't double-init). The **final** commit SHA = G5 `Profile-Generated-At`.
 7. **Type-check gate (last)** — run the authoritative type-check (from the would-be `stack.md` "Build & Verify"); the strict additions MUST still pass on the fresh scaffold (absolute-zero baseline). If they don't, fix the tsconfig merge before G5 — do not mask with `any`/`@ts-ignore`.
 

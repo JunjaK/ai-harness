@@ -22,7 +22,7 @@ Resolve the adapter from `testing.md`'s "Agentic Testing Adapter" (derived from 
 
 | Surface | Explorer driver | Generator emitter (house-style skill) | Concurrency | Status |
 |---|---|---|---|---|
-| **web/TS (base)** | Playwright MCP (`mcp__plugin_playwright_playwright__*`) | `.spec.ts` ← `e2e-testing` | one shared browser → **serialize Explorer** | ready |
+| **web/TS (base)** | `agent-browser` (default — run the `agent-browser-e2e` gate first); Playwright MCP (`mcp__plugin_playwright_playwright__*`) when the gate fails | `.spec.ts` ← `reference/e2e-testing.md` | Playwright MCP = one shared browser → **serialize Explorer**; agent-browser concurrency per its own core guide | ready |
 | **Spring/Kotlin (backend API)** | HTTP calls | `WebTestClient`/`@SpringBootTest` + Testcontainers ← `springboot-tdd`·`kotlin-testing` | stateless → **true parallel** (per-worker DB isolation) | ready |
 | **Flutter/Dart (mobile UI)** | maestro · Patrol · mobile MCP | `integration_test` · maestro yaml | single device → **serialize per device** | **driver-gated** |
 | Cross-journey (Flutter→Spring) | UI drive + backend assert | both layers | depends on above | later |
@@ -42,6 +42,10 @@ Run a goal only if ALL hold; else log the skip reason:
 - **NOISE**: deterministically assertable (subjective/aesthetic → defer to `web-reviewer`/`impeccable`).
 
 (This harness runs on a Claude Code subscription, not metered API — gate on value/time/noise, not cost.)
+
+## Preconditions (before the Explorer's first action)
+
+This phase runs unattended, so fixtures cannot be improvised mid-run. Confirm from the profile's `testing.md` → "E2E Fixtures": dedicated E2E account provisioned via the project's own idempotent seed path, test data the goals assume already seeded, target verified-local. No invented credentials, no committed passwords, prd/stg provisioning human-executed. Any unresolved row → STOP and report `E2E fixtures unresolved: [what]` instead of exploring a half-seeded app and blaming the feature. Rules: `reference/e2e-testing.md` → "Preconditions".
 
 ## Pipeline (Explorer → Generator)
 
@@ -79,9 +83,9 @@ Per goal: `id`, `outcome`, `met`, `trustworthy` (ultracode verify), `green`, `sp
 **Artifacts**: runtime artifacts (screenshots/traces/reports) follow the `_test/` gitignored **Artifact Layout** in `e2e-testing`; crystallized specs are committed **code** in the project's test dir, not `_test/`.
 
 ## See also (link, do not duplicate)
-- `skills/agent-browser-e2e/SKILL.md` — on-demand `agent-browser` browser-driving + headless Auth Vault login (separate from this phase; the Phase 4.5 web Explorer stays Playwright MCP)
-- `skills/e2e-testing/SKILL.md` — deterministic layer + web emitter conventions
-- `skills/verification-loop/SKILL.md` — vacuity guard (applied to "met" claims)
+- `skills/agent-browser-e2e/SKILL.md` — **the default driver for this phase's web Explorer** + headless Auth Vault login. Run its gate before driving; Playwright MCP is the fallback, not the first choice
+- `reference/e2e-testing.md` — deterministic layer + web emitter conventions (the crystallization target regardless of which driver explored)
+- `reference/verification-loop.md` — vacuity guard (applied to "met" claims)
 - `skills/team-workflow/SKILL.md` — Phase 4.5 + Orchestration Mode
 
 ## Dry-run acceptance runbook (run in a real web/TS project)

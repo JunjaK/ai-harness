@@ -21,7 +21,7 @@ If no task description provided, ask the user for one.
    - Leader drafts rough plan
    - Leader asks user about ambiguous decisions (always interactive)
 3. **Spawn Architects A + B** (parallel) for detailed plans
-4. **Cross-Review** via TeamCreate dialog (Leader + Arch A + Arch B)
+4. **Cross-Review** — two parallel objection passes (each architect receives the counterpart plan, returns objections only), Leader mediates and finalizes
 5. **Optional**: Spawn Architect C if infra/security concerns
 6. **Optional**: Spawn UI/UX Master if visual changes needed
 7. **Save plan** to `_docs/active/planning/<created>/<created>-<topic>-plan.md`

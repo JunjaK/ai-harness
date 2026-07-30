@@ -248,10 +248,21 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 - Target: [percentage if configured]
 - Report: [format and location]
 
+## E2E Fixtures (REQUIRED before any automated E2E run)
+- E2E account: <how it is provisioned — seed script path, fixture, or NONE FOUND>
+- Credentials source: <env var names / seed script default / gitignored env file path> — never a literal password in this file
+- Test-data seed: `[idempotent command]` (destructive re-load flag, if any: `[--reset]`)
+- Target env: <local only — name the local DB/port> · prd/stg = human-executed, never automated
+- Shared-resource caution: <e.g. one local DB shared by several app instances → coordinate before seeding>
+- Teardown: <idempotent re-run | explicit cleanup command | none needed>
+
+> If any row above is unknown or NONE FOUND, record it as `[FILL: …]` — an agent MUST NOT invent an
+> account, password, or seed command. See `reference/e2e-testing.md` → "Preconditions".
+
 ## Agentic Testing Adapter
 - Surface: <web | backend | mobile>
-- Driver: <playwright-mcp | http | maestro | patrol | mobile-mcp | UNAVAILABLE>
-- Emitter house-style: <e2e-testing | springboot-tdd + kotlin-testing | integration_test>
+- Driver: <agent-browser (default when CLI+skill present) | playwright-mcp | http | maestro | patrol | mobile-mcp | UNAVAILABLE>
+- Emitter house-style: <reference/e2e-testing.md | springboot-tdd + kotlin-testing | integration_test>
 - Concurrency: <serial-shared-browser | parallel-stateless | serial-per-device>
 - Generated spec dir: <tests/e2e/ | src/test/ | integration_test/>
 ```

@@ -1,16 +1,17 @@
 ---
 name: agent-browser-e2e
-description: "Preferred browser-driving path for on-demand E2E / QA / smoke when the `agent-browser` CLI and its skill are installed. Use when asked to E2E-test, QA, smoke-test, or drive a web app through a real browser — OR when a headless run is blocked at login and you must authenticate without exposing the password to the LLM. Gates on two conditions (agent-browser CLI present + agent-browser skill available) checked ONCE; falls back to Playwright (`e2e-testing` / `agentic-testing`) when either is missing. The headless-login answer is agent-browser's encrypted Auth Vault (default), with credential-plugin / state-import / persistent-profile fallbacks. The LLM never sees the password."
+description: "THE DEFAULT browser driver — invoke for ANY task driving a real browser, whether or not the user names it: E2E, QA, smoke, exploration, login-gated verification, resolving live selectors, plus team-workflow Phase 4 driving and Phase 4.5 exploration. Driver precedence: this skill FIRST → Playwright MCP only when its gate fails (say which condition) → claude-in-chrome only for the user's own logged-in Chrome profile. Reaching for a loaded browser MCP without running the gate is the known drift. Playwright still owns the committed `.spec.ts` suite — this drives, it is not a test framework. Headless login uses the encrypted Auth Vault, so the LLM never sees the password. Unattended runs (Phase 4/4.5, /team-run, scheduled) MUST have the dedicated E2E account + seeded test data in place BEFORE the first browser action — never invent credentials."
 ---
 
 # agent-browser E2E
 
-> **On-demand browser-driving layer.** NOT wired into team-workflow Phase 4/4.5 — those stay Playwright (`e2e-testing` deterministic `.spec.ts`; Phase 4.5 Explorer = Playwright MCP). Invoke this when you need to *drive a real browser* (E2E, QA, smoke, login-gated verification) and `agent-browser` is available. agent-browser is a **driver**, not a test framework.
+> **The default browser-driving layer** (CLAUDE.md → "Browser Driving"). Whenever a real browser must be driven — E2E, QA, smoke, exploration, login-gated verification, resolving live selectors — come here FIRST, including inside team-workflow **Phase 4 driving** and **Phase 4.5 exploration**. You do not need the user to name it. agent-browser is a **driver**, not a test framework.
 
 ## When to use / not use
 
-- **Use** — on-demand E2E / QA / smoke / exploration of a running app; any task blocked by a headless login.
-- **Don't use as** — a replacement for deterministic Playwright `.spec.ts` regression suites (Phase 4) or the Phase 4.5 Explorer pipeline. Those are unchanged. This skill drives; if a flow must regress forever, crystallize it to Playwright (see below).
+- **Use** — any browser-driving task, requested or not: E2E / QA / smoke / exploration of a running app, Phase 4 driving, Phase 4.5 exploration, resolving real selectors for spec generation, and anything blocked by a headless login.
+- **Don't use as** — the deterministic Playwright `.spec.ts` regression suite. Driving is this skill's job; a flow that must regress forever still crystallizes to a Playwright spec (see below).
+- **Don't reach past it** — picking Playwright MCP or `claude-in-chrome` without first running the gate below is the drift this skill exists to stop. `claude-in-chrome` is for the user's own logged-in Chrome profile only.
 
 ## Gate — check ONCE, then trust
 
@@ -22,7 +23,7 @@ Two conditions, evaluated deterministically **at skill entry only**. Cache the r
 | Outcome | Action |
 |---|---|
 | Both pass | agent-browser is the **preferred** driver. Proceed. |
-| Either fails | State **which** condition failed in one line, then fall back to `e2e-testing` (deterministic) / `agentic-testing` (exploratory) Playwright path. **No silent skip.** |
+| Either fails | State **which** condition failed in one line, then fall back to `reference/e2e-testing.md` (deterministic) / `agentic-testing` (exploratory) Playwright path. **No silent skip.** Fall back to Playwright, not to `claude-in-chrome`. |
 
 After the gate passes, load the real usage guide **once**: `agent-browser skills get core` (+ `agent-browser skills get dogfood` for exploratory QA / bug-hunts). The guide is version-matched and is the **SSOT for every command** — do not re-load it per command, and do not duplicate its command reference here. Run `agent-browser doctor` **only reactively** — when a command fails unexpectedly — never as a gate.
 
@@ -98,6 +99,6 @@ On-demand exploration is not a permanent test. If a flow should regress forever,
 ## See also (link, do not duplicate)
 
 - agent-browser CLI skills: `core` (command SSOT), `dogfood` (exploratory QA), `references/authentication.md` (full auth patterns)
-- `skills/e2e-testing/SKILL.md` — deterministic Playwright `.spec.ts` conventions (fallback target + crystallization house style)
-- `skills/agentic-testing/SKILL.md` — goal-verification concepts; the Phase 4.5 web Explorer stays Playwright MCP
-- `skills/verification-loop/SKILL.md` — vacuity guard for "it works" claims
+- `reference/e2e-testing.md` — deterministic Playwright `.spec.ts` conventions (fallback target + crystallization house style)
+- `skills/agentic-testing/SKILL.md` — goal-verification concepts; the Phase 4.5 web Explorer drives through agent-browser when this gate passes, Playwright MCP otherwise
+- `reference/verification-loop.md` — vacuity guard for "it works" claims

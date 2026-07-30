@@ -34,7 +34,8 @@ description: >-
 
 ```
 resolveMode():
-  driverAvailable = Playwright MCP present  OR  agent-browser CLI+skill installed (see agent-browser-e2e gate)
+  driverAvailable = agent-browser CLI+skill installed (PREFERRED — run the agent-browser-e2e gate first)
+                    OR Playwright MCP present (fallback)
   appReachable    = the doc's SETUP_HTML URL responds (or user gave a base URL)
   IF driverAvailable AND appReachable:  RETURN GROUNDED     # default — resolves real selectors + green-gates
   ELSE:                                  RETURN SCAFFOLD     # fallback — TODO selectors, marked UNVERIFIED
@@ -142,7 +143,7 @@ so specs and the checklist stay in lockstep.
 
 ## See also (link, do not duplicate)
 - `skills/test-scenario-doc/SKILL.md` — the input: the manual QA doc + the shared `SCENARIOS` config
-- `skills/e2e-testing/SKILL.md` — Playwright house style (selectors, waits, POM, config) the specs obey
+- `reference/e2e-testing.md` — Playwright house style (selectors, waits, POM, config) the specs obey
 - `skills/agentic-testing/SKILL.md` — the driver/concurrency adapter + the generate→run→green discipline
 - `skills/agent-browser-e2e/SKILL.md` — driver gate (agent-browser vs Playwright MCP) for GROUNDED mode
-- `skills/verification-loop/SKILL.md` — vacuity guard applied to the "green" claim
+- `reference/verification-loop.md` — vacuity guard applied to the "green" claim

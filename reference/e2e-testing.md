@@ -9,6 +9,21 @@ Playwright patterns for stable, fast, maintainable E2E tests.
 
 > This is the **deterministic** layer. For the exploratory goal-verification + test-generation layer above it (Phase 4.5), see the `agentic-testing` skill — its Generator emits specs that MUST follow the conventions here.
 
+## Preconditions — provision the E2E account + test data FIRST
+
+Any E2E run that executes **without a human driving it** (Phase 4, Phase 4.5, `/team-run`, a scheduled or looped run) MUST have its fixtures in place **before the first browser action**. Provisioning mid-run is the failure this gate prevents: a half-seeded run reports failures that are really missing data, and an agent that improvises a login invents credentials.
+
+**Order — do not start the run until every step below is settled:**
+
+1. **Read the project profile's `testing.md` → "E2E Fixtures"** for the account, credential source, and seed command. This is the per-project SSOT.
+2. **Dedicated E2E account, never a real user's.** Provision it through the project's own path (seed script, fixture, documented factory). Credentials come from env vars / a gitignored env file / the seed script's documented default — **MUST NOT invent an account, email, or password, and MUST NOT hard-code one into a spec or commit it.**
+3. **Seed the test data the scenarios assume** — using the project's idempotent seed command so a re-run is safe. If seeding is destructive, it MUST be explicit (`--reset`-style flag), never implicit.
+4. **Local target only.** Automated E2E runs against a verified-local app + DB. Against prd/stg the assistant writes the SQL/seed and stops — **a human executes** (account creation and seeding are data writes).
+5. **Coordinate shared resources.** When several app instances or people share one local DB, seeding/resetting is destructive to them too: confirm nobody is mid-entry before you run it, one at a time.
+6. **Missing information stops the run, it does not get guessed.** If the account or seed path is unknown, report the gap in one line — "E2E fixtures unresolved: `[what]`" — and ask. `[FILL: …]` in the profile is a blocker, not a default.
+
+**Report the fixture state with the result.** A green E2E run whose fixtures were unverified is `됐는데 미검증`, not `됐다`.
+
 ## Test File Organization
 
 ```
@@ -177,4 +192,4 @@ export default defineConfig({
 
 ## See also
 
-- `skills/agent-browser-e2e/SKILL.md` — when the `agent-browser` CLI + skill are installed, prefer it as the on-demand browser driver for E2E/QA/smoke and headless (Auth-Vault) login. This deterministic Playwright layer is the fallback and the crystallization target for verified flows.
+- `skills/agent-browser-e2e/SKILL.md` — **run its gate before driving anything**: when the `agent-browser` CLI + skill are installed it is the default driver for E2E/QA/smoke/exploration and headless (Auth-Vault) login. This deterministic Playwright layer is the fallback driver AND the permanent crystallization target — whatever drove the exploration, the committed suite is Playwright.
