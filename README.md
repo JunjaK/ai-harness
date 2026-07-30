@@ -31,35 +31,14 @@ Specialized AI agents collaborate through defined phases to implement features, 
 
 ### Workflow Phases
 
-```
-Phase 1: Planning
-  Leader drafts plan → Arch A + B detail (parallel) → Cross-review → File assignment
+Phase 1 (Planning) → Phase 2 (UI/UX, conditional) → Leader Approval Gate → Phase 3 (Implementation, TDD) → Phase 4 (Verification) → Phase 4.5 (Agentic Testing, conditional) → Phase 5 (Final Security Review).
 
-Phase 2: UI/UX (conditional)
-  UI/UX Master reviews and proposes changes
-
-Leader Approval Gate
-  Approve → Phase 3 | Reject → Phase 1
-
-Phase 3: Implementation (TDD)
-  Designer x N in parallel worktrees (Red-Green-Refactor)
-
-Phase 4: Verification
-  Tester x N (unit + E2E, loop until pass)
-
-Phase 4.5: Agentic Testing (conditional)
-  Agent explores goals → verifies → crystallizes deterministic tests
-  (then human QA via /test-scenario-doc, before final sign-off)
-
-Phase 5: Final Security Review
-  Arch C security & infra audit → SHIP or escalate
-```
+- **Visual** (phase graph, mermaid): `skills/team-workflow/SKILL.md` → "Orchestration Flow"
+- **Rules** (routing, classification, counters, abort thresholds): `skills/team-workflow/resources/escalation.md` → "Phase Transition Table"
 
 ### Escalation
 
-- Each agent self-judges: simple fix (retry, max 3) vs fundamental issue (escalate up)
-- Global re-plan limit: 3 cycles to prevent infinite loops
-- Both `/team` and `/team-run` report escalation events to user
+Classification (simple fix vs fundamental issue), routing, retry/global-cycle caps, and report formats are all defined in `skills/team-workflow/resources/escalation.md` — the single source of truth. Both `/team` and `/team-run` report escalation events to the user.
 
 ## Commands
 
