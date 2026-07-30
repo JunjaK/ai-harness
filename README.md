@@ -251,11 +251,11 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
 
-**v1.19.0** — Operational discipline from cross-machine usage insights:
-- Windows `Bash`→PowerShell fallback + no GUI-triggering CLI probes.
-- Server/background-process vacuity guard — a "running" claim re-verifies process/port liveness at claim time.
-- Parallel-session commit safety — commit only your own changes, never revert another session's uncommitted work.
-- Destructive ops act only on the exact target requested (no whole-datadir / system-DB wipes).
+**v1.20.0** — Graph-format orchestration: persisted run-state + one normative escalation transition table, replacing four divergent copies of the same rules/graph.
+- `escalation.md`'s ~20-row phase transition table (guard/classification/target/counter/abort) is now the sole rules SSOT; the ASCII path-tree and per-agent classification lists are gone.
+- `.claude/session-state/team-run.json` persists run state (`phase`/`retries`/`globalCycle`/etc.) to disk with a read-on-entry/write-on-transition contract, so retry/abort caps survive compaction and session boundaries.
+- `SKILL.md`'s mermaid node set is now provably identical to the transition table's, with Phase 4.5 finally present in both.
+- Escalation reports split into an agent-emitted block and an orchestrator-filled block (`Global cycle` is no longer something an agent reports).
 
 ## License
 

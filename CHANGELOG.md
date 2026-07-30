@@ -4,6 +4,27 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.20.0 — 2026-07-30
+
+Graph-format orchestration (LangGraph *technique*, not runtime): persisted run-state + one normative escalation transition table, replacing four divergent copies of the same rules/graph.
+
+### Added
+- **Phase transition table** (`escalation.md`) — the ~20-row normative SSOT (guard / classification / target phase / counter effect / abort threshold) covering every escalation edge across all 5 phases + Phase 4.5, plus explicit counter-semantics rules (`retries.pN` vs `globalCycle` increment/reset behavior).
+- **`.claude/session-state/team-run.json` read/write contract** (`team-workflow/SKILL.md` → "State Tracking") — persists `runId`/`phase`/`retries`/`globalCycle`/`escalations[]`/`designerAssignments[]` to disk so retry/abort caps are enforceable across compaction and session boundaries, not just held in orchestrator context. Read on every phase entry, written on every transition; a foreign `runId` still in flight STOPs and surfaces instead of silently overwriting (parallel-session safety).
+- `pre-compact.sh` reminds the post-compaction session to re-read `team-run.json` (no new persistence logic — the file already survives compaction via the filesystem).
+- `checkpoint` skill documents `team-run.json`'s placement (beside `checkpoints/`), orchestrator-only + primary-tree-only scope, and exemption from `session-stop.sh` rotation.
+
+### Changed
+- `team-workflow/SKILL.md`'s mermaid restructured so its node set is provably identical to `escalation.md`'s transition table (`START/P1/P2/GATE/P3/P4/P4.5/P5/DONE/ABORT`) — adds the previously-missing Phase 4.5 node and moves guards onto edge labels instead of separate decision/escalation nodes, so the visual and rules graphs can no longer silently drift apart.
+- `team-designer.md` / `team-tester.md` / `team-leader.md` escalation sections now point at `escalation.md` instead of keeping local classification lists that had already drifted (8 vs 6 vs 5 differently-scoped "Fundamental Issue" enumerations across the three files).
+- Escalation report format split into an **agent-emitted block** (Classification, Attempts, reason, files, root cause, tried approaches) and an **orchestrator-filled block** (Global cycle, cross-phase retries) — an agent cannot know orchestrator-level state, so it no longer reports it.
+- `README.md`'s phase-flow ASCII block trimmed to a one-line phase index + links to the visual SSOT (`SKILL.md` mermaid) and rules SSOT (`escalation.md` table); Escalation bullets collapse to the same link.
+
+### Removed
+- `escalation.md`'s ASCII "Escalation Paths" path-tree — superseded by the transition table.
+- Local "Simple Fix" / "Fundamental Issue" classification example-lists from `team-designer.md` and `team-tester.md`.
+- `Global cycle` from what a Designer/Tester agent can report (moved to orchestrator-filled, read from `team-run.json`).
+
 ## v1.19.0 — 2026-07-23
 
 ### Added — Operational Discipline (from cross-machine usage insights)
