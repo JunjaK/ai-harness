@@ -12,7 +12,7 @@
 | doc-storage | plan | complete | 2026-06-23 | [complete/doc-storage/2026-06-23-doc-storage.md](complete/doc-storage/2026-06-23-doc-storage.md) |
 | docs-lifecycle | plan | complete | 2026-06-25 | [complete/docs-lifecycle/2026-06-25-docs-lifecycle.md](complete/docs-lifecycle/2026-06-25-docs-lifecycle.md) |
 | docs-sweep | plan | complete | 2026-06-25 | [complete/docs-sweep/2026-06-25-docs-sweep.md](complete/docs-sweep/2026-06-25-docs-sweep.md) |
-| graph-orchestration | plan | processing | 2026-07-30 | [active/processing/2026-07-30/2026-07-30-graph-orchestration-plan.md](active/processing/2026-07-30/2026-07-30-graph-orchestration-plan.md) |
+| graph-orchestration | plan | complete | 2026-07-30 | [complete/graph-orchestration/2026-07-30-graph-orchestration-plan.md](complete/graph-orchestration/2026-07-30-graph-orchestration-plan.md) |
 | harness-v2 | plan | complete | 2026-04-16 | [complete/harness-v2/2026-04-16-harness-v2.md](complete/harness-v2/2026-04-16-harness-v2.md) |
 | ponytail-yagni | plan | complete | 2026-06-23 | [complete/ponytail-yagni/2026-06-23-ponytail-yagni.md](complete/ponytail-yagni/2026-06-23-ponytail-yagni.md) |
 | scenario-to-e2e | impl | complete | 2026-07-06 | [complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md](complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md) |

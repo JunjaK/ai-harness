@@ -1,6 +1,6 @@
 ---
 title: "Plan — graph-format orchestration: run-state persistence + escalation transition-table SSOT"
-status: processing
+status: complete
 topic: graph-orchestration
 kind: plan
 scope: harness
@@ -11,7 +11,7 @@ related: [skills/team-workflow/resources/escalation.md, skills/team-workflow/SKI
 
 # Graph-Format Orchestration (Option B) — Team Plan
 
-> Status: **Processing** (Phase 3 implemented + merged to `main` at `6380ec7`; Phase 4 verified, follow-ups landed at `2781525`)
+> Status: **Complete — SHIP** (Phase 3 → `6380ec7`; Phase 4 → `2781525`; Phase 5 → `e38d8d4`. Version `1.21.0`.)
 > Mode: `/team-brainstorm` (planning-only — no code written in this run)
 > Renewal Mode: **B — Destructive Renewal** (approved signal: own harness, git-reversible, no prod/data)
 > [View Plan Diagram](./2026-07-30-graph-orchestration-plan.visual.html)
@@ -260,7 +260,15 @@ Tester independently re-verified all 3 acceptance checks against merged `main` (
 No runtime test suite applies (pure docs/config change) — see plan's own "Testers: 1 (no runtime code)" note.
 
 ## Security Review
-_(filled in Phase 5 — not started. Arch C mandatory if executed via `/team-run`, even though Phase-1 triggers were all negative.)_
+
+Architect C — **SHIP**. Zero CRITICAL, zero HIGH.
+
+- **MEDIUM (fixed at `e38d8d4`)**: `team-run.json`'s path wasn't pinned to the primary tree (a linked worktree would silently create its own empty copy, defeating the foreign-`runId` guard), and there was no defined behavior for "file missing at a non-P1 phase entry" — the likely LLM behavior was to recreate with zeroed counters, silently resetting the abort caps this task exists to enforce. Fixed: path now resolves via the same primary-tree-absolute idiom `_docs/` already uses; missing-at-non-P1 now STOPs instead of recreating.
+- **LOW ×3 (fixed at `e38d8d4`)**: `pre-compact.sh`'s `[ -f ... ] && echo` was one `set -e` away from a failing hook (exit-code hygiene); it hardcoded a path `$STATE_DIR` already existed for; the CHANGELOG overstated the reminder as running on any compaction when the hook's matcher only fires on auto-compaction.
+- **INFO** (no action needed): prompt-injection surface on `designerAssignments[]`/`escalations[].reason` explicitly evaluated — no new trust boundary, nothing shell-interpolates the file. Mermaid's `any → ABORT` edge is drawn from P4 only, subordinate to the table by design. Verbatim STOP/PASS claims in the committed text (foreign-`runId` STOP, node-set parity) were checked against the actual files, not the plan's aspiration, and hold.
+- **Decision needed from the user at publish time (not a code fix)**: `v1.20.0` (test-scoping, commit `c473585`) has a CHANGELOG entry but `origin/main` is still at `v1.19.0` with no tags pushed — nothing has been released yet. Per this repo's versioning rule ("Publish a GitHub Release per bump"), the clean path is two sequential tagged releases (`v1.20.0` then `v1.21.0`), not squashing into one — both are real, separate behavior changes. Still pending, user-gated (push + `gh release create`).
+
+Full report: Phase 5 Architect C run, 2026-07-30.
 
 ## Escalation Log
 _(none — no escalations in this planning run)_
