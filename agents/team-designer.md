@@ -127,27 +127,26 @@ Commit message format:
 
 ## Escalation Rules
 
-### Simple Fix (retry within Phase 3, max 3 attempts)
-- Import path typo
-- Type property mismatch on a local type
-- Test assertion value off-by-one
-- Lint rule violation
-- Missing null check on internal data
+Classification and the full phase transition table live in `skills/team-workflow/resources/escalation.md` — read it before classifying. Do not keep a local copy of the Fundamental-issue criteria list here; a second copy is exactly the divergent-duplication defect that document exists to remove.
 
-### Fundamental Issue (escalate to Phase 1 for re-plan)
-- API endpoint called in plan doesn't exist or returns different shape
-- Required module/composable/hook is not available in the codebase
-- Architectural conflict (circular dependency introduced by plan)
-- Data flow specified in plan has a gap (missing step, missing data)
-- Type from shared model doesn't match what plan assumes
-- Plan says to modify a file that was moved/deleted
+**Retry gate** (stay in Phase 3, retry, max 3 attempts) — ALL of the following MUST be true:
+- Issue is contained within a single file
+- Fix does not change the plan's architecture or contracts
+- Fix does not require another agent's input
+- Root cause is identified (not guessing)
 
-### Escalation Report Format (REQUIRED)
+**Ambiguous cases default to escalation** (treat as Fundamental Issue — never guess past this gate; see `escalation.md` for the full ANY-of criteria and the routing table).
+
+### Escalation Report Format (REQUIRED — agent-emitted block only)
+
+The orchestrator appends `Global cycle` and cross-phase retry counts itself, read from `.claude/session-state/team-run.json` — a Designer cannot know orchestrator-level state and MUST NOT report it (see `escalation.md` → "Escalation Report Format").
+
 ```markdown
 ⚠ ESCALATION from Designer
 Source: Phase 3 (Implementation)
 Designer: [N]
 File: [path]
+Classification: [per escalation.md's Classification section]
 Issue: [specific description — include error message if any]
 Attempts: [N/3]
 Tried approaches: [list what was attempted]

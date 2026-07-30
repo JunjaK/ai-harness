@@ -31,35 +31,14 @@ Specialized AI agents collaborate through defined phases to implement features, 
 
 ### Workflow Phases
 
-```
-Phase 1: Planning
-  Leader drafts plan → Arch A + B detail (parallel) → Cross-review → File assignment
+Phase 1 (Planning) → Phase 2 (UI/UX, conditional) → Leader Approval Gate → Phase 3 (Implementation, TDD) → Phase 4 (Verification) → Phase 4.5 (Agentic Testing, conditional) → Phase 5 (Final Security Review).
 
-Phase 2: UI/UX (conditional)
-  UI/UX Master reviews and proposes changes
-
-Leader Approval Gate
-  Approve → Phase 3 | Reject → Phase 1
-
-Phase 3: Implementation (TDD)
-  Designer x N in parallel worktrees (Red-Green-Refactor)
-
-Phase 4: Verification
-  Tester x N (unit + E2E, loop until pass)
-
-Phase 4.5: Agentic Testing (conditional)
-  Agent explores goals → verifies → crystallizes deterministic tests
-  (then human QA via /test-scenario-doc, before final sign-off)
-
-Phase 5: Final Security Review
-  Arch C security & infra audit → SHIP or escalate
-```
+- **Visual** (phase graph, mermaid): `skills/team-workflow/SKILL.md` → "Orchestration Flow"
+- **Rules** (routing, classification, counters, abort thresholds): `skills/team-workflow/resources/escalation.md` → "Phase Transition Table"
 
 ### Escalation
 
-- Each agent self-judges: simple fix (retry, max 3) vs fundamental issue (escalate up)
-- Global re-plan limit: 3 cycles to prevent infinite loops
-- Both `/team` and `/team-run` report escalation events to user
+Classification (simple fix vs fundamental issue), routing, retry/global-cycle caps, and report formats are all defined in `skills/team-workflow/resources/escalation.md` — the single source of truth. Both `/team` and `/team-run` report escalation events to the user.
 
 ## Commands
 
@@ -272,9 +251,11 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
 
-**v1.20.0** — Test scope defaults to changed-files-only:
-- Phase 4 test gates (`verification-loop`, `team-tester`) default to `vitest run --changed` / `playwright test --only-changed` instead of the full suite.
-- Full suite runs only when the user explicitly requests it in the current request; `team-workflow` wires the pre-task base ref into the Tester prompt for the default scoped run.
+**v1.21.0** — Graph-format orchestration: persisted run-state + one normative escalation transition table, replacing four divergent copies of the same rules/graph.
+- `escalation.md`'s ~20-row phase transition table (guard/classification/target/counter/abort) is now the sole rules SSOT; the ASCII path-tree and per-agent classification lists are gone.
+- `.claude/session-state/team-run.json` persists run state (`phase`/`retries`/`globalCycle`/etc.) to disk with a read-on-entry/write-on-transition contract, so retry/abort caps survive compaction and session boundaries.
+- `SKILL.md`'s mermaid node set is now provably identical to the transition table's, with Phase 4.5 finally present in both.
+- Escalation reports split into an agent-emitted block and an orchestrator-filled block (`Global cycle` is no longer something an agent reports).
 
 ## License
 

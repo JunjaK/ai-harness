@@ -20,6 +20,9 @@ if [ -f "$STATE_DIR/current.md" ]; then
   fi
 fi
 
+# --- team-run.json (orchestrator run-state) survives compaction via the filesystem, not this hook ---
+[ -f ".claude/session-state/team-run.json" ] && echo "[pre-compact] team-run.json exists — re-read it after compaction (phase/retries/globalCycle) before resuming the workflow."
+
 echo ""
 echo "COMPACTION IMMINENT — Update .claude/session-state/current.md before context is compressed."
 echo ""

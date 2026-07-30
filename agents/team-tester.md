@@ -120,23 +120,24 @@ After tests pass, run `/ponytail-review` on this task's diff to flag over-engine
 
 ## Escalation Rules
 
-### Simple Fix (retry within Phase 4, max 3 attempts)
-- Flaky test — timing issue, retry with longer wait or deterministic wait
-- Missing mock data — add fixture
-- Assertion value slightly wrong — fix the assertion (only if plan clearly specifies the expected value)
-- Incorrect test setup — fix setup, not behavior
+Classification and the full phase transition table live in `skills/team-workflow/resources/escalation.md` — read it before classifying. Do not keep a local copy of the Fundamental-issue criteria list here (including a narrowed variant, such as "only if plan clearly specifies the expected value") — a second, differently-scoped copy is exactly the divergent-duplication defect that document exists to remove.
 
-### Fundamental Issue (escalate to Phase 3 → Phase 1)
-- Implementation is wrong (test proves behavior violates plan)
-- API contract mismatch (response shape differs from Architect B's plan)
-- Missing feature (plan specifies behavior that has no implementation)
-- Regression in unrelated tests (implementation broke existing features)
-- Test coverage target unreachable due to untestable code structure
+**Retry gate** (stay in Phase 4, retry, max 3 attempts) — ALL of the following MUST be true:
+- Issue is contained within a single file
+- Fix does not change the plan's architecture or contracts
+- Fix does not require another agent's input
+- Root cause is identified (not guessing)
 
-### Escalation Report Format (REQUIRED)
+**Ambiguous cases default to escalation** (treat as Fundamental Issue — never guess past this gate; see `escalation.md` for the full ANY-of criteria and the routing table).
+
+### Escalation Report Format (REQUIRED — agent-emitted block only)
+
+The orchestrator appends `Global cycle` and cross-phase retry counts itself, read from `.claude/session-state/team-run.json` — a Tester cannot know orchestrator-level state and MUST NOT report it (see `escalation.md` → "Escalation Report Format").
+
 ```markdown
 ⚠ ESCALATION from Tester
 Source: Phase 4 (Verification)
+Classification: [per escalation.md's Classification section]
 Failing test: [file:line]
 Expected: [from plan or spec]
 Actual: [what test observed]
