@@ -104,21 +104,32 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 
 ### Dependencies
 
-Alongside the env flags above, the harness uses a few external tools. Install them for the full experience — each is described below with what happens when it's absent.
+Alongside the env flags above, the harness uses a few external tools. Each row states what happens when it's absent — **two abort, the rest degrade**.
+
+**Hard (a workflow step stops and asks you to install):**
 
 | Tool | Used for | Without it |
 |------|----------|-----------|
 | **impeccable** plugin · [impeccable.style](https://impeccable.style/) | UI/UX design quality — the `team-uiux-master` / `web-architect` / `web-reviewer` agents call it via `Skill("impeccable:impeccable", "<sub-command> [target]")` | those agents pause and ask you to install it |
 | **superpowers** plugin · [repo](https://github.com/anthropics/claude-plugins-official) | general debugging methodology, code-review dispatch, and parallel-agent dispatch decisions — `/debug` and the `debug` skill invoke `superpowers:systematic-debugging` and layer the harness's TS/LSP patterns + escalation boundary on top | `/debug` aborts and asks you to install it |
+
+**Soft (the harness keeps working, with a named fallback or a reduced feature):**
+
+| Tool | Used for | Without it |
+|------|----------|-----------|
 | **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | **default** browser driver for E2E / QA / smoke / exploration (requested or not) + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `reference/e2e-testing.md` / `agentic-testing` path — never to `claude-in-chrome` |
+| **Playwright** (`@playwright/test`, or the Playwright MCP) | the committed `.spec.ts` E2E suite, and the fallback driver when `agent-browser` is absent | with neither Playwright nor `agent-browser`, Phase 4 has no browser driver: E2E is reported `미검증`, never inferred green |
+| **`jq`** | the `PostToolUse` hook reads its file path from the hook's stdin JSON | the post-edit warning hook (`console.*` / `debugger` / `_note/` write checks) silently no-ops. `session-start.sh` prints one "jq not found" line per session so it fails loudly once instead of quietly forever |
+| **`gh` CLI** | GitHub releases per version bump, and the `git-handler` agent's PR/issue work | do those steps by hand; nothing else is affected |
 
 ```bash
 /plugin marketplace add pbakaus/impeccable && /plugin install impeccable@impeccable
 /plugin install superpowers@claude-plugins-official
 npm i -g agent-browser && agent-browser install   # skill ships with the CLI
+brew install jq                                   # apt install jq · winget install jqlang.jq
 ```
 
-impeccable and superpowers are expected to be installed before running the workflow; agent-browser is optional, but when installed it is the default browser driver (CLAUDE.md → "Browser Driving").
+impeccable and superpowers are expected to be installed before running the workflow. `jq` is worth installing on any machine that edits code — it is the only soft dependency whose absence has no in-session symptom other than the session-start line.
 
 ### First Run
 
@@ -257,6 +268,10 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 ## Changelog
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
+
+**v1.25.1** — the dependency list said three tools; the harness reaches for six.
+- **`jq` no longer breaks the post-edit hook silently** — the `PostToolUse` command called `jq` before the script ran, so a machine without `jq` had the `console.*` / `debugger` / `_note/` checks disabled with no symptom. The guard now lives inside the script, and `session-start.sh` announces it once per session.
+- **Dependencies split Hard vs Soft, all six listed** — Hard: `impeccable`, `superpowers`. Soft: `agent-browser`, Playwright, `jq`, `gh` — the last three were load-bearing but undocumented.
 
 **v1.25.0** — the `ponytail` dependency is gone, and the harness lost the parts nothing routed to. Skills 21 → 19, reference docs 6 → 5, commands 13 → 14.
 - **`ponytail` removed entirely** — `team-tester` Step 6 (`/ponytail-review` on the diff, ABORT when uninstalled) and the Leader's Phase 4 minimalism checkpoint are gone. Hard dependencies: `impeccable`, `superpowers`. Minimalism is now decided once, at the **Phase 1 approval gate**, from the YAGNI ladder the architect agents already carry.

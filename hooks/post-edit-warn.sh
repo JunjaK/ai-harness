@@ -3,8 +3,16 @@
 # Triggered: PostToolUse for Edit/Write operations
 # Source: gstack console-warn + ECC design-quality-check patterns
 
-# Get the file path from the tool result (passed as argument)
+# File path comes either as an argument or from the hook's stdin JSON.
+# jq is the only external tool this hook needs; when it is absent we no-op
+# SILENTLY here (a warning on every Edit/Write would be spam) — session-start.sh
+# emits the one visible "jq not found" line, once per session.
 FILE="$1"
+
+if [ -z "$FILE" ]; then
+  command -v jq >/dev/null 2>&1 || exit 0
+  FILE=$(jq -r '.tool_input.file_path // empty' 2>/dev/null)
+fi
 
 if [ -z "$FILE" ] || [ ! -f "$FILE" ]; then
   exit 0

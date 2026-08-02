@@ -4,6 +4,16 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.25.1 — 2026-08-03
+
+The dependency list named three tools; the harness actually reaches for six. The undocumented one that mattered was `jq` — without it the post-edit hook failed on every single Edit/Write and said nothing.
+
+### Fixed
+- **The `PostToolUse` hook no longer depends on `jq` being present to fail safely.** `hooks.json` previously ran `jq -r '.tool_input.file_path' | xargs … post-edit-warn.sh`; with no `jq` on PATH the pipeline produced nothing and the hook's `console.*` / `debugger` / `_note/`-write checks were disabled silently, forever. The hook command now calls the script directly, and the script reads its path from stdin JSON behind a `command -v jq` guard — no output when `jq` is missing (a warning per keystroke-level edit would be spam), and the argument form still works. `session-start.sh` prints the one visible `jq not found` line per session, so the degradation is announced exactly once instead of never.
+
+### Changed
+- **`README` → Dependencies is split into Hard and Soft, and lists all six tools.** Hard (a step aborts): `impeccable`, `superpowers`. Soft (named fallback or reduced feature): `agent-browser`, **Playwright**, **`jq`**, **`gh` CLI** — the last three were load-bearing but undocumented. Each row states the actual degradation; the Playwright row records that with neither it nor `agent-browser` present, Phase 4 reports E2E as `미검증` rather than inferring green.
+
 ## v1.25.0 — 2026-08-02
 
 One less hard dependency, and a pass over the harness's own bulk. A structural audit — inbound references and actual invocation paths, not usage counters — found two components that nothing routes to and two that fire without being asked. Skills 21 → 19, reference docs 6 → 5, commands 13 → 14.
