@@ -4,6 +4,22 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.25.0 — 2026-08-02
+
+One less hard dependency, and a pass over the harness's own bulk. A structural audit — inbound references and actual invocation paths, not usage counters — found two components that nothing routes to and two that fire without being asked. Skills 21 → 19, reference docs 6 → 5, commands 13 → 14.
+
+### Removed
+- **The `ponytail` plugin dependency, entirely.** `team-tester` Step 6 ("Over-Engineering Audit"), which ran `/ponytail-review` on the diff and ABORTed when the plugin was missing, is gone; so are the delegated-plugin entry in `CLAUDE.md`, the README dependency row and its install line, and the pointer in `coding-standards` §4. Hard dependencies now number two: `impeccable` and `superpowers`.
+- **The Team Leader's Phase 4 minimalism checkpoint.** Its only input was the ponytail result. Phase 4 no longer re-opens Phase 3 over solution complexity — only a failing test, type, or security gate does.
+- **The `security-review` skill.** Nothing invoked it. Phase 5 spawns `Agent(team-architect-infra)`, and that agent carries the Security Checklist, Infrastructure Checklist, and audit output format in its own definition — so the skill was a second, silently diverging copy of the OWASP list. `.claude/rules/security.md` claimed the skill ran the audit; it now names the agent that actually does. The Phase 5 audit itself is unchanged and still mandatory.
+- **The `scenario-to-e2e` skill.** Zero entry points: no command, no agent, no other skill referenced it — reachable only if its own description happened to auto-fire.
+- **`reference/tdd-workflow.md`.** The agent that performs TDD (`team-designer`) never cited it; it carries its own RED→GREEN→REFACTOR cycle inline. The doc's only live citation was `/debug`.
+
+### Changed
+- **Minimalism is a design-time gate with one decision point.** The YAGNI ladder still lives in `coding-standards` §4 and in every architect agent's own definition (`team-architect-be` / `-fe` / `-infra`, `web-architect`); `plan-review` surfaces violations as "Over-Engineering / YAGNI" findings; the Team Leader decides at the **Phase 1 approval gate**, before anything is built. `team-tester` is now explicitly told not to substitute its own diff-level minimalism heuristic in place of the removed step.
+- **Plan diagrams are opt-in, via the new `/plan-visualizer` command.** `/team` and `/team-run` previously generated an HTML diagram unconditionally after Phase 1, and `/team-brainstorm` had a whole Visualization step — a render nobody asked for, in the hot path. Those steps are gone; the `plan-visualizer` skill now fires only from the command (no argument → newest plan in `_docs/active/planning/`; path argument → that plan).
+- **`submodule-worktree` triggers on the project profile, not on `.gitmodules`.** It now requires `.claude/project-profile/structure.md` → **Submodule Layout** with `Submodule-monorepo: yes`, and STOPs with "run `/team-init` first" otherwise, falling back to plain `parallelization`. A bare `.gitmodules` says submodules exist but not which hold code, which are worktree targets, or which gitignored runtime files a clean checkout would lack — guessing those is how a worktree comes up missing its `.env`.
+
 ## v1.24.0 — 2026-07-30
 
 App UI work had no stated verification surface, so "looks right in the code" could pass as done — and nothing recorded that half of it is impossible to check on a Windows host.

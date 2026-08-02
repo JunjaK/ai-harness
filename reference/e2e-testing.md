@@ -152,8 +152,8 @@ _test/                                 # GITIGNORED — all E2E run outputs
 - **`_test/` MUST be gitignored.** Before the first run, ensure the project `.gitignore` contains `_test/`
   (append if missing) — it holds screenshots, traces, videos, reports, and live session tokens.
 - Every run writes under `_test/<YYYY-MM-DD>-<test-name>/`; that run's screenshots go in its `screenshots/`.
-- **`_test/` = throwaway.** It holds run artifacts (from any run) + on-demand/exploratory specs
-  (e.g. `scenario-to-e2e` validation runs). **Durable CI test _code_** (committed suites, `agentic-testing`
+- **`_test/` = throwaway.** It holds run artifacts (from any run) + on-demand/exploratory specs.
+  **Durable CI test _code_** (committed suites, `agentic-testing`
   crystallized specs) lives in the project's real test dir (`tests/`/`e2e/`) — only its *artifacts* land in
   `_test/`. To keep a generated spec in CI, **promote** it out of `_test/` into the committed test dir.
 

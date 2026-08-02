@@ -1,6 +1,6 @@
 ---
 name: submodule-worktree
-description: "Worktree strategy for a submodule-monorepo where the superproject is a thin shell (doc storage + submodule pointers) and the real code lives in submodules (illustratively `fe`/`be`). TRIGGER when a worktree / parallel-implementation request lands in a repo that has git submodules (`.gitmodules`), or the project profile records a Submodule Layout. Rules: worktree ONLY the code submodules, keep the superproject as the single original checkout (the `_docs/` anchor), CARRY gitignored runtime files (`.env`/secrets/local config) into each new worktree, and defer submodule-pointer bumps. The submodule-specialized companion to `parallelization`."
+description: "Worktree strategy for a submodule-monorepo where the superproject is a thin shell (doc storage + submodule pointers) and the real code lives in submodules (illustratively `fe`/`be`). TRIGGER on ONE condition: a worktree / parallel-implementation request lands in a project whose profile (`.claude/project-profile/`, written by `/team-init`) records a **Submodule Layout** section with `Submodule-monorepo: yes`. A bare `.gitmodules` file is NOT a trigger — run `/team-init` first so the layout, worktree targets, and carry-list are recorded. Rules: worktree ONLY the code submodules, keep the superproject as the single original checkout (the `_docs/` anchor), CARRY gitignored runtime files (`.env`/secrets/local config) into each new worktree, and defer submodule-pointer bumps. The submodule-specialized companion to `parallelization`."
 ---
 
 # Submodule Worktree
@@ -8,6 +8,13 @@ description: "Worktree strategy for a submodule-monorepo where the superproject 
 For a **submodule-monorepo**: the superproject (`integrated`) is a thin shell whose only jobs are **document storage** (`_docs/`) and **submodule pointers**; the real code lives in submodules. This skill specializes `parallelization` for that shape — the general worktree rules (base-from-current-HEAD, max-5, no-file-overlap, merge order, cleanup) still apply and are NOT repeated here; read `parallelization` for them.
 
 > **`fe`/`be`/`integrated` throughout are illustrative — actual submodule names and roles are per-project.** The SSOT is the project profile: `/team-init` (`project-analyzer`) records, in `.claude/project-profile/structure.md`, whether the repo is a submodule-monorepo, which submodules hold code (the ones to worktree), and whether the superproject is a docs+pointers shell. Never hardcode names — read the profile, and enumerate live with `git submodule`.
+
+## Precondition (check FIRST — before any worktree command)
+
+Read `.claude/project-profile/structure.md` → **Submodule Layout**.
+
+- Section present with `Submodule-monorepo: yes` → proceed; its code-submodule list and carry-list are the SSOT for every step below.
+- Section absent, or the profile does not exist → **STOP**. Tell the user: `submodule layout not in the project profile — run /team-init first`, then fall back to plain `parallelization` for this request. MUST NOT infer the layout from a bare `.gitmodules`: the file says submodules exist, not which ones hold code, which are worktree targets, or what gitignored runtime files a clean checkout would lack. Guessing those is how a worktree comes up missing its `.env`.
 
 ## When this applies (and when it does NOT)
 

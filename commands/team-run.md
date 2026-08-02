@@ -36,11 +36,7 @@ Same as `/team` but with key differences:
 ## Orchestration
 
 1. **Load skill**: Invoke the `team-workflow` skill
-2. After Phase 1: Generate HTML plan diagram using `plan-visualizer` skill
-   - Save to `_docs/active/planning/<created>/<created>-<topic>-plan.visual.html` (same dir & basename as plan .md)
-   - Add `[View Plan Diagram](./<created>-<topic>-plan.visual.html)` link in plan .md
-   - Update HTML after Phase 3, 4, 5 with progress
-3. Execute all 5 phases following skill orchestration logic
+2. Execute all 5 phases following skill orchestration logic
 3. All agents run with `mode: "bypassPermissions"`
 4. Designers use `isolation: "worktree"` for parallel work
 
@@ -67,4 +63,4 @@ Tests: [pass count] pass, 0 fail
 - `/team` — Interactive mode (user involved in planning)
 - `/team-brainstorm` — Planning only mode (no implementation)
 - `team-workflow` skill — Full orchestration logic
-- `plan-visualizer` skill — HTML diagram generation
+- `/plan-visualizer` — render the plan as an HTML diagram, if you want one (never automatic)

@@ -1,6 +1,6 @@
 ---
 name: plan-visualizer
-description: "Generate interactive HTML visualization of team plans. Use after plan is finalized in /team, /team-run, or /team-brainstorm. Creates a visual diagram showing team composition, phase flow, file assignments, and dependency graph. Saves HTML alongside the plan .md file."
+description: "Generate an interactive HTML visualization of a team plan — team composition, phase flow, file assignments, dependency graph — saved alongside the plan .md. Fires ONLY from the /plan-visualizer command, i.e. when the user explicitly asks for a diagram. No workflow phase invokes it."
 ---
 
 # Plan Visualizer
@@ -9,8 +9,7 @@ Generate an interactive HTML diagram from a finalized team plan. The HTML file i
 
 ## When to Use
 
-- After Phase 1 (Planning) completes in `/team`, `/team-run`, or `/team-brainstorm`
-- After plan updates (post-escalation re-planning)
+**Only when the user explicitly asked for it** — via `/plan-visualizer` or a direct request for a plan diagram. Phase 1 of `/team`, `/team-run`, and `/team-brainstorm` completes WITHOUT a diagram; MUST NOT self-invoke there.
 
 ## Input
 

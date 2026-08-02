@@ -41,7 +41,7 @@ Before writing ANY code, walk this ladder top-down and STOP at the first rung th
 - Don't build features before needed; no speculative generality; start simple, refactor when needed.
 - **Lazy, not negligent.** Minimalism applies to *solution complexity ONLY*. Trust-boundary validation, data-loss handling, security, accessibility, and tests are NEVER on the chopping block — the harness gates these hard (TDD, verification-loop, Phase 5 security). Cutting them is not minimalism, it's a defect.
 - **Lazy about the solution, never about reading.** Understand the existing code flow before deciding what to cut or reuse.
-- The `ponytail` plugin operationalizes this ladder (modes + `/ponytail-review`); see CLAUDE.md "Code Minimalism (ponytail)".
+- **This ladder is a design-time gate, not a post-hoc audit.** The architect agents apply it before proposing; `plan-review` → "Over-Engineering / YAGNI" surfaces violations; the Team Leader decides at the Phase 1 gate. Phase 4 does not re-audit it.
 
 ## TypeScript Standards
 

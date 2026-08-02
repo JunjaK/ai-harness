@@ -148,11 +148,11 @@ On receiving an escalation, route entirely via `skills/team-workflow/resources/e
 5. Otherwise, route to the row's target phase with specific guidance
 6. Report to user: `⚠ ESCALATION: [source] → [target]. Reason: [reason]. Retry: N/3. Global cycle: N/3.` — values read from `team-run.json`, not recalled
 
-## Minimalism Gate (ponytail synthesis)
+## Minimalism Gate
 
-The Team Leader owns the over-engineering judgment across two checkpoints:
-- **Phase 1 approval gate**: weigh `plan-review`'s "Over-Engineering / YAGNI" findings against the architect plans. If a plan adds a file/dependency that a lower YAGNI rung (reuse / stdlib / native / installed dep) could satisfy, REQUEST REVISION before Phase 3.
-- **Phase 4**: consume the Tester's `/ponytail-review` result on the diff. For each flagged over-engineered section, decide: accept (justified) or request a trim (re-enter Phase 3).
+The Team Leader owns the over-engineering judgment at ONE checkpoint — **the Phase 1 approval gate**:
+- Weigh `plan-review`'s "Over-Engineering / YAGNI" findings against the architect plans. If a plan adds a file/dependency that a lower YAGNI rung (reuse / stdlib / native / installed dep) could satisfy, REQUEST REVISION before Phase 3.
+- **Phase 4 does NOT audit minimalism.** Minimalism is a design-time decision; do NOT re-enter Phase 3 for over-engineering discovered after implementation unless it breaks a test, type, or security gate.
 - **Bound**: minimalism applies to *solution complexity only*. Do NOT trim tests, validation, security, or accessibility — those are gated independently (TDD, verification-loop, Phase 5).
 
 ## Constraints

@@ -115,12 +115,7 @@ Pass criteria (ALL required):
 - All tests added in this task PASS
 - Coverage meets project threshold (check `testing.md`, default 80% lines/functions/branches/statements via `@vitest/coverage-v8`) on the files actually run
 
-### 6. Over-Engineering Audit (`/ponytail-review`)
-
-After tests pass, run `/ponytail-review` on this task's diff to flag over-engineered sections.
-- If the ponytail plugin is not installed, the invocation fails: ABORT this step and report `ponytail not installed — run /plugin install ponytail@ponytail`. Do NOT substitute your own heuristic.
-- Otherwise include ponytail's findings in the report — do NOT act on them yourself; the minimalism decision belongs to the Team Leader's gate.
-- This is an over-engineering audit ONLY. It NEVER overrides the test, coverage, or security gates above.
+> Over-engineering is NOT audited here. Minimalism is gated at design time (the architects' YAGNI ladder + `plan-review` → Over-Engineering / YAGNI, decided at the Team Leader's Phase 1 gate). Do NOT invent a diff-level minimalism heuristic in this phase.
 
 > On PASS, the orchestrator may invoke **Phase 4.5 agentic testing** (`team-agentic-tester`) before Phase 5. team-tester does not run it.
 

@@ -27,7 +27,7 @@ Run `Skill(skill="superpowers:systematic-debugging")` under its **Iron Law — n
    - **Verify by running, not by claiming** — the failing test now passes AND the authoritative type-check/lint/test commands from project-profile `stack.md` are green. Report `됐다 / 됐는데 미검증 / 안 됨` distinctly; never log unverified as done.
    - **A network 200 / green UI is not proof** — where the change touches data, confirm DB-level persistence (the value survives a refresh).
    - **App (mobile) targets verify on a booted simulator/emulator**, never by inspection. iOS simulator is **macOS only**; Android emulator runs on macOS and Windows — so on Windows an iOS fix is **미검증**, not fixed, and MUST NOT be inferred from Android. Say which device the run used.
-   - Full gate sequence + baseline-vs-net-new rules: `reference/verification-loop.md`; TDD cycle detail: `reference/tdd-workflow.md`.
+   - Full gate sequence + baseline-vs-net-new rules: `reference/verification-loop.md`.
 6. **Escalate at the boundary (see below).** When the bug crosses solo scope, STOP and route up.
 
 Effort: start `xhigh`; escalate `/effort max` only after `xhigh` fails twice on the **same** bug.
@@ -59,7 +59,6 @@ Status:     fixed · fixed-unverified · escalated→/team · not-reproduced
 
 - `superpowers:systematic-debugging` skill — the general methodology (Iron Law · 4 phases · red flags) this command fires
 - `debug` skill (harness) — the TS/LSP-accelerated layer loaded for TypeScript targets
-- `reference/tdd-workflow.md` — the failing test the root-cause fix is written against (document, not a skill: Read it)
 - `reference/verification-loop.md` — confirm the fix before claiming success (no self-report trust)
 - `/team` · `/team-run` — escalation target when the bug is a Fundamental Issue (cross-cutting / 3+ modules / BE change)
 

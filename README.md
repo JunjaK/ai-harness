@@ -8,7 +8,7 @@ Specialized AI agents collaborate through defined phases to implement features, 
 
 - **Testing stack** — unit (Vitest) → deterministic E2E (Playwright) → **agentic E2E** (Phase 4.5: an agent verifies goals and crystallizes deterministic tests) → **human QA** (`/test-scenario-doc`, an interactive checklist). When the [`agent-browser`](https://agent-browser.dev/) CLI + skill are installed, it becomes the **default browser driver** for every browser-driving task — E2E / QA / smoke / exploration, Phase 4 driving and Phase 4.5 exploration included — including headless login via its encrypted **Auth Vault** (the password never reaches the LLM) — and otherwise falls back to the Playwright path.
 - **Document storage (3 buckets)** — `_docs/` (project, lifecycle-managed) · `_note/` (human-owned, agent read-only) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge), classified by a portable ownership discriminator.
-- **Code minimalism** — the `ponytail` YAGNI decision ladder, applied at design time and reviewed in Phase 4.
+- **Code minimalism** — a harness-owned YAGNI decision ladder (`coding-standards` §4), applied by the architect agents at design time and gated once, at the Phase 1 plan approval.
 - **Renewal Mode Gate** — every non-trivial refactor / fix / redesign starts by choosing **A (compatible)** or **B (destructive renewal)**; Mode B requires a risk block + explicit approval, then a full anti-drift commitment so back-compat scaffolding never creeps back in.
 - **Continuous learning** — `continuous-learning` extracts reusable, validated, non-obvious patterns from sessions, reuses them at task start, and evolves stable ones into skills / commands / agents.
 - **Ultracode orchestration** — when enabled, fan-out phases run via the Workflow tool, with **per-agent model routing** (read-only scan → Haiku, TDD-implement / verify / review / translate → Sonnet, architecture / security → Opus) so a fan-out isn't silently all-Opus.
@@ -56,6 +56,7 @@ Classification (simple fix vs fundamental issue), routing, retry/global-cycle ca
 | `/take-over` | Resume a handed-off work-stream from `_docs/handoff/` — hydrate the spec, verify state, graduate the handoff into its durable `_docs` home |
 | `/docs-sweep` | Reap stale `_docs/` and re-verify orphan-document invariants |
 | `/test-scenario-doc` | On-demand human QA checklist HTML (human acceptance layer) |
+| `/plan-visualizer` | On-demand HTML diagram of a plan (team, phases, files, deps) — no workflow phase generates one |
 | `/brain-connect` | Pair an optional personal **brain** SSOT (cross-machine persona, global `CLAUDE.md`, personal global skills, auto-memory, recommended-settings manifest) with the harness, or relocate an existing one |
 
 ## Installation (Plugin)
@@ -108,18 +109,16 @@ Alongside the env flags above, the harness uses a few external tools. Install th
 | Tool | Used for | Without it |
 |------|----------|-----------|
 | **impeccable** plugin · [impeccable.style](https://impeccable.style/) | UI/UX design quality — the `team-uiux-master` / `web-architect` / `web-reviewer` agents call it via `Skill("impeccable:impeccable", "<sub-command> [target]")` | those agents pause and ask you to install it |
-| **ponytail** plugin · [repo](https://github.com/DietrichGebert/ponytail) | YAGNI minimalism — Phase 4 runs `/ponytail-review` on the diff | Phase 4 asks you to install it (the decision ladder is also distilled into `coding-standards` §4) |
 | **superpowers** plugin · [repo](https://github.com/anthropics/claude-plugins-official) | general debugging methodology, code-review dispatch, and parallel-agent dispatch decisions — `/debug` and the `debug` skill invoke `superpowers:systematic-debugging` and layer the harness's TS/LSP patterns + escalation boundary on top | `/debug` aborts and asks you to install it |
 | **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | **default** browser driver for E2E / QA / smoke / exploration (requested or not) + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `reference/e2e-testing.md` / `agentic-testing` path — never to `claude-in-chrome` |
 
 ```bash
 /plugin marketplace add pbakaus/impeccable && /plugin install impeccable@impeccable
-/plugin install ponytail@ponytail
 /plugin install superpowers@claude-plugins-official
 npm i -g agent-browser && agent-browser install   # skill ships with the CLI
 ```
 
-impeccable, ponytail, and superpowers are expected to be installed before running the workflow; agent-browser is optional, but when installed it is the default browser driver (CLAUDE.md → "Browser Driving").
+impeccable and superpowers are expected to be installed before running the workflow; agent-browser is optional, but when installed it is the default browser driver (CLAUDE.md → "Browser Driving").
 
 ### First Run
 
@@ -166,14 +165,12 @@ Skills that agents reference during their workflow phases:
 | `agentic-testing` | Phase 4.5 | Adapter-based agentic E2E — explore goal → verify → crystallize deterministic test |
 | `agent-browser-e2e` | **Default driver — any browser-driving task, Phase 4 driving + Phase 4.5 exploration included** | `agent-browser` is the first choice for E2E/QA/smoke/exploration/selector resolution, requested or not, plus headless login via its encrypted Auth Vault (no password reaches the LLM). One-time gate (CLI present + skill available), else fall back to Playwright — never silently, and never to `claude-in-chrome`. Playwright still owns the committed `.spec.ts` suite |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
-| `scenario-to-e2e` | On-demand | Turn a `test-scenario-doc` into runnable Playwright specs — the doc's `SCENARIOS` config is SSOT; drives the live app for real selectors, runs + green-gates each spec, falls back to a marked-unverified scaffold. No fabricated selectors |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
-| `security-review` | Phase 5 | OWASP Top 10 checklist for Architect C |
-| `plan-visualizer` | Phase 1+ | HTML diagram of plan (team, phases, files, deps) — fills the self-contained skeleton in `skills/plan-visualizer/resources/template.html` |
+| `plan-visualizer` | **On-demand only** (`/plan-visualizer`) | HTML diagram of a plan (team, phases, files, deps) — fills the self-contained skeleton in `skills/plan-visualizer/resources/template.html`. No workflow phase generates one |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
 | `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT with the harness — links global `CLAUDE.md`, `persona.md`, per-skill global skills, commands and auto-memory, plus a merged recommended-settings manifest and opt-in sync hooks; dependency-free, ships a generic connector template for both shells |
 
-Cross-cutting skills (any phase): `continuous-learning`, `parallelization`, `submodule-worktree`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`.
+Cross-cutting skills (any phase): `continuous-learning`, `parallelization`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`. Plus `submodule-worktree`, which fires only where the project profile records a Submodule Layout (`/team-init` writes it; a bare `.gitmodules` is not enough).
 
 ### Reference documents (`reference/*.md`) — read, don't invoke
 
@@ -182,7 +179,6 @@ Methodology bodies that agents cite by section rather than dispatch. They carry 
 | Document | Used by | Contents |
 |----------|---------|----------|
 | `reference/coding-standards.md` | Architects, Designers (Phase 1/3) | Universal code quality baseline (strict TS); §4 = YAGNI decision ladder |
-| `reference/tdd-workflow.md` | Designers (Phase 3), `/debug` | Red-Green-Refactor cycle (Vitest 4.x) |
 | `reference/e2e-testing.md` | Testers (Phase 4) | Playwright E2E patterns, Page Object Model, flaky-test strategy |
 | `reference/verification-loop.md` | Testers, Leader (Phase 4-5) | 6-phase quality gate (build, type, lint, test, security, diff) + baseline-vs-net-new rules, reliability gates (tests green in ≥ 80% of runs, security 3/3 clean), opt-in human comprehension quiz |
 | `reference/plan-review.md` | Leader (Phase 1) | Critical plan review + pre-plan elicitation |
@@ -212,7 +208,7 @@ junjak-ai-harness/
 │   ├── team-agentic-tester.md
 │   ├── web-architect.md
 │   └── web-reviewer.md
-├── commands/                    # 13 slash commands
+├── commands/                    # 14 slash commands
 │   ├── team-new.md              # /team-new
 │   ├── team-init.md             # /team-init
 │   ├── team.md                  # /team
@@ -225,6 +221,7 @@ junjak-ai-harness/
 │   ├── take-over.md             # /take-over
 │   ├── docs-sweep.md            # /docs-sweep
 │   ├── test-scenario-doc.md     # /test-scenario-doc
+│   ├── plan-visualizer.md       # /plan-visualizer
 │   └── brain-connect.md         # /brain-connect
 ├── hooks/
 │   ├── hooks.json               # Plugin hook registration
@@ -232,14 +229,13 @@ junjak-ai-harness/
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
 │   └── post-edit-warn.sh
-├── reference/                   # 6 methodology documents — read, never invoked
+├── reference/                   # 5 methodology documents — read, never invoked
 │   ├── coding-standards.md
-│   ├── tdd-workflow.md
 │   ├── e2e-testing.md
 │   ├── verification-loop.md
 │   ├── plan-review.md
 │   └── token-optimization.md
-└── skills/                      # 21 workflow skills
+└── skills/                      # 19 workflow skills
     ├── team-workflow/
     ├── greenfield-bootstrap/
     ├── project-analyzer/
@@ -250,8 +246,6 @@ junjak-ai-harness/
     ├── wiki/
     ├── agentic-testing/
     ├── test-scenario-doc/
-    ├── scenario-to-e2e/
-    ├── security-review/
     ├── brainstorm/
     └── ... (8 more)
 ```
@@ -264,11 +258,12 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
 
-**v1.24.0** — app UI work now names its verification surface, and the host OS gates it.
-- **Mobile verification runs on a booted simulator/emulator**, never by code inspection — boot/select the device explicitly through the project's version pin (`fvm flutter run -d <id>`) and name it in the report.
-- **macOS runs iOS + Android; Windows/Linux run Android only** (the iOS Simulator needs Xcode). On Windows an iOS result is `미검증`, never inferred from a green Android run — permissions, safe-area insets, keyboard, deep links, sign-in, file pickers and push are where that inference breaks.
-- No device bootable → `driver unavailable` and stop, rather than reasoning statically and calling it verified.
-- New `testing.md` device rows record each app project's simulator/AVD targets, launch command, and version pin at `/team-init` time.
+**v1.25.0** — the `ponytail` dependency is gone, and the harness lost the parts nothing routed to. Skills 21 → 19, reference docs 6 → 5, commands 13 → 14.
+- **`ponytail` removed entirely** — `team-tester` Step 6 (`/ponytail-review` on the diff, ABORT when uninstalled) and the Leader's Phase 4 minimalism checkpoint are gone. Hard dependencies: `impeccable`, `superpowers`. Minimalism is now decided once, at the **Phase 1 approval gate**, from the YAGNI ladder the architect agents already carry.
+- **`security-review` skill removed** — nothing invoked it; Phase 5's `team-architect-infra` owns the OWASP checklist in its own definition, so the skill was a diverging second copy. The Phase 5 audit is unchanged and still mandatory.
+- **`scenario-to-e2e` removed** (zero entry points) and **`reference/tdd-workflow.md` removed** (the TDD agent never cited it — it inlines its own cycle).
+- **Plan diagrams are opt-in via `/plan-visualizer`** — `/team`, `/team-run`, and `/team-brainstorm` no longer render one automatically.
+- **`submodule-worktree` gates on the project profile**, not a bare `.gitmodules` — no Submodule Layout recorded → "run `/team-init` first", fall back to `parallelization`.
 
 ## License
 

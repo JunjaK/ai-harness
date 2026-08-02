@@ -10,4 +10,4 @@ Loads when source files are read. (The Phase 5 audit is mandatory for every team
 - MUST NOT commit secrets (keys, tokens, passwords) — use env vars via the config module.
 - MUST NOT use `eval`, `new Function`, or `innerHTML` with unsanitized input.
 - MUST sanitize user input before rendering or DB insert; MUST parameterize every SQL query.
-- Phase 5 security audit is MANDATORY for every team workflow (`security-review` skill — OWASP Top 10 + audit format).
+- Phase 5 security audit is MANDATORY for every team workflow. It runs as `Agent(team-architect-infra)`, which owns the OWASP checklist and the audit output format in its own definition — there is no separate skill to invoke.

@@ -71,7 +71,7 @@ Create a todo per item and complete in order:
 
 - **Save the design to `_docs/active/planning/<created>/<created>-<topic>-design.md`** (per `docs-lifecycle`). NOT to any `docs/superpowers/` path.
 - **Do NOT auto-commit.** The user gates commits — leave the file staged-or-unstaged for them.
-- Use the `docs-lifecycle` skill for foldering/status conventions; use `plan-visualizer` only if a diagram genuinely helps (optional, not default).
+- Use the `docs-lifecycle` skill for foldering/status conventions. Do NOT generate a diagram; if the user wants one, point them at `/plan-visualizer`.
 
 ## Spec Self-Review
 

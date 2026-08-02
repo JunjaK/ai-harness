@@ -40,18 +40,17 @@ Applies to all agents, skills, and direct use at the start of any task that chan
 | Security (secrets, injection, SQL) | `.claude/rules/security.md` |
 | `_docs/` plan-storage foldering | `.claude/rules/docs.md` |
 | UI/UX design quality | `impeccable` plugin + the uiux/web agent definitions |
-| Code minimalism (YAGNI) | `coding-standards` §4 + build-agent defs + Phase 4 `/ponytail-review` |
+| Code minimalism (YAGNI) | `coding-standards` §4 + architect/build-agent defs + `plan-review` → Phase 1 gate (design-time only; Phase 4 does NOT audit it) |
 | Escalation criteria + retry caps | `skills/team-workflow/resources/escalation.md` (per-phase retries max 3; global re-plan cycles max 3 → ABORT) |
 | Parallelization, contract-sync, docs-lifecycle, checkpoint, … | the matching skill (loads on invoke) |
 
-**`reference/<name>.md` are documents, not skills** — `coding-standards`, `tdd-workflow`, `e2e-testing`, `verification-loop`, `plan-review`, `token-optimization`. A citation like "(`verification-loop` §Baseline & Net-New)" means **Read that file**; MUST NOT pass these names to the Skill tool. Rules that must fire unconditionally are inlined at their call sites.
+**`reference/<name>.md` are documents, not skills** — `coding-standards`, `e2e-testing`, `verification-loop`, `plan-review`, `token-optimization`. A citation like "(`verification-loop` §Baseline & Net-New)" means **Read that file**; MUST NOT pass these names to the Skill tool. Rules that must fire unconditionally are inlined at their call sites.
 
 `.claude/rules/` is repo-local and path-scoped; it does not travel with the plugin. **Non-TS projects**: use the native checker from `stack.md` (`pyright`/`mypy`/`go vet`…); `verification-loop` Phase 2 adapts.
 
-**Delegated plugins (hard dependencies)** — each reaches subagents via agent/command definitions, not this file. All three ABORT + request install when unregistered. MUST NOT add any of them to `plugin.json` deps: external-marketplace manifest deps break plugin load.
+**Delegated plugins (hard dependencies)** — each reaches subagents via agent/command definitions, not this file. Both ABORT + request install when unregistered. MUST NOT add either to `plugin.json` deps: external-marketplace manifest deps break plugin load.
 
 - **`impeccable`** (`pbakaus/impeccable`) — UI/UX quality.
-- **`ponytail`** — YAGNI minimalism (`/ponytail-review`, Phase 4).
 - **`superpowers`** — general debugging methodology, code-review dispatch, and parallel-agent dispatch decisions. The harness deliberately does NOT fork these; `/debug` and the `debug` skill invoke `superpowers:systematic-debugging` and layer the harness's TS/LSP patterns and escalation boundary on top.
 
 ---

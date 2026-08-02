@@ -25,21 +25,9 @@ If no task description provided, ask the user for one.
 5. **Optional**: Spawn Architect C if infra/security concerns
 6. **Optional**: Spawn UI/UX Master if visual changes needed
 7. **Save plan** to `_docs/active/planning/<created>/<created>-<topic>-plan.md`
-8. **Generate visualization** — create HTML diagram of the plan
-   - Save to `_docs/active/planning/<created>/<created>-<topic>-plan.visual.html`
-   - Add link in plan .md: `[View Plan Diagram](./<created>-<topic>-plan.visual.html)`
-9. **Present plan** to user for review
+8. **Present plan** to user for review
 
-## Visualization
-
-After the plan is finalized, generate an HTML file with:
-- **Team composition** — roles involved and why
-- **Phase flow** — which phases will execute
-- **File assignment** — Designer file distribution (if determined)
-- **Dependency graph** — component/store/API relationships
-- **Risk highlights** — from plan-review (if applicable)
-
-Invoke the `plan-visualizer` skill.
+No diagram is generated here. If the user wants one, they run `/plan-visualizer`.
 
 ## Output
 
@@ -47,7 +35,6 @@ Invoke the `plan-visualizer` skill.
 📋 TEAM BRAINSTORM COMPLETE
 Task: [description]
 Plan: _docs/active/planning/<created>/<created>-<topic>-plan.md
-Diagram: _docs/active/planning/<created>/<created>-<topic>-plan.visual.html
 Team: Leader + Arch A + Arch B [+ Arch C] [+ UI/UX Master]
 
 Ready to execute? Use:
@@ -64,4 +51,4 @@ Ready to execute? Use:
 ## Related
 - `/team` — Full workflow with user involvement in planning
 - `/team-run` — Full workflow autonomous
-- `plan-visualizer` skill — HTML diagram generation
+- `/plan-visualizer` — render the plan as an HTML diagram, if you want one (never automatic)
