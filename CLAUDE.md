@@ -39,6 +39,7 @@ Applies to all agents, skills, and direct use at the start of any task that chan
 | TS type-check gate · LSP · generated-client contracts | `.claude/rules/typescript.md` |
 | Security (secrets, injection, SQL) | `.claude/rules/security.md` |
 | `_docs/` plan-storage foldering | `.claude/rules/docs.md` |
+| Throwaway output layout (`_workspace/`, screenshots, E2E byproducts) | §Document Storage below + `e2e-testing` §Artifact Layout |
 | UI/UX design quality | `impeccable` plugin + the uiux/web agent definitions |
 | Code minimalism (YAGNI) | `coding-standards` §4 + architect/build-agent defs + `plan-review` → Phase 1 gate (design-time only; Phase 4 does NOT audit it) |
 | Escalation criteria + retry caps | `skills/team-workflow/resources/escalation.md` (per-phase retries max 3; global re-plan cycles max 3 → ABORT) |
@@ -88,15 +89,20 @@ Task that modifies 3+ files / is cross-cutting (API+UI+state) / touches auth·pa
 
 ---
 
-## Document Storage (3 buckets)
+## Document Storage (4 buckets)
 
-Classify by **owner**, discriminator: *"swap this agent CLI for another — still meaningful?"* Yes → project/human (repo root, `_` prefix); No, agent-only → `.claude/`.
+Classify by **owner**, discriminator: *"swap this agent CLI for another — still meaningful?"* Yes → project/human (repo root, `_` prefix); No, agent-only → `.claude/`. Keeps-nothing byproducts go to `_workspace/` regardless of owner.
 
-| Bucket | Owner | Automation |
-|--------|-------|-----------|
-| `_docs/` | project | `docs-lifecycle` (auto-move, merge-on-complete, `git rm`) |
-| `_note/` | human | **none — agent read-only** |
-| `.claude/wiki/` | agent | `wiki` skill |
+| Bucket | Owner | Committed | Automation |
+|--------|-------|-----------|-----------|
+| `_docs/` | project | yes | `docs-lifecycle` (auto-move, merge-on-complete, `git rm`) |
+| `_note/` | human | yes | **none — agent read-only** |
+| `.claude/wiki/` | agent | yes | `wiki` skill |
+| `_workspace/` | throwaway | **no — gitignored** | none; delete freely |
+
+**Every throwaway file goes in `_workspace/<context>/`, never the repo root.** Screenshots, Playwright/E2E byproducts (traces, videos, reports), and anything else awkward to commit. Group by context — one folder per purpose, named for that purpose (`_workspace/e2e/`, …); a bare file at `_workspace/` root or the repo root is a defect. Ensure the project `.gitignore` contains `_workspace/` before the first write, and pass an **explicit path** to every capture call — a relative filename resolves to the repo root, which is the scatter this bucket exists to stop. Full layout: `e2e-testing` §Artifact Layout.
+
+**Vendor state paths win over `_workspace/`**: auth/session state is not a byproduct — use the tool's published location (Playwright → `playwright/.auth/`, gitignored). MUST NOT relocate those into `_workspace/`.
 
 **`_note/` is human-owned, agent read-only**: MUST NOT create/move/merge/reorganize/delete there on your own initiative — modify ONLY on explicit request. Exempt from `_docs/` lifecycle and frontmatter rules.
 

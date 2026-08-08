@@ -69,8 +69,8 @@ Credentials are stored AES-256-GCM encrypted under `~/.agent-browser/`. The agen
   ```
 - **Import state from a logged-in Chrome** (best for 2FA / SSO — no password step at all). The human starts Chrome with `--remote-debugging-port=9222` and logs in; then:
   ```bash
-  agent-browser --auto-connect state save _test/.auth/app.json
-  agent-browser --state _test/.auth/app.json open https://app.example.com/dashboard
+  agent-browser --auto-connect state save playwright/.auth/app.json
+  agent-browser --state playwright/.auth/app.json open https://app.example.com/dashboard
   ```
 - **Persistent profile / session restore** (login survives across runs):
   ```bash
@@ -81,8 +81,9 @@ Credentials are stored AES-256-GCM encrypted under `~/.agent-browser/`. The agen
 
 ### Security
 
-- State / auth files contain live session tokens → keep them under the gitignored `_test/.auth/` and
-  screenshots under `_test/<run>/screenshots/` (see `e2e-testing` **Artifact Layout**); delete when done.
+- State / auth files contain live session tokens → keep them under the gitignored `playwright/.auth/`
+  (Playwright's own published convention — not `_workspace/`, which is for byproducts) and screenshots under
+  `_workspace/e2e/<run>/screenshots/` (see `e2e-testing` **Artifact Layout**); delete when done.
 - Encrypt at rest: `export AGENT_BROWSER_ENCRYPTION_KEY=$(openssl rand -hex 32)`.
 - `--remote-debugging-port` grants full browser control on localhost — trusted machines only; close Chrome when done.
 - **Starting the app server / tunnels is the human's job** — surface a one-line "please start X" and don't script around it (harness operational discipline).

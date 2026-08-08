@@ -93,7 +93,7 @@ selectMode(ctx):
 
 Per goal: `id`, `outcome`, `met`, `trustworthy` (ultracode verify), `green`, `specPath|null`, `skipReason|null`. Sections: Verified+crystallized / Verified-not-crystallizable / Unmet (→ human escalation) / Distrusted verdicts.
 
-**Artifacts**: runtime artifacts (screenshots/traces/reports) follow the `_test/` gitignored **Artifact Layout** in `e2e-testing`; crystallized specs are committed **code** in the project's test dir, not `_test/`.
+**Artifacts**: runtime artifacts (screenshots/traces/reports) follow the `_workspace/` gitignored **Artifact Layout** in `e2e-testing` (E2E output → `_workspace/e2e/<run>/`); crystallized specs are committed **code** in the project's test dir, not `_workspace/`.
 
 ## See also (link, do not duplicate)
 - `skills/agent-browser-e2e/SKILL.md` — **the default driver for this phase's web Explorer** + headless Auth Vault login. Run its gate before driving; Playwright MCP is the fallback, not the first choice

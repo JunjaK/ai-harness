@@ -132,33 +132,41 @@ await responsePromise;
 await page.locator('[data-testid="modal"]').waitFor({ state: 'visible' });
 ```
 
-## Artifact Layout (`_test/` — gitignored)
+## Artifact Layout (`_workspace/` — gitignored)
 
-All E2E **run outputs** live under a single project-root `_test/` folder — **gitignored, never committed**
-(leading `_` = harness "special/owned", same family as `_docs`/`_note`). One dated, named folder per run;
-screenshots isolated in their own subfolder.
+Every throwaway run output lives under a single project-root `_workspace/` folder — **gitignored, never
+committed** (leading `_` = harness "special/owned", same family as `_docs`/`_note`). Files are grouped by
+**context**: one folder per purpose, named after that purpose. E2E owns `_workspace/e2e/`. A file dropped
+directly at `_workspace/` root — or at the repo root — is a defect, not a shortcut.
 
 ```
-_test/                                 # GITIGNORED — all E2E run outputs
-  <YYYY-MM-DD>-<test-name>/            # one folder per run/suite (date + what was tested, kebab)
-    screenshots/                       # screenshots ONLY here — never scattered at run root
-    artifacts/                         # Playwright outputDir: traces, videos, failure shots
-    report/                            # HTML report + results.json
-    run.log
-  .auth/                               # shared session/state tokens (cross-run) — also gitignored
+_workspace/                            # GITIGNORED — all throwaway output, grouped by context
+  e2e/                                 # E2E run outputs
+    <YYYY-MM-DD>-<test-name>/          # one folder per run/suite (date + what was tested, kebab)
+      screenshots/                     # screenshots ONLY here — never scattered at run root
+      artifacts/                       # Playwright outputDir: traces, videos, failure shots
+      report/                          # HTML report + results.json
+      run.log
+  <context>/                           # any other throwaway output — folder named for its purpose
 ```
 
 **Rules (MUST):**
-- **`_test/` MUST be gitignored.** Before the first run, ensure the project `.gitignore` contains `_test/`
-  (append if missing) — it holds screenshots, traces, videos, reports, and live session tokens.
-- Every run writes under `_test/<YYYY-MM-DD>-<test-name>/`; that run's screenshots go in its `screenshots/`.
-- **`_test/` = throwaway.** It holds run artifacts (from any run) + on-demand/exploratory specs.
-  **Durable CI test _code_** (committed suites, `agentic-testing`
-  crystallized specs) lives in the project's real test dir (`tests/`/`e2e/`) — only its *artifacts* land in
-  `_test/`. To keep a generated spec in CI, **promote** it out of `_test/` into the committed test dir.
+- **`_workspace/` MUST be gitignored.** Before the first run, ensure the project `.gitignore` contains
+  `_workspace/` (append if missing) — it holds screenshots, traces, videos, and reports.
+- Every run writes under `_workspace/e2e/<YYYY-MM-DD>-<test-name>/`; that run's screenshots go in its
+  `screenshots/`. Pass an explicit path to every capture call — a relative filename resolves to the repo
+  root, which is exactly the scatter this layout exists to stop.
+- **Auth / session state is NOT an artifact and does NOT go here.** Follow the tool's own published
+  convention: for Playwright that is `playwright/.auth/<name>.json` with `playwright/.auth` in `.gitignore`
+  ([auth.md](https://playwright.dev/docs/auth)). `_workspace/` is for byproducts; a vendor-specified state
+  path wins over it.
+- **`_workspace/` = throwaway.** It holds run artifacts (from any run) + on-demand/exploratory specs.
+  **Durable CI test _code_** (committed suites, `agentic-testing` crystallized specs) lives in the project's
+  real test dir (`tests/`/`e2e/`) — only its *artifacts* land in `_workspace/`. To keep a generated spec in
+  CI, **promote** it out of `_workspace/` into the committed test dir.
 
 ```typescript
-const RUN = `_test/${process.env.E2E_RUN}`;   // e.g. E2E_RUN=2026-07-06-login-nav, set once per run
+const RUN = `_workspace/e2e/${process.env.E2E_RUN}`;  // E2E_RUN=2026-07-06-login-nav, set once per run
 await page.screenshot({ path: `${RUN}/screenshots/dashboard.png` });
 await page.locator('[data-testid="chart"]').screenshot({ path: `${RUN}/screenshots/chart.png` });
 ```
@@ -169,13 +177,13 @@ await page.locator('[data-testid="chart"]').screenshot({ path: `${RUN}/screensho
 import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
-  testDir: './tests/e2e',                                 // committed spec CODE (NOT _test/)
-  outputDir: `_test/${process.env.E2E_RUN}/artifacts`,    // gitignored run artifacts — see Artifact Layout
+  testDir: './tests/e2e',                                              // committed spec CODE (NOT _workspace/)
+  outputDir: `_workspace/e2e/${process.env.E2E_RUN}/artifacts`,        // gitignored — see Artifact Layout
   fullyParallel: true,
   retries: process.env.CI ? 2 : 0,
   reporter: [
-    ['html', { outputFolder: `_test/${process.env.E2E_RUN}/report`, open: 'never' }],
-    ['json', { outputFile: `_test/${process.env.E2E_RUN}/report/results.json` }],
+    ['html', { outputFolder: `_workspace/e2e/${process.env.E2E_RUN}/report`, open: 'never' }],
+    ['json', { outputFile: `_workspace/e2e/${process.env.E2E_RUN}/report/results.json` }],
   ],
   use: {
     baseURL: process.env.BASE_URL || 'http://localhost:3000',

@@ -4,5 +4,8 @@
 !.claude/rules/
 .DS_Store
 
-# E2E / Playwright run artifacts (screenshots, traces, videos, reports, session tokens) — see e2e-testing Artifact Layout
-_test/
+# Throwaway run output (screenshots, traces, videos, reports) — see e2e-testing Artifact Layout
+_workspace/
+
+# Playwright auth/session state — Playwright's own convention (https://playwright.dev/docs/auth)
+playwright/.auth

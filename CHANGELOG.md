@@ -4,6 +4,22 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.26.0 — 2026-08-08
+
+Playwright runs kept dumping screenshots into the project root. The rule against that already existed — `_test/` §Artifact Layout in `reference/e2e-testing.md` — but it lived only in a lazily-loaded reference, so nothing guaranteed an agent read it before calling `page.screenshot()`. Renaming the folder alone would have reproduced the same failure under a new name, so this release adds the enforcement the old rule never had: the bucket is named in the always-on router, and the session-stop hook reports what still leaks.
+
+### Added
+- **`_workspace/` — one gitignored bucket for every throwaway output**, grouped by **context**: one folder per purpose, named for that purpose. E2E owns `_workspace/e2e/<YYYY-MM-DD>-<test-name>/{screenshots,artifacts,report}`. A bare file at the repo root — or at `_workspace/` root — is now a named defect rather than an unstated preference.
+- **Stray-artifact scan in `session-stop.sh`.** At session end it scans the repo root (depth 1) for untracked `*.png|jpg|jpeg|gif|webm|mp4|zip` plus `test-results/`, `playwright-report/`, `blob-report/`, and lists what it finds. **Warn only** — tracked root files (a logo, a README image) are never flagged, and the hook never moves or deletes, because it cannot tell a deliberate root file from a leaked one. Silent on a clean root, and a no-op outside a git repo.
+- **CLAUDE.md routing row + a fourth bucket-table entry** for `_workspace/`, so the layout loads every session instead of only when someone happens to open `e2e-testing`.
+
+### Changed
+- **`_test/` → `_workspace/e2e/` everywhere** — `reference/e2e-testing.md` §Artifact Layout and its `playwright.config.ts` example (`outputDir`, both reporters), `skills/agent-browser-e2e/SKILL.md`, `skills/agentic-testing/SKILL.md`, and this repo's `.gitignore`. No `_test/` reference remains.
+- **Capture calls must pass an explicit path.** The layout rules now say why: a relative filename resolves to the repo root, which is the exact scatter the bucket exists to prevent.
+
+### Fixed
+- **Auth state no longer deviates from Playwright's published convention.** The harness told agents to keep session tokens in `_test/.auth/`; Playwright's own docs specify `playwright/.auth/` with `playwright/.auth` in `.gitignore` ([auth.md](https://playwright.dev/docs/auth)). `agent-browser-e2e` and the artifact layout now use the vendor path, and the rule generalizes: a tool's published state path wins over `_workspace/`, which is for byproducts only.
+
 ## v1.25.1 — 2026-08-03
 
 The dependency list named three tools; the harness actually reaches for six. The undocumented one that mattered was `jq` — without it the post-edit hook failed on every single Edit/Write and said nothing.

@@ -7,7 +7,7 @@ A reusable Claude Code harness for Claude Opus: greenfield project bootstrap (re
 Specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code. Beyond the core team workflow, the harness adds:
 
 - **Testing stack** — unit (Vitest) → deterministic E2E (Playwright) → **agentic E2E** (Phase 4.5: an agent verifies goals and crystallizes deterministic tests) → **human QA** (`/test-scenario-doc`, an interactive checklist). When the [`agent-browser`](https://agent-browser.dev/) CLI + skill are installed, it becomes the **default browser driver** for every browser-driving task — E2E / QA / smoke / exploration, Phase 4 driving and Phase 4.5 exploration included — including headless login via its encrypted **Auth Vault** (the password never reaches the LLM) — and otherwise falls back to the Playwright path.
-- **Document storage (3 buckets)** — `_docs/` (project, lifecycle-managed) · `_note/` (human-owned, agent read-only) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge), classified by a portable ownership discriminator.
+- **Document storage (4 buckets)** — `_docs/` (project, lifecycle-managed) · `_note/` (human-owned, agent read-only) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge) · `_workspace/` (gitignored throwaway run output), classified by a portable ownership discriminator.
 - **Code minimalism** — a harness-owned YAGNI decision ladder (`coding-standards` §4), applied by the architect agents at design time and gated once, at the Phase 1 plan approval.
 - **Renewal Mode Gate** — every non-trivial refactor / fix / redesign starts by choosing **A (compatible)** or **B (destructive renewal)**; Mode B requires a risk block + explicit approval, then a full anti-drift commitment so back-compat scaffolding never creeps back in.
 - **Continuous learning** — `continuous-learning` extracts reusable, validated, non-obvious patterns from sessions, reuses them at task start, and evolves stable ones into skills / commands / agents.
@@ -152,15 +152,18 @@ The agents are framework-agnostic by default. To specialize for your project:
 4. **team-designer.md** — Add your test framework and TDD patterns
 5. **team-tester.md** — Add your test runner commands and E2E setup
 
-### Document Storage (3 buckets)
+### Document Storage (4 buckets)
 
-Documents are classified by **owner**, using a portable discriminator: *"swap the agent CLI — is this still meaningful?"* → yes = project / human (`_` prefix at repo root); no = agent-only (`.claude/`).
+Documents are classified by **owner**, using a portable discriminator: *"swap the agent CLI — is this still meaningful?"* → yes = project / human (`_` prefix at repo root); no = agent-only (`.claude/`). Byproducts that keep nothing go to `_workspace/` regardless of owner.
 
 | Bucket | Owner | Holds |
 |--------|-------|-------|
 | `_docs/` | project | plans, specs, ADRs — lifecycle-managed (`planning → processing → complete`), sidecars merged on completion |
 | `_note/` | human | personal / research / scratch notes — **agent read-only** (edited only on explicit request), no frontmatter |
 | `.claude/wiki/` | agent | an **LLM wiki** — compounding, interlinked knowledge (ingest / query / lint); links to the SSOT, never duplicates |
+| `_workspace/` | throwaway | **gitignored** run output grouped by context — screenshots, Playwright traces/videos/reports, anything awkward to commit |
+
+`_workspace/` exists because run artifacts kept landing at the repo root: a bare `page.screenshot({ path: 'shot.png' })` resolves to the project root, not to wherever the suite lives. Every throwaway file goes in `_workspace/<context>/` (E2E → `_workspace/e2e/<run>/`), never at the repo root or bare at `_workspace/` root. Auth/session state is **not** a byproduct and stays at the tool's own published path — for Playwright that is [`playwright/.auth/`](https://playwright.dev/docs/auth), also gitignored. The `session-stop` hook scans the repo root at session end and names any stray artifact it finds; it only warns — it never moves or deletes, since a root file may be deliberate.
 
 Handoffs live in `_docs/handoff/`. `/team-init` bootstraps `_note/README.md` and `.claude/wiki/`. The rules live in the `docs-lifecycle` and `wiki` skills; `_docs/index.md` is updated on every plan change. Under worktree parallelization, `_docs/` stays in the **primary working tree** — worktree agents read and write doc files there by absolute path, and only `index.md` edits + status-moves are orchestrator-serialized, so plans stay readable from main without cd-ing into a worktree.
 
@@ -268,6 +271,12 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 ## Changelog
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
+
+**v1.26.0** — run artifacts stop landing at the repo root. `_test/` → `_workspace/`, grouped by context.
+- **`_workspace/` is the single throwaway bucket** — screenshots, Playwright traces/videos/reports, and anything else awkward to commit, grouped one folder per purpose (`_workspace/e2e/<run>/`). Replaces `_test/` everywhere; a bare file at the repo root or at `_workspace/` root is now a named defect.
+- **Auth state follows Playwright's own convention** — `playwright/.auth/` per [the vendor docs](https://playwright.dev/docs/auth), not the harness's old `_test/.auth/`. Vendor state paths win over `_workspace/`.
+- **`session-stop` names stray root artifacts** — scans the repo root at session end for untracked images/videos/archives plus `test-results/`, `playwright-report/`, `blob-report/`. Warns only; tracked files are never flagged and nothing is moved or deleted.
+- **The rule is always on** — `_workspace/` is in CLAUDE.md's routing table and bucket table, not only in the lazily-loaded `e2e-testing` reference. That gap is why the old `_test/` rule went unread.
 
 **v1.25.1** — the dependency list said three tools; the harness reaches for six.
 - **`jq` no longer breaks the post-edit hook silently** — the `PostToolUse` command called `jq` before the script ran, so a machine without `jq` had the `console.*` / `debugger` / `_note/` checks disabled with no symptom. The guard now lives inside the script, and `session-start.sh` announces it once per session.
