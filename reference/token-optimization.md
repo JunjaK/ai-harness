@@ -53,7 +53,7 @@ Rules:
 - Omit `opts.model` **only** for the Opus row — inheriting the session model is correct there; every other stage MUST pass an explicit `haiku`/`sonnet`.
 - `opts.agentType` does **not** guarantee that agent's frontmatter tier is applied — set `opts.model` explicitly even when passing `agentType` (e.g. `team-tester` → `sonnet`).
 - Same upgrade/downgrade triggers below still apply per-stage (a "Sonnet" stage that fails twice or turns cross-cutting → upgrade to Opus).
-- **Designer → Opus** specifically when a worktree spans the full types→backend→frontend stack, touches auth/payment/PII, or after a failed Phase 4 cycle; routine single-domain feature implementation stays `sonnet`. (Sonnet 5 covers plan-driven TDD implementation; the design reasoning already happened upstream in Phase 1.)
+- **Designer → Opus** specifically when a worktree spans the full types→backend→frontend stack, touches auth/payment/PII, or after a failed Phase 4 cycle; routine single-domain feature implementation stays `sonnet`. (the Sonnet tier covers plan-driven TDD implementation; the design reasoning already happened upstream in Phase 1.)
 
 ### Upgrade Triggers (MUST upgrade when ANY applies)
 
