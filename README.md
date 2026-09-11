@@ -288,6 +288,7 @@ Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
 - **`_note/` removed** — a read-only bucket blocked the work it was meant to hold, since the agent is usually the one turning raw material into something readable. Documents unify under `_docs/`; protection moved from folder ownership to bucket purpose.
 - **`REVIEW.md`** — review policy for a rules repo: consistency, literalness, release discipline, contradiction, with a nit cap and history excluded.
 - **`.gitignore` fix** — `_workspace/` (bare directory form) makes a `!_workspace/README.md` negation unreachable. Now `_workspace/*` + the negation, so the layout README is actually tracked.
+- **Hook hardening** — the collection guard matches by inversion so project-declared buckets are covered too, and `post-edit-warn.sh` stopped expanding backslash escapes in grep'd file content, which let a source line forge its own warning output.
 
 **v1.26.0** — run artifacts stop landing at the repo root. `_test/` → `_workspace/`, grouped by context.
 - **`_workspace/` is the single throwaway bucket** — screenshots, Playwright traces/videos/reports, and anything else awkward to commit, grouped one folder per purpose (`_workspace/e2e/<run>/`). Replaces `_test/` everywhere; a bare file at the repo root or at `_workspace/` root is now a named defect.
