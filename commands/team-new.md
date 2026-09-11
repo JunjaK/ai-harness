@@ -28,7 +28,7 @@ Existing codebase, not yet analyzed?
 
 Invokes the `greenfield-bootstrap` skill (G0–G5):
 
-1. **G0 intake** — `team-leader` asks: users · platform · must-have first features · constraints · non-goals → brief + a fully-scoped research question.
+1. **G0 intake** — `team-leader` asks: users · platform · must-have first features · constraints · non-goals → intent + a fully-scoped research question.
 2. **G1 research** — runs the `deep-research` bundled workflow on that question; captures the returned cited report into `_docs/`. (Unavailable → direct `WebSearch` fallback with a loud warning; nothing to install.)
 3. **G2 decision** — `team-architect-fe` + `-be` propose the stack/structure; cross-review; leader consolidates a stack-decision (exact scaffold command + harness layer + forward-looking conventions).
 4. **G3 ★ user gate** — presents research + recommended stack + the exact scaffold command. APPROVE / edit / reject. **Nothing is written to the source tree before this** (only the `_docs/` planning artifacts you're reviewing).
@@ -39,7 +39,8 @@ Invokes the `greenfield-bootstrap` skill (G0–G5):
 
 ```
 .claude/project-profile/     # 9 docs (api-layer + state-management 🌱 Seeded from the decision)
-_docs/complete/project-bootstrap/<date>-project-bootstrap.md   # merged brief+research+decision
+_docs/intent/<date>-project-bootstrap-intent.md                # the request (stays here)
+_docs/complete/project-bootstrap/<date>-project-bootstrap.md   # merged research+decision
 <scaffolded project source>  # framework files + harness layer, committed
 ```
 
@@ -49,7 +50,7 @@ _docs/complete/project-bootstrap/<date>-project-bootstrap.md   # merged brief+re
 ✅ PROJECT BOOTSTRAPPED
 Stack:   <framework + language + bun>
 Profile: .claude/project-profile/  (9 docs)
-Next:    /team-run <first feature>   — suggested: <must-haves from the brief>
+Next:    /team-run <first feature>   — suggested: <must-haves from the intent>
 ```
 
 ## Related

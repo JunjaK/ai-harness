@@ -89,22 +89,26 @@ Task that modifies 3+ files / is cross-cutting (API+UI+state) / touches auth·pa
 
 ---
 
-## Document Storage (4 buckets)
+## Document Storage (3 buckets)
 
-Classify by **owner**, discriminator: *"swap this agent CLI for another — still meaningful?"* Yes → project/human (repo root, `_` prefix); No, agent-only → `.claude/`. Keeps-nothing byproducts go to `_workspace/` regardless of owner.
+Classify by **owner**, discriminator: *"swap this agent CLI for another — still meaningful?"* Yes → the project (repo root, `_` prefix); No, agent-only → `.claude/`. Keeps-nothing byproducts go to `_workspace/` regardless of owner.
 
 | Bucket | Owner | Committed | Automation |
 |--------|-------|-----------|-----------|
 | `_docs/` | project | yes | `docs-lifecycle` (auto-move, merge-on-complete, `git rm`) |
-| `_note/` | human | yes | **none — agent read-only** |
 | `.claude/wiki/` | agent | yes | `wiki` skill |
-| `_workspace/` | throwaway | **no — gitignored** | none; delete freely |
+| `_workspace/` | throwaway | **README.md only** | none; delete the rest freely |
 
-**Every throwaway file goes in `_workspace/<context>/`, never the repo root.** Screenshots, Playwright/E2E byproducts (traces, videos, reports), and anything else awkward to commit. Group by context — one folder per purpose, named for that purpose (`_workspace/e2e/`, …); a bare file at `_workspace/` root or the repo root is a defect. Ensure the project `.gitignore` contains `_workspace/` before the first write, and pass an **explicit path** to every capture call — a relative filename resolves to the repo root, which is the scatter this bucket exists to stop. Full layout: `e2e-testing` §Artifact Layout.
+**`_docs/` has two kinds of top-level bucket.** Only the lifecycle four carry the status↔folder lockstep:
+
+- **Lifecycle buckets** — `active/` (`planning/`, `processing/`), `complete/`, `reference/`, `deprecated/`. Status↔folder lockstep, merge-on-complete, `/docs-sweep` invariants all apply.
+- **Collection buckets** — `intent/`, `handoff/` in the base set. Status↔folder lockstep **exempt**; **not lifecycle-tidied by default** — never merged, reorganized, or `git rm`'d on the agent's initiative. They hold durable records (raw transcripts, source material, request history) whose value is being unaltered.
+
+A project MAY add collection buckets (`meetings/`, `inquiry/`, `proposal/`, …) by declaring them in its project-profile — never by inventing a folder ad hoc. Contract + declaration site: `docs-lifecycle` §Collection buckets.
+
+**Every throwaway file goes in `_workspace/<context>/`, never the repo root.** Screenshots, Playwright/E2E byproducts (traces, videos, reports), and anything else awkward to commit. Group by context — one folder per purpose, named for that purpose (`_workspace/e2e/`, …); a bare file at `_workspace/` root or the repo root is a defect. **Read `_workspace/README.md` before the first write of a session** — it is that project's layout SSOT and says which context folder a file belongs in; add a section to it when introducing a new context, and seed it from `e2e-testing` §Artifact Layout when absent. Ensure the project `.gitignore` carries `_workspace/*` + `!_workspace/README.md` (the directory form `_workspace/` silently defeats the negation) before the first write, and pass an **explicit path** to every capture call — a relative filename resolves to the repo root, which is the scatter this bucket exists to stop.
 
 **Vendor state paths win over `_workspace/`**: auth/session state is not a byproduct — use the tool's published location (Playwright → `playwright/.auth/`, gitignored). MUST NOT relocate those into `_workspace/`.
-
-**`_note/` is human-owned, agent read-only**: MUST NOT create/move/merge/reorganize/delete there on your own initiative — modify ONLY on explicit request. Exempt from `_docs/` lifecycle and frontmatter rules.
 
 **`_docs/` is primary-worktree-only**: every `_docs/` file lives in the repo's primary working tree, never in a linked worktree's checkout. Worktree agents read/write doc content by the primary tree's absolute path, each owning distinct files; only `index.md` edits and status-moves stay orchestrator-serialized. Path resolution and the concurrency protocol: `.claude/rules/docs.md` + `docs-lifecycle`.
 

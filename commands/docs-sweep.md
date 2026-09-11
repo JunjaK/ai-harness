@@ -40,7 +40,7 @@ Static pass over `_docs/**` + `.claude/wiki/**`; report + auto-fix where safe:
 | I3 | no off-vocabulary `complete/`/`reference/` topic folder | propose vocab-add / topic-rename |
 | I4 | no empty `active/**` date folder | `rmdir` |
 | I5 | no `active/` sidecar sharing `(topic,date)` with a `complete/<topic>` doc | propose merge |
-| I6 | no dangling `_docs/` link from `.claude/wiki/`; `_note/` refs surfaced as warnings | wiki: yes; `_note/`: warn-only |
+| I6 | no dangling `_docs/` link from `.claude/wiki/`; no collection doc reorganized or removed outside its bucket | wiki: yes; collection: report-only |
 
 ## On Completion
 
@@ -48,7 +48,7 @@ Static pass over `_docs/**` + `.claude/wiki/**`; report + auto-fix where safe:
 🧹 DOCS SWEEP
 Reaped:   <n> → complete, <n> → deprecated, <n> snoozed, <n> flagged (no signal)
 Lint:     I1 ✓  I2 ✓  I3 ✓  I4 ✓ (rmdir <n>)  I5 ✓  I6 ✓
-Warnings: <_note/ references to moved docs, if any>
+Warnings: <collection docs found outside their bucket, if any>
 ```
 
 ## Related

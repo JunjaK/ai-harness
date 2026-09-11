@@ -59,8 +59,9 @@ Follow template §8. Skip if no CI/CD found.
 Follow template §9. MUST include relevance + status for every profile file. Record `Profile-Generated-At: <git rev-parse --short HEAD>` so staleness can be detected later (`/team-init --update`).
 
 ### Step 10: Bootstrap document buckets (if absent)
-Follow template §10. Establish the three document buckets alongside `_docs/`:
-- `_note/README.md` — only if `_note/` does not exist. MUST NOT create any other file under `_note/`, and MUST NOT modify an existing `_note/` (agent read-only).
+Follow template §10. Establish the other two document buckets alongside `_docs/`, and record `_docs/`'s own bucket declaration:
+- `_workspace/README.md` — only if absent. It is the project's `_workspace/` layout SSOT; also ensure `.gitignore` carries `_workspace/*` + `!_workspace/README.md` (the bare directory form defeats the negation).
+- The profile's **Document buckets** table — always, even when the project adds no collection beyond the base `intent/` + `handoff/`.
 - `.claude/wiki/{index.md, log.md, schema.md}` — only the files that are absent (empty catalog / empty chronicle / conventions stub).
 
 Never overwrite an existing file. On `--update`, re-run this step but only create what is missing.

@@ -20,11 +20,12 @@ If no task description provided, ask the user for one.
 2. **Spawn Team Leader** with task description
    - Leader drafts rough plan
    - Leader asks user about ambiguous decisions (always interactive)
+   - Once the *what/why/constraints* have settled — before any architect runs — the Leader writes `_docs/intent/<created>-<topic>-intent.md` (`kind: intent`, a **collection** doc: it stays put, is never merged, and moves to `intent/deprecated/` if the idea is dropped). Register it in `index.md` §① + §④.
 3. **Spawn Architects A + B** (parallel) for detailed plans
 4. **Cross-Review** — two parallel objection passes (each architect receives the counterpart plan, returns objections only), Leader mediates and finalizes
 5. **Optional**: Spawn Architect C if infra/security concerns
 6. **Optional**: Spawn UI/UX Master if visual changes needed
-7. **Save plan** to `_docs/active/planning/<created>/<created>-<topic>-plan.md`
+7. **Save plan** to `_docs/active/planning/<created>/<created>-<topic>-plan.md`, `related:`→ the intent (both ways)
 8. **Present plan** to user for review
 
 No diagram is generated here. If the user wants one, they run `/plan-visualizer`.
@@ -34,7 +35,8 @@ No diagram is generated here. If the user wants one, they run `/plan-visualizer`
 ```
 📋 TEAM BRAINSTORM COMPLETE
 Task: [description]
-Plan: _docs/active/planning/<created>/<created>-<topic>-plan.md
+Intent: _docs/intent/<created>-<topic>-intent.md          (the ask — stays here)
+Plan: _docs/active/planning/<created>/<created>-<topic>-plan.md   (the design — rides the lifecycle)
 Team: Leader + Arch A + Arch B [+ Arch C] [+ UI/UX Master]
 
 Ready to execute? Use:

@@ -25,6 +25,17 @@
 |-------|------|------|
 | brain-memory | 2026-06-26 | [handoff/2026-06-26-brain-memory-trigger-handoff.md](handoff/2026-06-26-brain-memory-trigger-handoff.md) |
 
+## Collection buckets (SSOT)
+
+Append-only records. The agent may add files; it MUST NOT merge, restructure, rename, or delete
+existing ones. Deprecate in place under `<collection>/deprecated/`. A collection folder on disk
+but missing from this table is an I3 defect.
+
+| Bucket | Holds | Curated by agent? |
+|--------|-------|-------------------|
+| `intent/` | request records — head of the intent→spec→plan chain; survives rejection | no — append only |
+| `handoff/` | live work-stream handoffs | prune-to-latest only |
+
 ## Topic vocabulary (SSOT)
 
 The authoritative topic list. A doc's `topic` MUST be one of these; add a new entry here (kebab-case, subject-based) only when none fits.

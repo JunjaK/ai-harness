@@ -7,7 +7,7 @@ A reusable Claude Code harness for Claude Opus: greenfield project bootstrap (re
 Specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code. Beyond the core team workflow, the harness adds:
 
 - **Testing stack** — unit (Vitest) → deterministic E2E (Playwright) → **agentic E2E** (Phase 4.5: an agent verifies goals and crystallizes deterministic tests) → **human QA** (`/test-scenario-doc`, an interactive checklist). When the [`agent-browser`](https://agent-browser.dev/) CLI + skill are installed, it becomes the **default browser driver** for every browser-driving task — E2E / QA / smoke / exploration, Phase 4 driving and Phase 4.5 exploration included — including headless login via its encrypted **Auth Vault** (the password never reaches the LLM) — and otherwise falls back to the Playwright path.
-- **Document storage (4 buckets)** — `_docs/` (project, lifecycle-managed) · `_note/` (human-owned, agent read-only) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge) · `_workspace/` (gitignored throwaway run output), classified by a portable ownership discriminator.
+- **Document storage (3 buckets)** — `_docs/` (project) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge) · `_workspace/` (throwaway run output, gitignored but for its layout `README.md`), classified by a portable ownership discriminator. Inside `_docs/`, **lifecycle** buckets ride `planning → processing → complete`; **collection** buckets (`intent/`, `handoff/`, plus whatever a project declares) are append-only records the agent may add to but never reorganize.
 - **Code minimalism** — a harness-owned YAGNI decision ladder (`coding-standards` §4), applied by the architect agents at design time and gated once, at the Phase 1 plan approval.
 - **Renewal Mode Gate** — every non-trivial refactor / fix / redesign starts by choosing **A (compatible)** or **B (destructive renewal)**; Mode B requires a risk block + explicit approval, then a full anti-drift commitment so back-compat scaffolding never creeps back in.
 - **Continuous learning** — `continuous-learning` extracts reusable, validated, non-obvious patterns from sessions, reuses them at task start, and evolves stable ones into skills / commands / agents.
@@ -119,7 +119,7 @@ Alongside the env flags above, the harness uses a few external tools. Each row s
 |------|----------|-----------|
 | **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | **default** browser driver for E2E / QA / smoke / exploration (requested or not) + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `reference/e2e-testing.md` / `agentic-testing` path — never to `claude-in-chrome` |
 | **Playwright** (`@playwright/test`, or the Playwright MCP) | the committed `.spec.ts` E2E suite, and the fallback driver when `agent-browser` is absent | with neither Playwright nor `agent-browser`, Phase 4 has no browser driver: E2E is reported `미검증`, never inferred green |
-| **`jq`** | the `PostToolUse` hook reads its file path from the hook's stdin JSON | the post-edit warning hook (`console.*` / `debugger` / `_note/` write checks) silently no-ops. `session-start.sh` prints one "jq not found" line per session so it fails loudly once instead of quietly forever |
+| **`jq`** | the `PostToolUse` hook reads its file path from the hook's stdin JSON | the post-edit warning hook (`console.*` / `debugger` / collection-bucket write checks) silently no-ops. `session-start.sh` prints one "jq not found" line per session so it fails loudly once instead of quietly forever |
 | **`gh` CLI** | GitHub releases per version bump, and the `git-handler` agent's PR/issue work | do those steps by hand; nothing else is affected |
 
 ```bash
@@ -152,20 +152,30 @@ The agents are framework-agnostic by default. To specialize for your project:
 4. **team-designer.md** — Add your test framework and TDD patterns
 5. **team-tester.md** — Add your test runner commands and E2E setup
 
-### Document Storage (4 buckets)
+### Document Storage (3 buckets)
 
-Documents are classified by **owner**, using a portable discriminator: *"swap the agent CLI — is this still meaningful?"* → yes = project / human (`_` prefix at repo root); no = agent-only (`.claude/`). Byproducts that keep nothing go to `_workspace/` regardless of owner.
+Documents are classified by **owner**, using a portable discriminator: *"swap the agent CLI — is this still meaningful?"* → yes = the project (`_` prefix at repo root); no = agent-only (`.claude/`). Byproducts that keep nothing go to `_workspace/`.
 
 | Bucket | Owner | Holds |
 |--------|-------|-------|
-| `_docs/` | project | plans, specs, ADRs — lifecycle-managed (`planning → processing → complete`), sidecars merged on completion |
-| `_note/` | human | personal / research / scratch notes — **agent read-only** (edited only on explicit request), no frontmatter |
+| `_docs/` | project | intent, plans, specs, ADRs — see the two-axis split below |
 | `.claude/wiki/` | agent | an **LLM wiki** — compounding, interlinked knowledge (ingest / query / lint); links to the SSOT, never duplicates |
-| `_workspace/` | throwaway | **gitignored** run output grouped by context — screenshots, Playwright traces/videos/reports, anything awkward to commit |
+| `_workspace/` | throwaway | run output grouped by context — screenshots, Playwright traces/videos/reports, anything awkward to commit. Gitignored except `README.md`, which declares that project's layout |
+
+`_docs/` top level carries **two kinds of bucket**, and only the first is lifecycle-managed:
+
+| | Lifecycle | Collection |
+|---|---|---|
+| Base set | `active/{planning,processing}/` · `complete/` · `reference/` · `deprecated/` | `intent/` · `handoff/` |
+| status↔folder lockstep | enforced | exempt |
+| Sidecars merged on completion | yes | **never** |
+| Agent may reorganize | yes | **no — append only** |
+
+Collection buckets hold durable records whose value is being unaltered: `intent/` is the head of the `intent → spec → plan → impl` chain and the one artifact that survives rejection (rejected intents go to `intent/deprecated/`, in place). A project adds its own — `meetings/`, `inquiry/`, `proposal/` — by declaring them in its project profile, never ad hoc; the declaration also states what, if anything, the agent may rewrite there.
 
 `_workspace/` exists because run artifacts kept landing at the repo root: a bare `page.screenshot({ path: 'shot.png' })` resolves to the project root, not to wherever the suite lives. Every throwaway file goes in `_workspace/<context>/` (E2E → `_workspace/e2e/<run>/`), never at the repo root or bare at `_workspace/` root. Auth/session state is **not** a byproduct and stays at the tool's own published path — for Playwright that is [`playwright/.auth/`](https://playwright.dev/docs/auth), also gitignored. The `session-stop` hook scans the repo root at session end and names any stray artifact it finds; it only warns — it never moves or deletes, since a root file may be deliberate.
 
-Handoffs live in `_docs/handoff/`. `/team-init` bootstraps `_note/README.md` and `.claude/wiki/`. The rules live in the `docs-lifecycle` and `wiki` skills; `_docs/index.md` is updated on every plan change. Under worktree parallelization, `_docs/` stays in the **primary working tree** — worktree agents read and write doc files there by absolute path, and only `index.md` edits + status-moves are orchestrator-serialized, so plans stay readable from main without cd-ing into a worktree.
+Handoffs live in `_docs/handoff/` — the one collection the agent may prune, since keep-latest-per-stream is its defining contract. `/team-init` bootstraps `_workspace/README.md` and `.claude/wiki/`, and records the project's declared collection buckets in its profile. The rules live in the `docs-lifecycle` and `wiki` skills; `_docs/index.md` is updated on every plan change. Under worktree parallelization, `_docs/` stays in the **primary working tree** — worktree agents read and write doc files there by absolute path, and only `index.md` edits + status-moves are orchestrator-serialized, so plans stay readable from main without cd-ing into a worktree.
 
 ## Supporting Skills
 
@@ -271,6 +281,13 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 ## Changelog
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
+
+**v1.27.0** — `_note/` is gone; `_docs/` splits into lifecycle and collection buckets.
+- **`_docs/intent/`** — the request record, head of the `intent → spec → plan → impl` chain and the one artifact that survives rejection. `brainstorm` now writes the *what/why* here and the *how* to the paired spec; `kind: brief` is replaced by `kind: intent`.
+- **Collection buckets** — `intent/` and `handoff/` in the base set, appended to but never reorganized by the agent. A project declares its own (`meetings/`, `inquiry/`, `proposal/`) in its profile's Document buckets table; the `Curated` column is what authorizes any rewriting, and the default is append-only.
+- **`_note/` removed** — a read-only bucket blocked the work it was meant to hold, since the agent is usually the one turning raw material into something readable. Documents unify under `_docs/`; protection moved from folder ownership to bucket purpose.
+- **`REVIEW.md`** — review policy for a rules repo: consistency, literalness, release discipline, contradiction, with a nit cap and history excluded.
+- **`.gitignore` fix** — `_workspace/` (bare directory form) makes a `!_workspace/README.md` negation unreachable. Now `_workspace/*` + the negation, so the layout README is actually tracked.
 
 **v1.26.0** — run artifacts stop landing at the repo root. `_test/` → `_workspace/`, grouped by context.
 - **`_workspace/` is the single throwaway bucket** — screenshots, Playwright traces/videos/reports, and anything else awkward to commit, grouped one folder per purpose (`_workspace/e2e/<run>/`). Replaces `_test/` everywhere; a bare file at the repo root or at `_workspace/` root is now a named defect.

@@ -135,7 +135,7 @@ await page.locator('[data-testid="modal"]').waitFor({ state: 'visible' });
 ## Artifact Layout (`_workspace/` — gitignored)
 
 Every throwaway run output lives under a single project-root `_workspace/` folder — **gitignored, never
-committed** (leading `_` = harness "special/owned", same family as `_docs`/`_note`). Files are grouped by
+committed** (leading `_` = harness "special/owned", same family as `_docs`). Files are grouped by
 **context**: one folder per purpose, named after that purpose. E2E owns `_workspace/e2e/`. A file dropped
 directly at `_workspace/` root — or at the repo root — is a defect, not a shortcut.
 

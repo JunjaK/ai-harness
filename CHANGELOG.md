@@ -4,6 +4,35 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.27.0 — 2026-09-11
+
+`_note/` existed so the human had a bucket the agent could not touch. In practice the pattern went the other way: the raw material arrives (a transcript, a dump, a half-formed idea) and the agent is the one who turns it into something readable. A read-only bucket blocked exactly the work it was meant to hold, so it is gone — one place for documents now, with the protection moved from *who owns the folder* to *what the folder is for*.
+
+That split is the real change. `_docs/` top level now carries **lifecycle** buckets, which the agent moves and merges, and **collection** buckets, which it may append to but never reorganize. `intent/` — the request record, head of the `intent → spec → plan → impl` chain — is the first collection, and the one artifact that survives its idea being rejected.
+
+### Added
+- **`_docs/intent/`** — durable request records, `YYYY-MM-DD-<topic>-intent.md`. Written from a `brainstorm` / `/team-brainstorm` result: the settled *what/why/constraints* goes to the intent, the *how* to the paired spec in `active/planning/`. Most intents never become specs, and a rejected one still records the decision — it moves to `intent/deprecated/` **in place**, never to the global `deprecated/`.
+- **Collection buckets, as a declared contract.** A project adds `meetings/`, `inquiry/`, `proposal/` — whatever it needs — by declaring it in its project profile's new **Document buckets** table, never by inventing a folder mid-task. The declaration's `Curated` column is the only thing that authorizes an agent to rewrite anything in there; the default is `no — append only`. A folder on disk but absent from `index.md` §④ is an I3 defect.
+- **`index.md` §④** — the SSOT list of declared collection buckets, alongside the existing status list, handoffs, and topic vocabulary.
+- **`REVIEW.md`** — repo-root review policy: four passes (consistency, literalness, release discipline, contradiction), what counts as Important in a rules repo, a nit cap, and an exclusion list. Historical `_docs/complete/**` records are explicitly out of scope.
+- **`_workspace/README.md`** — the only tracked file in that bucket, and the per-project layout SSOT. Read it before the first write of a session; add a row when introducing a new context folder. It is also how the `_workspace/` convention reaches consumer projects at all, since plugins cannot inject a `CLAUDE.md`.
+
+### Changed
+- **Document storage: 4 buckets → 3.** `_docs/` (project) · `.claude/wiki/` (agent) · `_workspace/` (throwaway). The discriminator is unchanged; the human/project split inside the repo root is gone.
+- **`kind: brief` → `kind: intent`.** `/team-new` G0 now writes `_docs/intent/<date>-project-bootstrap-intent.md` instead of a `planning/` brief, and G4 merges **research + stack-decision only** — the intent is linked from the archive, never merged into it. G3 rejection sends the intent to `intent/deprecated/` and the rest to `deprecated/`.
+- **The reference-safe move transaction lost its `_note/` warning step** (steps renumbered 7 → 6) and now names collection buckets explicitly in the cross-bucket rewrite. Rewriting a link inside a collection doc is the one edit allowed there without asking.
+- **`/docs-sweep` REAP is lifecycle-only.** Collection buckets are never reaped; I3 additionally flags undeclared collections, and I6 replaces its `_note/` clause with "no collection doc reorganized or removed outside its bucket".
+- **The post-edit hook warns on `_docs/intent/` writes** instead of `_note/` writes — creating a record is fine, reshaping one is not.
+- **`/team-init` bootstraps `_workspace/README.md`** (was `_note/README.md`) and records the Document buckets table in the profile.
+- **`wiki` sources** are now `_docs/` (lifecycle docs on completion, collections append-only), `learnings/`, and external docs.
+
+### Fixed
+- **`.gitignore` could never have tracked `_workspace/README.md`.** The bare directory form `_workspace/` makes git skip the tree entirely, so a `!_workspace/README.md` negation is unreachable — verified empirically, not assumed. The pattern is now `_workspace/*` + the negation, and the trap is documented inline and in the project-profile template.
+- **No hard-coded model version in an active file.** `reference/token-optimization.md` said "Sonnet 5" where it meant the Sonnet tier, against CLAUDE.md's own rule.
+
+### Removed
+- **`_note/` entirely** — bucket, governance section, `/team-init` scaffold, hook warning, I6 clause, and all references across `CLAUDE.md`, `.claude/rules/docs.md`, `docs-lifecycle`, `project-analyzer`, `wiki`, `team-init`, `docs-sweep`, `e2e-testing`, and `README.md`. Existing `_note/` directories in consumer projects are left on disk and simply stop being governed; a project that still wants one can declare it as a collection bucket.
+
 ## v1.26.0 — 2026-08-08
 
 Playwright runs kept dumping screenshots into the project root. The rule against that already existed — `_test/` §Artifact Layout in `reference/e2e-testing.md` — but it lived only in a lazily-loaded reference, so nothing guaranteed an agent read it before calling `page.screenshot()`. Renaming the folder alone would have reproduced the same failure under a new name, so this release adds the enforcement the old rule never had: the bucket is named in the always-on router, and the session-stop hook reports what still leaks.

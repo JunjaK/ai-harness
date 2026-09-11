@@ -392,22 +392,46 @@ Status tokens: `✅` scanned-from-code · `⏭️` Skipped (not applicable) · `
 
 ## 10. Document bucket scaffolds (bootstrap)
 
-Created by Step 10 only when absent. Establishes the `_note/` (human) and `.claude/wiki/` (agent) buckets alongside `_docs/`. Never overwrite existing files. Never create files under `_note/` other than `README.md`, and never modify an existing `_note/` afterward (agent read-only).
+Created by Step 10 only when absent. Establishes the `.claude/wiki/` (agent) and `_workspace/` (throwaway) buckets alongside `_docs/`, and records which `_docs/` collection buckets this project uses. Never overwrite existing files.
 
-**`_note/README.md`** (only if `_note/` does not exist):
+### Document buckets (record in the profile, always)
+
+`_docs/` ships two collection buckets — `intent/` and `handoff/`. A project may declare more; this section is the **declaration site** the `docs-lifecycle` contract points at. Write the table even when nothing was added, so a later agent knows the base set is deliberate.
+
 ```markdown
-# _note/ — owner's personal notes (agent read-only)
+## Document buckets
 
-This bucket is **yours**. The agent treats it as **read-only**: it reads `_note/` for
-context but will NOT create, move, merge, reorganize, or delete anything here unless you
-explicitly ask. Dump notes freely — no frontmatter, no lifecycle, no structure required.
+Lifecycle: active/{planning,processing}/ · complete/ · reference/ · deprecated/   (standard)
 
-- Owner: you (human). Tool-agnostic — lives at repo root, not under `.claude/`.
-- Exempt from `_docs/` automation (lifecycle, status frontmatter, merge-on-completion).
-- Keep one central `_note/` at the repo root; preserve provenance with subfolders (`_note/<source>/`).
-- Graduation: when a note becomes project-canonical, you (not the agent) promote it `_note/ → _docs/`.
+| Collection | Holds | Curated by agent? |
+|------------|-------|-------------------|
+| `intent/`  | request records, head of intent→spec→plan chain | no — append only |
+| `handoff/` | live work-stream handoffs | prune-to-latest only |
+<!-- add project collections below; "Curated" MUST say what the agent may rewrite -->
+```
 
-Governance detail: `skills/docs-lifecycle/SKILL.md` (Three-bucket section).
+Fill the **Curated** column literally — it is the only thing that authorizes an agent to reshape a collection. `no — append only` is the default. Example of an opt-in: a `meetings/` row reading `yes — reconstruct notes from transcript + human summary` grants exactly that and nothing more (the raw transcript still stays).
+
+**`_workspace/README.md`** (only if absent — the layout SSOT the agent reads before its first write):
+```markdown
+# _workspace/ — throwaway run output
+
+Gitignored except this file. Everything here is disposable; delete freely.
+**Before writing here, read this file** — it says which context folder a file belongs in.
+**After adding a new context folder, add a row here** so the next session reuses it.
+
+| Folder | What goes in it |
+|--------|-----------------|
+| `e2e/` | Playwright/E2E run output — `<YYYY-MM-DD>-<test-name>/{screenshots,artifacts,report}/`, run.log |
+
+Rules: one folder per purpose, named for that purpose. A bare file at `_workspace/` root
+or at the repo root is a defect. Vendor state paths win (Playwright auth → `playwright/.auth/`).
+```
+
+Also ensure `.gitignore` carries — the directory form `_workspace/` silently defeats the negation, so the star is required:
+```
+_workspace/*
+!_workspace/README.md
 ```
 
 **`.claude/wiki/index.md`** (only if absent — empty catalog):
@@ -439,7 +463,7 @@ How this wiki is structured and maintained (Karpathy "schema" layer). The `wiki`
 reads this before ingest/query/lint.
 
 ## Conventions
-- Pages link to the SSOT (code / `_docs/` / `_note/`); they route and synthesize, they do NOT duplicate facts.
+- Pages link to the SSOT (code / `_docs/`); they route and synthesize, they do NOT duplicate facts.
 - Page types: entity / concept / overview / comparison.
 - `index.md` = catalog; `log.md` = chronicle.
 

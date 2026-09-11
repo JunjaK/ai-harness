@@ -1,13 +1,13 @@
 ---
 name: wiki
-description: "Build and maintain the agent wiki (.claude/wiki/) — a persistent, compounding knowledge base. Use when ingesting a source into the wiki, querying it, or linting it for drift. The wiki links to the SSOT (code / _docs/ / _note/); it routes and synthesizes, it does NOT duplicate facts."
+description: "Build and maintain the agent wiki (.claude/wiki/) — a persistent, compounding knowledge base. Use when ingesting a source into the wiki, querying it, or linting it for drift. The wiki links to the SSOT (code / _docs/); it routes and synthesizes, it does NOT duplicate facts."
 ---
 
 # Wiki
 
 The agent's compounding knowledge layer. Unlike RAG (re-derive from raw docs on every query), the wiki is **built once and kept current** — an interlinked set of markdown pages under `.claude/wiki/` that the agent owns and maintains.
 
-Three layers (Karpathy LLM Wiki): **raw sources** (`_note/` human, `_docs/` project, `learnings/`, external) → **the wiki** (`.claude/wiki/`, this skill owns) → **the schema** (`.claude/wiki/schema.md`, conventions).
+Three layers (Karpathy LLM Wiki): **raw sources** (`_docs/` project — lifecycle docs AND collections like `intent/`, `learnings/`, external) → **the wiki** (`.claude/wiki/`, this skill owns) → **the schema** (`.claude/wiki/schema.md`, conventions).
 
 ## Where it lives
 
@@ -17,7 +17,7 @@ Three layers (Karpathy LLM Wiki): **raw sources** (`_note/` human, `_docs/` proj
 - `schema.md` — structure + conventions (read before any operation).
 - `<page>.md` — entity / concept / overview / comparison pages.
 
-**Core rule: link, don't duplicate.** A page routes to and synthesizes the SSOT (code, `_docs/`, `_note/`); it never restates a fact that lives elsewhere. A duplicated fact goes stale. (`continuous-learning` §7.)
+**Core rule: link, don't duplicate.** A page routes to and synthesizes the SSOT (code, `_docs/`); it never restates a fact that lives elsewhere. A duplicated fact goes stale. (`continuous-learning` §7.)
 
 ## Operation: ingest
 
@@ -28,11 +28,11 @@ User-driven, **one source at a time, supervised** (the preferred flow). Trigger:
 3. Discuss takeaways with the human if non-trivial.
 4. Write/update the summary page for the source.
 5. Update entity/concept pages the source touches — a single source may touch 10–15 pages.
-6. Add cross-references between affected pages; link to the SSOT (code / `_docs/` / `_note/`).
+6. Add cross-references between affected pages; link to the SSOT (code / `_docs/`).
 7. Update `index.md` (new/changed pages, one-line summaries).
 8. Append to `log.md`: `## [<date>] ingest | <source title>`.
 
-Sources: `_note/` (**read-only** — read for context, never modify), `_docs/` (on completion), `.claude/session-state/learnings/`, external docs the user provides.
+Sources: `_docs/` — lifecycle docs on completion, plus collection buckets (`intent/` and any project-declared one) which are **append-only: read for context, never reorganize** — `.claude/session-state/learnings/`, and external docs the user provides.
 
 ## Operation: query
 

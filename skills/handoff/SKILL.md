@@ -16,7 +16,7 @@ A handoff is the **state layer** over a spec/plan: not the design (that lives in
 
 ## Hard rules
 
-- **Location**: `_docs/handoff/` (flat — handoffs are often cross-cutting, so no topic subfolder). Exempt from date/topic subfoldering but NOT from the reference-rewrite sweep.
+- **Location**: `_docs/handoff/` (flat — handoffs are often cross-cutting, so no topic subfolder). A **collection** bucket: exempt from date/topic subfoldering and status↔folder lockstep, but NOT from the reference-rewrite sweep. It is also the one collection the agent may prune — keep-latest-per-stream is its defining contract, and that exception does NOT generalize to `intent/` or any project-declared collection.
 - **Name**: `YYYY-MM-DD-<topic>-handoff.md`, where `<topic>` is from the `index.md` controlled vocabulary.
 - **Link, never duplicate**: `related:` points at the spec/plan/impl docs being handed off. Do NOT restate the design — if you find yourself copying architecture into the handoff, link instead.
 - **Keep only the latest per work-stream**: before writing, `git rm` any superseded handoff for the same topic (git history is the trail; a stale handoff is a liability). Update `index.md` accordingly.

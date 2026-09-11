@@ -13,26 +13,26 @@ The entry point the rest of the harness assumes away: taking an **empty repo + a
 
 Run ONLY in an empty/near-empty repo. **Refuse** (and point at `/team-init`) if real project files exist — `package.json`, `src/`, `tsconfig*`, `node_modules/`. **Allow** `.git`, `README*`, `LICENSE*`, `.gitignore`, and any `_docs/` this bootstrap itself wrote.
 
-**Idempotency**: if a `project-bootstrap` brief already exists with no G4 scaffold commit, an in-flight bootstrap is detected → resume/replace it, never duplicate.
+**Idempotency**: if a `project-bootstrap` intent already exists with no G4 scaffold commit, an in-flight bootstrap is detected → resume/replace it, never duplicate.
 
-## G0 — Intake → brief + a fully-scoped research question
+## G0 — Intake → intent + a fully-scoped research question
 
 Spawn `team-leader` interactively. Gather: target users · platform (`web` / `mobile` / `CLI` / `API` / `backend-only`) · must-have first features · hard constraints (deploy target, existing infra, team prefs) · explicit non-goals.
 
 Two outputs:
-1. **Brief** → `_docs/active/planning/<today>/<today>-project-bootstrap-brief.md` (topic `project-bootstrap`, kind `brief`).
+1. **Intent** → `_docs/intent/<today>-project-bootstrap-intent.md` (topic `project-bootstrap`, kind `intent`). It is a **collection** doc: it stays there for good — never moved into `active/`, never merged at G4. Register it in `index.md` §① + §④.
 2. **A FULLY-SCOPED research question** for G1. This is load-bearing: deep-research asks 2–3 clarifying questions only when under-scoped, which would stall an automated handoff. G0 exists to pre-empt that — the question MUST be self-contained: *domain + platform + must-have features + hard constraints + the exact stack/architecture decision being researched.*
 
 ## G1 — Deep research (return-then-write)
 
 `deep-research` is a **CLI-bundled WORKFLOW** (not a Skill/plugin). Invoke it with the G0 question as **args** (it decomposes "question from args" into 5 search angles → searches → adversarially verifies → synthesizes). It **RETURNS a cited report as text — no file side-effect.**
 
-- **Capture**: take the returned report text and **write it yourself** to `_docs/active/planning/<today>/<today>-project-bootstrap-research.md` (topic `project-bootstrap`, kind `research`, `related:`→brief). **Never poll for a file deep-research "wrote" — it writes none.**
+- **Capture**: take the returned report text and **write it yourself** to `_docs/active/planning/<today>/<today>-project-bootstrap-research.md` (topic `project-bootstrap`, kind `research`, `related:`→intent). **Never poll for a file deep-research "wrote" — it writes none.**
 - **Soft-degrade = capability probe**: if deep-research is absent from this session's roster / WorkflowTool disabled / SIMPLE-mode CLI → fall back to architects running `WebSearch` directly, and warn loudly: *"⚠ deep-research unavailable — research depth reduced, proceeding with direct WebSearch."* **MUST NOT** tell the user to install anything (it ships with the CLI; nothing to install).
 
 ## G2 — Architecture & stack decision
 
-Spawn `team-architect-fe` + `team-architect-be` in parallel (consume brief + research). They propose: concrete stack (exact versions from research), project structure, state management, API layer, testing/tooling, deploy target. Cross-review: give each architect the counterpart proposal and collect objections only, in parallel (add `team-architect-infra` if auth/payments/deploy flagged). Leader consolidates →
+Spawn `team-architect-fe` + `team-architect-be` in parallel (consume intent + research). They propose: concrete stack (exact versions from research), project structure, state management, API layer, testing/tooling, deploy target. Cross-review: give each architect the counterpart proposal and collect objections only, in parallel (add `team-architect-infra` if auth/payments/deploy flagged). Leader consolidates →
 
 **stack-decision doc** `_docs/active/planning/<today>/<today>-project-bootstrap-stack-decision.md` (kind `stack-decision`) — MUST contain:
 - chosen framework + package manager (bun default)
@@ -46,8 +46,8 @@ Spawn `team-architect-fe` + `team-architect-be` in parallel (consume brief + res
 
 Present: research summary + recommended stack + structure + **the exact scaffold command(s) that will run**. Verify the CLI's flags BEFORE presenting, so the approved command is the one that runs.
 
-- **"Nothing written before G3" = SOURCE tree only.** The brief/research/decision are in `_docs/` (the artifacts under review) — that is correct and required. No scaffold / `package.json` / `src/` exists yet.
-- **APPROVE** → G4. **Edit** → loop to G2 (escalation cap 3). **Reject / Ctrl-C** → rollback: move brief/research/decision → `deprecated/` with a `g3-rejected` note (preserves the research cost); offer to delete if the repo is otherwise empty.
+- **"Nothing written before G3" = SOURCE tree only.** The intent/research/decision are in `_docs/` (the artifacts under review) — that is correct and required. No scaffold / `package.json` / `src/` exists yet.
+- **APPROVE** → G4. **Edit** → loop to G2 (escalation cap 3). **Reject / Ctrl-C** → rollback: research/decision → `deprecated/`, intent → `_docs/intent/deprecated/` (in place — a rejected request is still a record), each with a `g3-rejected` note (preserves the research cost); offer to delete if the repo is otherwise empty.
 
 ## G4 — Scaffold (official CLI + harness layer)
 
@@ -65,13 +65,13 @@ Invoke `project-analyzer` in **Seeded Mode** (see its `## Seeded Mode` section),
 
 ## Handoff
 
-Merge brief + research + stack-decision via the docs-lifecycle **merge rule** → `_docs/complete/project-bootstrap/<date>-project-bootstrap.md`. Then:
+Merge research + stack-decision via the docs-lifecycle **merge rule** → `_docs/complete/project-bootstrap/<date>-project-bootstrap.md`, with `related:`→ the intent. **The intent is NOT merged in** — collection docs are never swept into a merge; the archive links back to it instead. Then:
 
 ```
 ✅ PROJECT BOOTSTRAPPED
 Stack: <framework + language + package manager>
 Profile: .claude/project-profile/ (9 docs; api-layer + state-management 🌱 Seeded)
-Next: /team-run <first feature>   — suggested first features: <from the brief's must-haves>
+Next: /team-run <first feature>   — suggested first features: <from the intent's must-haves>
 ```
 
 ## Escalation

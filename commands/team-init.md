@@ -18,7 +18,7 @@ Analyze the current project and generate a structured profile that all team agen
 1. **Load skill**: Invoke the `project-analyzer` skill
 2. **Scan project** following the 10-step analysis process
 3. **Generate profile** files in `.claude/project-profile/`
-4. **Bootstrap document buckets** (if absent): `_note/README.md` (human-owned, agent read-only) and `.claude/wiki/{index.md, log.md, schema.md}` (agent wiki). Never overwrites existing files; never creates other files under `_note/`.
+4. **Bootstrap document buckets** (if absent): `_workspace/README.md` (throwaway-layout SSOT) and `.claude/wiki/{index.md, log.md, schema.md}` (agent wiki), plus the profile's **Document buckets** table declaring this project's `_docs/` collections. Never overwrites existing files.
 5. **Report** what was found and any notable conventions
 
 ## Output
@@ -38,7 +38,7 @@ Analyze the current project and generate a structured profile that all team agen
 
 Plus the document buckets (created only when absent):
 ```
-_note/README.md           # human-owned scratch notes (agent read-only)
+_workspace/README.md      # throwaway-output layout (the only tracked file there)
 .claude/wiki/
 ├── index.md              # agent wiki — content catalog
 ├── log.md                # agent wiki — chronological log

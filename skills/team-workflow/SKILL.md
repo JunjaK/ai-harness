@@ -118,6 +118,8 @@ _docs/
             └── <created>-<topic>-plan.md               # Team plan document
 ```
 
+If the task arrived without an intent (no `_docs/intent/<…>-<topic>-intent.md` exists for this topic), write one first from the Leader's settled framing — `/team-run` often starts from a bare task string, and the ask is what the Phase 5 archive links back to. It is a **collection** doc: never moved, never merged into the `complete/` archive.
+
 The plan document follows the template defined in `team-leader.md` (Plan Document Template section).
 Status follows the `docs-lifecycle` skill: `planning` (here) → `processing` (Phase 3) → `complete` (Phase 5, with the sidecar-merge rule). Keep `status` frontmatter in lockstep with the folder, and update `index.md` on every transition.
 
@@ -221,7 +223,7 @@ Agent(
 )
 ```
 
-- SHIP → transition the plan `processing → complete` per `docs-lifecycle` (apply the **merge rule**: consolidate spec + plan + metrics + findings into one `complete/` doc, `git rm` sidecars, update `index.md`), then report success to user
+- SHIP → transition the plan `processing → complete` per `docs-lifecycle` (apply the **merge rule**: consolidate spec + plan + metrics + findings into one `complete/` doc, `git rm` sidecars, update `index.md`). **The intent is NOT a sidecar** — it stays in `_docs/intent/`; the archive links back to it via `related:`. Then report success to user
 - Issues found → escalate per escalation rules
 
 ## Escalation Handling

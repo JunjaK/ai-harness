@@ -18,10 +18,12 @@ if [ -z "$FILE" ] || [ ! -f "$FILE" ]; then
   exit 0
 fi
 
-# _note/ is human-owned (agent read-only). Warn on ANY write, regardless of file type.
+# _docs/ collection buckets are append-only: new files are fine, rewriting an existing
+# one is not. Warn on ANY write regardless of file type; the agent decides if it was a
+# create (fine) or a reorganize (defect).
 case "$FILE" in
-  */_note/*|_note/*)
-    echo -e "[warn] $FILE is under _note/ — human-owned (agent read-only). Edit ONLY on the human's explicit request; never reorganize, merge, or delete _note/ on your own.\n"
+  */_docs/intent/*|_docs/intent/*)
+    echo -e "[warn] $FILE is in a _docs/ collection bucket (append-only). Creating a new record is fine; MUST NOT merge, restructure, rename, or delete an existing one without the human's explicit request. Deprecate in place under intent/deprecated/.\n"
     ;;
 esac
 

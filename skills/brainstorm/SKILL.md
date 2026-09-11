@@ -45,7 +45,7 @@ Create a todo per item and complete in order:
 2. **Ask clarifying questions** — one at a time; purpose, constraints, success criteria
 3. **Propose 2-3 approaches** — with trade-offs and an explicit recommendation
 4. **Present the design** — in sections scaled to complexity; get approval after each section
-5. **Write the design doc** — to `_docs/active/planning/<created>/<created>-<topic>-design.md` (see Output Rules). Do NOT auto-commit.
+5. **Write the intent, then the design doc** — the settled *what/why/constraints* goes to `_docs/intent/<created>-<topic>-intent.md`; the *how* goes to `_docs/active/planning/<created>/<created>-<topic>-spec.md` (see Output Rules). Do NOT auto-commit.
 6. **Spec self-review** — inline scan for placeholders, contradictions, ambiguity, scope; fix inline
 7. **User reviews the spec** — ask the user to review the written file before proceeding
 8. **Hand off to implementation** — see Handoff (NOT an external writing-plans skill)
@@ -69,8 +69,17 @@ Create a todo per item and complete in order:
 
 ## Output Rules (harness-native — differs from external brainstorming)
 
-- **Save the design to `_docs/active/planning/<created>/<created>-<topic>-design.md`** (per `docs-lifecycle`). NOT to any `docs/superpowers/` path.
-- **Do NOT auto-commit.** The user gates commits — leave the file staged-or-unstaged for them.
+The brainstorm produces **two** artifacts, on different axes — do not collapse them into one file.
+
+| | `_docs/intent/<created>-<topic>-intent.md` | `_docs/active/planning/<created>/<created>-<topic>-spec.md` |
+|---|---|---|
+| Holds | problem · proposed outcome · affected users/systems · constraints · non-goals · open questions | approaches considered · chosen design · architecture · files touched · risks |
+| Axis | **collection** — stays put for good, never merged, never reorganized | **lifecycle** — rides `planning → processing → complete` |
+| If the idea dies | move to `_docs/intent/deprecated/` — the record survives | `deprecated/` or `git rm` |
+
+- `related:` links the two both ways; register BOTH in `index.md` (the intent also in §④'s bucket).
+- A pure-`how` change later (the design shifts, the ask does not) edits the spec only. Rewriting an intent to match what got built is the failure this split prevents.
+- **Do NOT auto-commit.** The user gates commits — leave the files staged-or-unstaged for them.
 - Use the `docs-lifecycle` skill for foldering/status conventions. Do NOT generate a diagram; if the user wants one, point them at `/plan-visualizer`.
 
 ## Spec Self-Review

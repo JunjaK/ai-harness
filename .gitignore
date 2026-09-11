@@ -4,8 +4,11 @@
 !.claude/rules/
 .DS_Store
 
-# Throwaway run output (screenshots, traces, videos, reports) — see e2e-testing Artifact Layout
-_workspace/
+# Throwaway run output (screenshots, traces, videos, reports) — see e2e-testing Artifact Layout.
+# The star is required: the bare directory form `_workspace/` makes git skip the whole tree,
+# so the negation below would never be reached and README.md would stay untracked.
+_workspace/*
+!_workspace/README.md
 
 # Playwright auth/session state — Playwright's own convention (https://playwright.dev/docs/auth)
 playwright/.auth
