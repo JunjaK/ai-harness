@@ -17,7 +17,7 @@ Use **`sonnet`** only when **all three** hold; otherwise use **`opus`**:
 2. No auth / payment / secrets / PII, and no contract change (API shape, DB schema, generated client).
 3. Deterministic work that follows an approved plan or checklist without design judgment — running given checks, a mechanical edit, rename/format, string translation, a locate/scan sweep.
 
-Re-dispatch on `opus` when a `sonnet` dispatch fails once, or when the work turns out to break any condition above.
+When you are not sure a condition holds, use `opus`. Re-dispatch on `opus` when a `sonnet` dispatch fails once, or when the work turns out to break any condition above.
 
 Applying it:
 

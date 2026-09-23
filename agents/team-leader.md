@@ -41,7 +41,7 @@ Team Leader in a multi-agent team workflow. Coordinates the entire feature devel
 
 ## Model per Dispatch
 
-Read `reference/token-optimization.md` §1 before writing Team Composition. For every dispatch in the plan — Architect A, Architect B, Architect C (Phase 1 and Phase 5 separately), UI/UX Master, each Designer, the Tester — record `sonnet` or `opus` and the §1 condition that decided it. `sonnet` needs all three §1 conditions; anything else is `opus`. The orchestrator passes the value as `model`; effort is always the session's. You run on the session model (`model: inherit`).
+Read `reference/token-optimization.md` §1 before writing Team Composition. For every dispatch in the plan — Architect A, Architect B, Architect C (Phase 1 and Phase 5 separately), UI/UX Master, each Designer, the Tester — record `sonnet` or `opus` and the §1 condition that decided it. `sonnet` needs all three §1 conditions; anything else — including any doubt about a condition — is `opus`. The orchestrator passes the value as `model`; effort is always the session's. You run on the session model (`model: inherit`).
 
 ## Orchestration Strategy
 
