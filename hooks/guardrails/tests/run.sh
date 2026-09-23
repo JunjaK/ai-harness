@@ -91,11 +91,22 @@ on feature; hook "$PROJ" default 'git commit -m x';                        check
             hook "$PROJ" default 'cd "$DIR" && git commit -m x';           check "c11 cd to a variable" deny 'cannot be resolved'
 GH_FAKE=main hook "$PROJ" default 'gh pr merge 12';                         check "c12 gh pr merge, base main" deny 'branch "main"'
 GH_FAKE=fail hook "$PROJ" default 'gh pr merge 12';                         check "c13 gh base lookup fails" deny 'within 5 s'
+SLOWLOG="$PROJ/.claude/session-state/guardrails-slow.log"
+fileok() {  # <name> <condition result 0|1>
+  if [ "$2" -eq 0 ]; then PASS=$((PASS + 1)); echo "ok   $1"; else FAIL=$((FAIL + 1)); echo "FAIL $1"; fi
+}
+[ ! -e "$SLOWLOG" ]; fileok "l01 fast checks write no slow log" $?
 S=$(date +%s)
 GH_FAKE=slow hook "$PROJ" default 'gh pr merge 12'
 E=$(( $(date +%s) - S ))
 check "c14 gh base lookup times out" deny 'within 5 s'
 if [ "$E" -le 8 ]; then PASS=$((PASS + 1)); echo "ok   c14b timeout returned in ${E}s"; else FAIL=$((FAIL + 1)); echo "FAIL c14b timeout took ${E}s (> 8s)"; fi
+grep -q "^slow	.*exit=0	.*gh pr merge 12" "$SLOWLOG" 2>/dev/null; fileok "l02 a check of 3 s or more is logged as slow" $?
+[ -z "$(ls -A "$PROJ/.claude/session-state/guardrails-inflight" 2>/dev/null)" ]; fileok "l03 finished checks leave no inflight marker" $?
+printf '2026-01-01T00:00:00Z\nSID-killed\n%s\n' "$(jq -cn --arg d "$PROJ" '{tool_input: {command: "git push origin main"}, cwd: $d}')" >"$PROJ/.claude/session-state/guardrails-inflight/99999"
+touch -t 202601010000 "$PROJ/.claude/session-state/guardrails-inflight/99999"
+hook "$PROJ" default 'git status'
+grep -q "^unfinished	2026-01-01T00:00:00Z	SID-killed	.*git push origin main" "$SLOWLOG" 2>/dev/null && [ ! -e "$PROJ/.claude/session-state/guardrails-inflight/99999" ]; fileok "l04 a killed check's marker becomes an unfinished log line" $?
             hook "$PROJ" bypassPermissions 'cd be && git commit -m x';     check "c15 ask escalates under bypassPermissions" deny 'permission_mode=bypassPermissions'
             hook "$PROJ" dontAsk 'cd be && git commit -m x';               check "c16 ask escalates under dontAsk" deny 'permission_mode=dontAsk'
             hook "$WT" default 'git switch main && git commit -m x';       check "c17 worktree switches to main" deny 'repo "."'
