@@ -61,11 +61,32 @@ class GuardrailsTest(unittest.TestCase):
                 self.assertEqual(decision, "deny")
                 self.assertIn("forbidden command", reason)
 
+    def test_forbidden_wrappers_backticks_and_variable_program(self) -> None:
+        self.policy["forbiddenCommands"] = ["pnpm test"]
+        self.save()
+        for command in ("timeout 600 pnpm test", "nice pnpm test",
+                        "nice -n 5 pnpm test", "ionice -c 3 pnpm test",
+                        "stdbuf -oL pnpm test", "setsid pnpm test",
+                        "doas pnpm test", "chronic pnpm test", "caffeinate pnpm test",
+                        "echo `pnpm test`", "`printf pnpm` test",
+                        "$(printf pnpm) test", "P=pnpm; $P test",
+                        'P=pnpm; "$P" test', 'P=pnpm; timeout 600 "$P" test',
+                        "P=pnpm; ${P} test", "ssh host pnpm test"):
+            with self.subTest(command=command):
+                decision, reason = self.decision(command)
+                self.assertEqual(decision, "deny")
+                self.assertIn("forbidden command", reason)
+
     def test_literal_echo_is_allowed(self) -> None:
         self.policy["forbiddenCommands"] = ["pnpm test"]
         self.save()
         self.assertEqual(self.decision("echo 'pnpm test'")[0], "allow")
+        self.assertEqual(self.decision('echo "pnpm test"')[0], "allow")
+        self.assertEqual(self.decision("echo '`pnpm test`'")[0], "allow")
+        self.assertEqual(self.decision("echo '$(pnpm test)'")[0], "allow")
+        self.assertEqual(self.decision('P=pnpm; echo "$P" test')[0], "allow")
         self.assertEqual(self.decision("pnpm tester")[0], "allow")
+        self.assertEqual(self.decision("timeout 600 pnpm lint")[0], "allow")
 
     def test_feature_branch_allowed(self) -> None:
         subprocess.run(["git", "-C", str(self.project), "switch", "-q", "-c", "feature"], check=True)

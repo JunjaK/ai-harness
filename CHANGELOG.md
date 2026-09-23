@@ -4,6 +4,11 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.31.1 — 2026-09-23
+
+### Fixed
+- Codex `forbiddenCommands` now blocks a forbidden command after launch wrappers such as `timeout`, `nice`, and `stdbuf`, inside backticks, or when the program name comes from a variable or command substitution. It also fails closed when an unrecognized program contains a visible forbidden command. Quoted literal text remains allowed. The Codex regression suite covers these cases; Claude's shared branch evaluator is unchanged.
+
 ## v1.31.0 — 2026-09-23
 
 The Claude plugin and the Codex adapter ship together at 1.31.0: Codex gains the v1.30.0 workflow and guardrails, and both share one branch evaluator.

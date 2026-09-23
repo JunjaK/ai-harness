@@ -11,7 +11,7 @@
       "name": "junjak-ai-harness",
       "source": "./",
       "description": "TypeScript-first multi-agent team workflow harness — greenfield bootstrap, TDD, lightweight verification, deferred batched QA, branch guardrails, two-tier model routing, per-session run state, lifecycle-managed docs + LLM wiki, continuous learning, personal-brain pairing, ultracode orchestration",
-      "version": "1.31.0",
+      "version": "1.31.1",
       "category": "workflow",
       "tags": [
         "team-workflow",

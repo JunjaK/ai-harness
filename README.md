@@ -253,8 +253,11 @@ For Codex, put branch-independent bans in the same project's
 `.claude/project-profile/guardrails.json` as `"forbiddenCommands"`, an array of
 literal command prefixes (the prefix covers any following arguments). For
 example, add `"forbiddenCommands": ["pnpm test"]` beside `"repos"`. The
-Codex hook checks compound commands, shell `-c` wrappers, substitutions, and
-`xargs` for these prefixes. Codex `.rules` alone cannot cover commands that
+Codex hook checks compound commands, launch wrappers (`timeout`, `nice`,
+`stdbuf` and others), shell `-c`, substitutions including backticks, variable
+program names, and `xargs` for these prefixes. Unrecognized programs with a
+visible forbidden command are denied; quoted literal text is ignored. Codex
+`.rules` alone cannot cover commands that
 stay inside its sandbox. To install a preset from the Codex plugin, copy
 `<codex-plugin>/hooks/presets/default.json` (or `light.json` / `toy.json`) to
 the project config path; the Claude plugin uses
@@ -400,14 +403,12 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.31.0** — the Codex
-adapter catches up with v1.30.0 (guardrail hook with `forbiddenCommands`,
-single-pass verification, deferred QA, scoped docs sweep, learnings promotion)
-on a branch evaluator shared with Claude, and the guardrails no longer let
-launch wrappers (`timeout`, `nice`, `ssh`, `$VAR`) slip past protected-branch
-rules. v1.30.0 brought lightweight team verification with batched `/team-qa`,
-opt-in branch guardrails, two-tier model routing, per-session
-`.claude/session-state/` with team-run ownership, and Mermaid doc-state SSOTs.
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.31.1** — the Codex
+`forbiddenCommands` guardrail now catches launch wrappers, backticks, variable
+program names, and visible forbidden commands inside programs it cannot
+follow, while leaving quoted literal text alone. v1.31.0 aligned the Codex
+adapter with Claude's lightweight verification and deferred QA workflow and
+fixed protected-branch checks through launch wrappers.
 
 ## License
 
