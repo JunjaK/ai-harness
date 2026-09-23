@@ -4,6 +4,11 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.31.2 — 2026-09-23
+
+### Fixed
+- **UI/UX agents no longer stall on a personal-skill `impeccable` install.** `team-uiux-master`, `web-architect`, and `web-reviewer` called `impeccable:impeccable` and were told to ABORT when that name was missing, so a bare `impeccable` install (a personal skill) either stopped the run or cost a failed call first — observed in a live `/team-run`. Each agent now reads its available-skills list once, uses `impeccable:impeccable` if listed and `impeccable` otherwise, and aborts only when neither is present. `CLAUDE.md` and the README dependency row say the same. The Codex adapter is unchanged; its version moves with the release number.
+
 ## v1.31.1 — 2026-09-23
 
 ### Fixed

@@ -117,7 +117,7 @@ Alongside the env flags above, the harness uses a few external tools. Each row s
 
 | Tool | Used for | Without it |
 |------|----------|-----------|
-| **impeccable** plugin · [impeccable.style](https://impeccable.style/) | UI/UX design quality — the `team-uiux-master` / `web-architect` / `web-reviewer` agents call it via `Skill("impeccable:impeccable", "<sub-command> [target]")` | those agents pause and ask you to install it |
+| **impeccable** plugin · [impeccable.style](https://impeccable.style/) | UI/UX design quality — the `team-uiux-master` / `web-architect` / `web-reviewer` agents call it via `Skill("impeccable:impeccable", "<sub-command> [target]")`, or `Skill("impeccable", …)` when it is installed as a personal skill — they read which name is listed before the first call | those agents pause and ask you to install it |
 | **superpowers** plugin · [repo](https://github.com/anthropics/claude-plugins-official) | general debugging methodology, code-review dispatch, and parallel-agent dispatch decisions — `/debug` and the `debug` skill invoke `superpowers:systematic-debugging` and layer the harness's TS/LSP patterns + escalation boundary on top | `/debug` aborts and asks you to install it |
 
 **Soft (the harness keeps working, with a named fallback or a reduced feature):**
@@ -176,7 +176,7 @@ settings itself. See [OpenAI's plugin packaging and local marketplace guide](htt
 | Codex plugin `SessionStart` hook | Read-only reminder about stale `_docs/active/` documents, after Codex hook trust review. |
 | Codex plugin `PreToolUse(Bash)` hook | Opt-in project guardrails: protected branch writes and configured forbidden command prefixes are denied. Claude `ask` rules also deny in Codex. |
 
-The Codex adapter is at v1.31.0. `$harness-team` now follows Claude's
+The Codex adapter is at v1.31.2. `$harness-team` now follows Claude's
 lightweight Phase 4 verdict and Phase 5 deferred QA/document contract, but
 Codex does not have a separate `/team-qa` command; request execution of the
 archived QA scenarios later. Codex does not write Claude session-state files.
@@ -403,7 +403,9 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.31.1** — the Codex
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.31.2** — the UI/UX
+agents accept a personal-skill `impeccable` install instead of stalling on the
+plugin name. v1.31.1: the Codex
 `forbiddenCommands` guardrail now catches launch wrappers, backticks, variable
 program names, and visible forbidden commands inside programs it cannot
 follow, while leaving quoted literal text alone. v1.31.0 aligned the Codex
