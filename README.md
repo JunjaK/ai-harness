@@ -111,14 +111,13 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 
 ### Dependencies
 
-Alongside the env flags above, the harness uses a few external tools. Each row states what happens when it's absent — **two abort, the rest degrade**.
+Alongside the env flags above, the harness uses a few external tools. Each row states what happens when it's absent — **one aborts, the rest degrade**.
 
 **Hard (a workflow step stops and asks you to install):**
 
 | Tool | Used for | Without it |
 |------|----------|-----------|
 | **impeccable** plugin · [impeccable.style](https://impeccable.style/) | UI/UX design quality — the `team-uiux-master` / `web-architect` / `web-reviewer` agents call it via `Skill("impeccable:impeccable", "<sub-command> [target]")`, or `Skill("impeccable", …)` when it is installed as a personal skill — they read which name is listed before the first call | those agents pause and ask you to install it |
-| **superpowers** plugin · [repo](https://github.com/anthropics/claude-plugins-official) | general debugging methodology, code-review dispatch, and parallel-agent dispatch decisions — `/debug` and the `debug` skill invoke `superpowers:systematic-debugging` and layer the harness's TS/LSP patterns + escalation boundary on top | `/debug` aborts and asks you to install it |
 
 **Soft (the harness keeps working, with a named fallback or a reduced feature):**
 
@@ -131,12 +130,11 @@ Alongside the env flags above, the harness uses a few external tools. Each row s
 
 ```bash
 /plugin marketplace add pbakaus/impeccable && /plugin install impeccable@impeccable
-/plugin install superpowers@claude-plugins-official
 npm i -g agent-browser && agent-browser install   # skill ships with the CLI
 brew install jq                                   # apt install jq · winget install jqlang.jq
 ```
 
-impeccable and superpowers are expected to be installed before running the workflow. `jq` is worth installing on any machine that edits code — it is the only soft dependency whose absence has no in-session symptom other than the session-start line.
+impeccable is expected to be installed before running the workflow. `jq` is worth installing on any machine that edits code — it is the only soft dependency whose absence has no in-session symptom other than the session-start line.
 
 ### First Run
 
@@ -302,7 +300,7 @@ Skills that agents reference during their workflow phases:
 |-------|-------|---------|
 | `greenfield-bootstrap` | `/team-new` | G0 intake → G1 deep-research → G2 stack decision → G3 user gate → G4 scaffold → G5 seeded profile |
 | `brainstorm` | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design (no auto-commit); solo counterpart to `/team-brainstorm` |
-| `debug` | Phase 3-4 | LSP-driven debugging patterns (TS), layered on `superpowers:systematic-debugging` |
+| `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) under the harness root-cause-first method; `/debug` carries the full method and red flags |
 | `agentic-testing` | `/team-qa` | Adapter-based deferred QA: verify goals; generate deterministic tests when `--crystallize` is requested |
 | `agent-browser-e2e` | **Default driver — any browser-driving task** | `agent-browser` is the first choice for E2E/QA/smoke/exploration/selector resolution, requested or not, plus headless login via its encrypted Auth Vault (no password reaches the LLM). One-time gate (CLI present + skill available), else fall back to Playwright — never silently, and never to `claude-in-chrome`. Playwright still owns the committed `.spec.ts` suite |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
@@ -325,7 +323,7 @@ Methodology bodies that agents cite by section rather than dispatch. They carry 
 | `reference/plan-review.md` | Leader (Phase 1) | Critical plan review + pre-plan elicitation |
 | `reference/token-optimization.md` | Any orchestrator | Model routing (incl. per-`agent()` Workflow routing), effort levels, compaction; §6 = 3-cycle retrieval protocol + six-element briefing contract |
 
-General debugging methodology, code-review dispatch, and parallel-agent dispatch decisions come from the **superpowers** plugin (`superpowers:systematic-debugging`, `superpowers:requesting-code-review`, `superpowers:dispatching-parallel-agents`) — the harness layers its own TS/LSP patterns and escalation boundary on top instead of forking them.
+Debugging methodology is harness-owned: `/debug` carries the root-cause-first method (Iron Law, red flags, escalation boundary) and the `debug` skill adds TS/LSP patterns. Parallel-agent decisions use the `parallelization` skill, and code review uses Claude Code's built-in `/code-review`. Neither needs an extra plugin.
 
 - `handoff` / `take-over` are a **write ↔ read pair**: `handoff` writes the state layer into `_docs/handoff/`; `take-over` (`/take-over`) consumes it — hydrates the linked spec, verifies the claimed state against the repo, then **graduates** the temp handoff into its durable `_docs` home (a `complete/` archive, or a `plan` in `active/`) with the name/kind/status corrected to `_docs` grammar — never a bare delete. Distinct from `/checkpoint` (agent session-state restore).
 

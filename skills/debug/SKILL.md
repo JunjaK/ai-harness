@@ -1,11 +1,11 @@
 ---
 name: debug
-description: "LSP-driven debugging patterns for TypeScript codebases. Complements the general debugging methodology in the `superpowers:systematic-debugging` skill. Use in Phase 3-4 escalation scenarios or when investigating unexpected behavior."
+description: "LSP-driven debugging patterns for TypeScript codebases under the harness root-cause-first method (Iron Law: no fix before the root cause is confirmed). Use in Phase 3-4 escalation scenarios or when investigating unexpected behavior; `/debug` is the solo entry point with the full method and red flags."
 ---
 
 # Debug (LSP Patterns)
 
-This skill covers **LSP-accelerated debugging patterns** specific to this harness. For the full systematic debugging methodology (reproduce → narrow → hypothesize → test), use the `superpowers:systematic-debugging` skill.
+This skill covers **LSP-accelerated debugging patterns** specific to this harness, under one rule — the **Iron Law: no fix until the root cause is confirmed by evidence**. The full solo method (reproduce → narrow → hypothesize → test, red flags, escalation boundary) lives in the `/debug` command; follow it when you debug outside a team phase.
 
 ## When to Use This Skill
 
@@ -15,7 +15,7 @@ This skill covers **LSP-accelerated debugging patterns** specific to this harnes
 
 ## Workflow (MUST execute in order)
 
-1. **Reproduce** — Use the `superpowers:systematic-debugging` skill for the reproduction step
+1. **Reproduce** — Make the failure happen on demand (a failing test, a command, exact steps) and read the whole error before touching code. Not reproducible after 3 attempts → ask for reproduction steps.
 2. **Locate** — Use LSP to find the failing symbol's definition and callers
 3. **Inspect types** — Use `hover` to check inferred types against assumptions
 4. **Trace call paths** — Use `incomingCalls` / `outgoingCalls` to map the flow
@@ -39,7 +39,7 @@ When a bug looks like a **type-system or dependency-injection** failure rather t
 
 ## Root Cause Rules
 
-- Fix the root cause, not the symptom (duplicate from the `superpowers:systematic-debugging` skill)
+- Fix the root cause, not the symptom: state it as "X is root cause because Y", test that one hypothesis with the smallest change, and change one variable at a time
 - After any type-related fix, MUST run the authoritative type-check (project-profile `stack.md` → "Build & Verify") before declaring the fix complete
 - After any refactor, MUST use `findReferences` to confirm no orphaned callers
 
@@ -50,4 +50,4 @@ When a bug looks like a **type-system or dependency-injection** failure rather t
 - Fix requires API/backend changes not in plan → escalate to Team Leader
 - Bug is timing-dependent → add logging, do not guess
 
-For non-TypeScript investigation patterns, fall back to the `superpowers:systematic-debugging` skill.
+For non-TypeScript targets, follow the `/debug` method with the native checker named in project-profile `stack.md`.

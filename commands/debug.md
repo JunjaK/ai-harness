@@ -15,7 +15,7 @@ The **solo, direct** entry point for debugging — a deterministic way to force 
 
 ## What It Does
 
-Run `Skill(skill="superpowers:systematic-debugging")` under its **Iron Law — no fixes without root-cause investigation first**, layering the harness `debug` skill's LSP patterns when the target is TypeScript. `superpowers` is a hard dependency: if the skill is unregistered, ABORT and tell the user to install it.
+Follow the method below under the **Iron Law — no fix until the root cause is confirmed by evidence**. For TypeScript targets, also load the harness `debug` skill's LSP patterns. The method is harness-owned and needs no other plugin.
 
 1. **Frame — no fix yet.** Capture the symptom (from `<symptom>` or context: last error, failing test, recent diff). Establish reproduction; if not reproducible after 3 attempts → request repro steps, do not guess.
 2. **Route by stack.** TS/JS target → also load the `debug` skill (`goToDefinition` / `findReferences` / `incomingCalls`, structural traps); non-TS → the native checker from project-profile `stack.md`.
@@ -29,6 +29,15 @@ Run `Skill(skill="superpowers:systematic-debugging")` under its **Iron Law — n
    - **App (mobile) targets verify on a booted simulator/emulator**, never by inspection. iOS simulator is **macOS only**; Android emulator runs on macOS and Windows — so on Windows an iOS fix is **미검증**, not fixed, and MUST NOT be inferred from Android. Say which device the run used.
    - Full gate sequence + baseline-vs-net-new rules: `reference/verification-loop.md`.
 6. **Escalate at the boundary (see below).** When the bug crosses solo scope, STOP and route up.
+
+**Red flags — you are guessing, not investigating.** Stop and go back to step 3 when you notice any of these:
+- Proposing a fix before the bug reproduces, or before reading the whole error and stack trace.
+- "Let me just try X" with no hypothesis written as "X is root cause because Y".
+- Changing two things at once, or stacking a new fix on a failed one without reverting it.
+- "It's probably Y" with no observation behind it.
+- Skipping the failing test because the fix "is obvious".
+- Guarding only the call site the report named while other callers take the same path.
+- Each fix surfaces a new problem somewhere else — that is the architectural signal; escalate (Boundary).
 
 Effort: start `xhigh`; escalate `/effort max` only after `xhigh` fails twice on the **same** bug.
 
@@ -57,7 +66,6 @@ Status:     fixed · fixed-unverified · escalated→/team · not-reproduced
 
 ## Related
 
-- `superpowers:systematic-debugging` skill — the general methodology (Iron Law · 4 phases · red flags) this command fires
 - `debug` skill (harness) — the TS/LSP-accelerated layer loaded for TypeScript targets
 - `reference/verification-loop.md` — confirm the fix before claiming success (no self-report trust)
 - `/team` · `/team-run` — escalation target when the bug is a Fundamental Issue (cross-cutting / 3+ modules / BE change)

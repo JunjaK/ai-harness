@@ -51,10 +51,11 @@ Applies to all agents, skills, and direct use at the start of any task that chan
 
 `.claude/rules/` is repo-local and path-scoped; it does not travel with the plugin. **Non-TS projects**: use the native checker from `stack.md` (`pyright`/`mypy`/`go vet`…); `verification-loop` Phase 2 adapts.
 
-**Delegated plugins (hard dependencies)** — each reaches subagents via agent/command definitions, not this file. Both ABORT + request install when unregistered. MUST NOT add either to `plugin.json` deps: external-marketplace manifest deps break plugin load.
+**Delegated plugin (hard dependency)** — reaches subagents via agent definitions, not this file. It ABORTs + requests install when unregistered. MUST NOT add it to `plugin.json` deps: external-marketplace manifest deps break plugin load.
 
 - **`impeccable`** (`pbakaus/impeccable`) — UI/UX quality. A personal-skill install (bare `impeccable`) also counts as registered; the agents resolve which name is listed before the first call.
-- **`superpowers`** — general debugging methodology, code-review dispatch, and parallel-agent dispatch decisions. The harness deliberately does NOT fork these; `/debug` and the `debug` skill invoke `superpowers:systematic-debugging` and layer the harness's TS/LSP patterns and escalation boundary on top.
+
+Owned by the harness, no plugin needed: debugging methodology (`/debug` + `debug` skill), parallel-agent decisions (`parallelization` skill), and code review (Claude Code's built-in `/code-review`).
 
 ---
 
