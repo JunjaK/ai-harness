@@ -80,7 +80,7 @@ The brainstorm produces **two** artifacts, on different axes — do not collapse
 - `related:` links the two both ways; register BOTH in `index.md` (the intent also in §④'s bucket).
 - A pure-`how` change later (the design shifts, the ask does not) edits the spec only. Rewriting an intent to match what got built is the failure this split prevents.
 - **Do NOT auto-commit.** The user gates commits — leave the files staged-or-unstaged for them.
-- Use the `docs-lifecycle` skill for foldering/status conventions. Do NOT generate a diagram; if the user wants one, point them at `/plan-visualizer`.
+- Use the `docs-lifecycle` skill for foldering/status conventions, including its **Diagrams in docs** rule: draw branching flows, state changes, and component interactions in the intent/spec as inline Mermaid. An interactive HTML rendering is a separate, on-request `/plan-visualizer` step.
 
 ## Spec Self-Review
 

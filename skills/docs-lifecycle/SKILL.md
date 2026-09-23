@@ -63,7 +63,7 @@ The base set ships two. Projects commonly add `meetings/`, `inquiry/` (questions
 
 ### `intent/` — the request record
 
-`_docs/intent/YYYY-MM-DD-<topic>-intent.md` holds what was asked and why, before any spec exists. It is the head of the artifact chain (`intent → spec → plan → impl`) and the one document that survives rejection: most intents never become specs, and a rejected one still records the decision. Written from a `brainstorm` / `/team-brainstorm` result; the paired `spec` and `plan` then live in `active/planning/<date>/` and ride the normal lifecycle, linking back via `related:`.
+`_docs/intent/YYYY-MM-DD-<topic>-intent.md` holds what was asked and why, before any spec exists. It is the head of the artifact chain (`intent → spec → plan → impl`) and the one document that survives rejection: most intents never become specs, and a rejected one still records the decision. Written from a `brainstorm` / `/team-brainstorm` result; the paired `spec` and `plan` then live in `active/planning/<date>/` and ride the normal lifecycle, linking back via `related:`. A live intent carries `status: reference` and keeps it while its spec moves; a rejected or superseded intent moves to `intent/deprecated/` with `status: deprecated`.
 
 ## Folder lifecycle — two axes
 
@@ -112,6 +112,18 @@ revived: YYYY-MM-DD   # only present after a deprecated→active revive
 `updated` records the last substantive review or change, not a claim that implementation or QA passed. A failed required implementation check leaves a lifecycle doc in `active/processing/`; record the evidence and next action there. Deferred QA is independent: a completed implementation stays in `complete/` while its QA scenarios are `pending`, `failed`, or `blocked`. A date alone never proves that a doc's claims are current.
 
 > Write docs in the project's working language (match existing `_docs/`), keeping code identifiers, paths, and API routes verbatim.
+
+### Diagrams in docs
+
+When an intent, spec, plan, handoff, or findings doc explains any of the following, draw it as an inline Mermaid block next to the text it replaces:
+
+| Content | Mermaid type |
+|---------|--------------|
+| A flow with branches or decision points | `flowchart` |
+| A state change — a status field with 3+ values, or new/changed transitions | `stateDiagram-v2` |
+| An interaction among 2+ components or actors (FE ↔ BE ↔ DB, agent ↔ hook, user ↔ system) | `sequenceDiagram` |
+
+Keep a plain numbered list for a linear sequence of steps. The diagram and the text carry different things: when a diagram holds the logic, the text keeps only what the diagram cannot show — reasons, thresholds, exceptions, evidence. This is separate from `/plan-visualizer`, which renders an interactive HTML page only on request.
 
 ## Controlled topic vocabulary (SSOT in index.md)
 

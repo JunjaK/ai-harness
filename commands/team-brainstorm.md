@@ -4,7 +4,7 @@ description: "Team Brainstorm — Leader + Architects가 plan만 논의 (구현 
 
 # Team Brainstorm — Planning Only Mode
 
-Lightweight team discussion: Leader + Architects brainstorm and produce a plan without proceeding to implementation. Includes visual HTML diagram of the plan.
+Lightweight team discussion: Leader + Architects brainstorm and produce a plan without proceeding to implementation.
 
 ## Usage
 
@@ -28,7 +28,7 @@ If no task description provided, ask the user for one.
 7. **Save plan** to `_docs/active/planning/<created>/<created>-<topic>-plan.md`, `related:`→ the intent (both ways)
 8. **Present plan** to user for review
 
-No diagram is generated here. If the user wants one, they run `/plan-visualizer`.
+The plan follows `docs-lifecycle` → **Diagrams in docs**: branching flows, state changes, and component interactions are drawn inline as Mermaid. An interactive HTML rendering is separate — the user runs `/plan-visualizer` when they want one.
 
 ## Output
 

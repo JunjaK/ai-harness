@@ -13,6 +13,10 @@ Planned single release: the v1.29.0 entry below has not been published and will 
 - Harness projects without a guardrails config get a one-line preset suggestion at session start; any config file, including `toy`, silences it.
 - `hooks/guardrails/tests/run.sh`: table-driven hook tests (bash 3.2 compatible).
 
+### Changed
+- `docs-lifecycle` gains a **Diagrams in docs** rule: intents, specs, plans, handoffs, and findings draw branching flows (`flowchart`), state changes (`stateDiagram-v2`), and component interactions (`sequenceDiagram`) as inline Mermaid; linear steps stay a list. `brainstorm` and `/team-brainstorm` follow it instead of forbidding diagrams; `/plan-visualizer` stays the on-request HTML view.
+- A live intent's `status` is defined as `reference` (`deprecated` once rejected or superseded).
+
 ## v1.29.0 — 2026-09-23
 
 ### Added
