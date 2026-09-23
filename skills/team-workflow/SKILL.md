@@ -46,6 +46,8 @@ Before starting any phase, verify `.claude/project-profile/index.md` exists.
   - **Existing tree** (has `package.json`/`src/`): prompt user to run `/team-init` first, then proceed.
   - **Greenfield** (empty/near-empty repo, no source tree): prompt user to run **`/team-new`** — it bootstraps the project (research → scaffold → profile) and ends by generating the profile `/team-run` then consumes. Do NOT run `/team-init` on an empty repo (it would produce a vacuous profile).
 
+**Ignore rule**: make sure the project's `.gitignore` carries `.claude/session-state/` before the run writes its run file there; append the line if it is missing and say so in the completion report. That folder is per-session runtime state and never belongs in a commit.
+
 **Loading rule**: Only `index.md` is required. Agents load other profile files on-demand based on relevance (see index.md's file table). Some files may not exist — agents fall back to general best practices.
 
 ## Orchestration Mode (read once)

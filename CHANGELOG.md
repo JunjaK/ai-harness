@@ -24,7 +24,7 @@ Planned single release: the v1.29.0 entry below has not been published and will 
 
 ### Fixed
 - The `Stop` hook ran after **every reply** and moved `current.md` to `last-session.md` each time, so the live state disappeared between turns. State is now snapshotted once by a new `SessionEnd` hook (which also prunes session folders untouched for 14 days); `Stop` keeps only the stray-artifact warning. `PreCompact` snapshots the session's own folder and names the team runs it owns.
-- `/team-init` now makes sure the consumer project's `.gitignore` carries `.claude/session-state/`.
+- The consumer project's `.gitignore` now always carries `.claude/session-state/`: `/team-init` adds it, and a team run or `/checkpoint` save appends it before its first write when an older profile left it out.
 
 ## v1.29.0 — 2026-09-23
 

@@ -58,6 +58,7 @@ Persist work state for cross-session recovery. Checkpoints capture everything ne
 └── learnings/<topic>.md               # shared across sessions (continuous-learning)
 ```
 
+- Before the first write, make sure the project's `.gitignore` carries `.claude/session-state/`; append the line if it is missing and tell the user.
 - `$CLAUDE_CODE_SESSION_ID` is set in every Bash tool and hook subprocess and equals the hook input's `session_id`. It survives `--resume`/`--continue` and changes on `/clear`, so a cleared session starts a new folder.
 - Team workflow phase checkpoints go in the orchestrator's own `checkpoints/` with a prefix: `phase1-baseline.md`, `phase3-worktree-auth.md`.
 - `runs/<plan-id>.json` (`<plan-id>` = the plan filename stem) is **orchestrator-only** (Designers/Testers never write it). It carries `owner_session`; a session that is not the owner reads it but MUST NOT write it — ask the user first, and change the owner only when the user asks to take the run over (`/checkpoint` restore or `/take-over`). Schema: `team-workflow/SKILL.md` → "State Tracking".
