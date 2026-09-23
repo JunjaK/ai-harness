@@ -1,8 +1,10 @@
 # AI Harness — Multi-Agent Team Workflow
 
-A reusable Claude Code harness for Claude Opus: greenfield project bootstrap (research → scaffold → profile) plus a 5-phase multi-agent team workflow (TDD, escalation loops, worktree parallelization), a full testing stack, a lifecycle-managed document-storage system, code-minimalism discipline, and continuous pattern learning.
+A reusable Claude Code harness for Claude Opus, with a focused Codex adapter for project analysis, implementation, and debugging. The Claude workflow includes greenfield bootstrap (research → scaffold → profile), a 5-phase multi-agent team workflow, testing layers, document lifecycle, and continuous learning.
 
 ## Overview
+
+The following overview and slash commands describe the Claude Code workflow.
 
 Specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code. Beyond the core team workflow, the harness adds:
 
@@ -59,7 +61,7 @@ Classification (simple fix vs fundamental issue), routing, retry/global-cycle ca
 | `/plan-visualizer` | On-demand HTML diagram of a plan (team, phases, files, deps) — no workflow phase generates one |
 | `/brain-connect` | Pair an optional personal **brain** SSOT (cross-machine persona, global `CLAUDE.md`, personal global skills, auto-memory, recommended-settings manifest) with the harness, or relocate an existing one |
 
-## Installation (Plugin)
+## Claude Code installation (Plugin)
 
 This harness is distributed as a **Claude Code plugin**.
 
@@ -139,6 +141,47 @@ impeccable and superpowers are expected to be installed before running the workf
 ```
 
 `/team-init` generates `.claude/project-profile/` in your project — all agents adapt to your stack and conventions.
+
+## Codex support
+
+Codex automatically discovers this repository's three `.agents/skills/` links
+to the self-contained skills in `codex/skills/` when opened here. Invoke
+`$harness-init` to profile an existing project, `$harness-team` for a
+cross-cutting implementation, or `$harness-debug` for a bounded bug. Give the
+target repository path in the request when it differs from the current working
+directory. These are Codex skill names, not Claude slash commands. `AGENTS.md`
+governs Codex work **on this repository**; a different project uses its own
+`AGENTS.md` if present.
+
+To use the skills in another repository, add this repository as a Codex plugin
+marketplace source (`codex plugin marketplace add JunjaK/ai-harness`), install
+`junjak-ai-harness` from `/plugins`, and start a new Codex session in the target
+repository. The legacy marketplace file remains for Claude; the Codex marketplace
+entry points to `codex/`, whose manifest selects only Codex skills and whose
+hook is discovered inside that package. For local development, use
+`codex plugin marketplace add /absolute/path/to/ai-harness`. Installation changes
+the user's Codex plugin configuration; this repository does not write user-level
+settings itself. See [OpenAI's plugin packaging and local marketplace guide](https://developers.openai.com/plugins/build/plugins).
+
+| Codex entry point | Supported behavior |
+|---|---|
+| `$harness-init` | Scans an existing project and writes `.codex/project-profile/index.md` from observed files. |
+| `$harness-team` | Plans, implements, tests, and reviews a cross-cutting change; uses Codex subagents for independent tasks when available. |
+| `$harness-debug` | Reproduces, traces, fixes, and verifies a bounded bug; escalates broad contract changes to the team skill. |
+| Codex plugin `SessionStart` hook | Read-only reminder about stale `_docs/active/` documents, after Codex hook trust review. |
+
+The Codex adapter does not promise parity with Claude's `/team-new`,
+`/team-brainstorm`, `/checkpoint`, personal `brain-connect`, 14 slash commands,
+10 named agents, ultracode `Workflow()`, or the complete 5-phase state machine.
+Claude `skills/` are intentionally not exposed to Codex as a set: several call
+`Agent()`, `Skill()`, `Workflow()`, or Claude-only plugins. Codex subagents use
+the runtime's own delegation tools rather than the Claude agent definitions.
+Codex's informational hook does not run Claude's `Stop`, `PreCompact`, or
+`PostToolUse` handlers, which use `.claude/session-state` and Claude tool input.
+Codex requires the user to review and trust a plugin hook before it runs; the
+three skills work without hook trust. No new package dependency is required.
+Direct repository discovery requires Git symlink support; the plugin package
+contains regular skill files.
 
 ## Customization
 
@@ -280,32 +323,9 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). Latest:
-
-**v1.27.0** — `_note/` is gone; `_docs/` splits into lifecycle and collection buckets.
-- **`_docs/intent/`** — the request record, head of the `intent → spec → plan → impl` chain and the one artifact that survives rejection. `brainstorm` now writes the *what/why* here and the *how* to the paired spec; `kind: brief` is replaced by `kind: intent`.
-- **Collection buckets** — `intent/` and `handoff/` in the base set, appended to but never reorganized by the agent. A project declares its own (`meetings/`, `inquiry/`, `proposal/`) in its profile's Document buckets table; the `Curated` column is what authorizes any rewriting, and the default is append-only.
-- **`_note/` removed** — a read-only bucket blocked the work it was meant to hold, since the agent is usually the one turning raw material into something readable. Documents unify under `_docs/`; protection moved from folder ownership to bucket purpose.
-- **`REVIEW.md`** — review policy for a rules repo: consistency, literalness, release discipline, contradiction, with a nit cap and history excluded.
-- **`.gitignore` fix** — `_workspace/` (bare directory form) makes a `!_workspace/README.md` negation unreachable. Now `_workspace/*` + the negation, so the layout README is actually tracked.
-- **Hook hardening** — the collection guard matches by inversion so project-declared buckets are covered too, and `post-edit-warn.sh` stopped expanding backslash escapes in grep'd file content, which let a source line forge its own warning output.
-
-**v1.26.0** — run artifacts stop landing at the repo root. `_test/` → `_workspace/`, grouped by context.
-- **`_workspace/` is the single throwaway bucket** — screenshots, Playwright traces/videos/reports, and anything else awkward to commit, grouped one folder per purpose (`_workspace/e2e/<run>/`). Replaces `_test/` everywhere; a bare file at the repo root or at `_workspace/` root is now a named defect.
-- **Auth state follows Playwright's own convention** — `playwright/.auth/` per [the vendor docs](https://playwright.dev/docs/auth), not the harness's old `_test/.auth/`. Vendor state paths win over `_workspace/`.
-- **`session-stop` names stray root artifacts** — scans the repo root at session end for untracked images/videos/archives plus `test-results/`, `playwright-report/`, `blob-report/`. Warns only; tracked files are never flagged and nothing is moved or deleted.
-- **The rule is always on** — `_workspace/` is in CLAUDE.md's routing table and bucket table, not only in the lazily-loaded `e2e-testing` reference. That gap is why the old `_test/` rule went unread.
-
-**v1.25.1** — the dependency list said three tools; the harness reaches for six.
-- **`jq` no longer breaks the post-edit hook silently** — the `PostToolUse` command called `jq` before the script ran, so a machine without `jq` had the `console.*` / `debugger` / `_note/` checks disabled with no symptom. The guard now lives inside the script, and `session-start.sh` announces it once per session.
-- **Dependencies split Hard vs Soft, all six listed** — Hard: `impeccable`, `superpowers`. Soft: `agent-browser`, Playwright, `jq`, `gh` — the last three were load-bearing but undocumented.
-
-**v1.25.0** — the `ponytail` dependency is gone, and the harness lost the parts nothing routed to. Skills 21 → 19, reference docs 6 → 5, commands 13 → 14.
-- **`ponytail` removed entirely** — `team-tester` Step 6 (`/ponytail-review` on the diff, ABORT when uninstalled) and the Leader's Phase 4 minimalism checkpoint are gone. Hard dependencies: `impeccable`, `superpowers`. Minimalism is now decided once, at the **Phase 1 approval gate**, from the YAGNI ladder the architect agents already carry.
-- **`security-review` skill removed** — nothing invoked it; Phase 5's `team-architect-infra` owns the OWASP checklist in its own definition, so the skill was a diverging second copy. The Phase 5 audit is unchanged and still mandatory.
-- **`scenario-to-e2e` removed** (zero entry points) and **`reference/tdd-workflow.md` removed** (the TDD agent never cited it — it inlines its own cycle).
-- **Plan diagrams are opt-in via `/plan-visualizer`** — `/team`, `/team-run`, and `/team-brainstorm` no longer render one automatically.
-- **`submodule-worktree` gates on the project profile**, not a bare `.gitmodules` — no Submodule Layout recorded → "run `/team-init` first", fall back to `parallelization`.
+Full history: [CHANGELOG.md](./CHANGELOG.md). Latest: **v1.28.0** adds
+Codex-specific skills, plugin metadata, and a separate informational hook while
+preserving the Claude Code workflow.
 
 ## License
 

@@ -1,0 +1,20 @@
+{
+  "name": "ai-harness-codex",
+  "interface": {
+    "displayName": "AI Harness for Codex"
+  },
+  "plugins": [
+    {
+      "name": "junjak-ai-harness",
+      "source": {
+        "source": "local",
+        "path": "./codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

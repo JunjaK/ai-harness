@@ -4,6 +4,15 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.28.0 — 2026-09-23
+
+### Added
+- Codex repository entry points: `AGENTS.md` and three self-contained `.agents/skills/` workflows for project analysis, team implementation, and debugging.
+- A `codex/` plugin package and repo marketplace entry for distributing those skills, with a separate, informational Codex `SessionStart` hook.
+
+### Changed
+- Documented Codex installation, invocation, supported scope, and parity limits. Claude commands, agent definitions, skill bodies, and hooks retain their existing behavior.
+
 ## v1.27.0 — 2026-09-11
 
 `_note/` existed so the human had a bucket the agent could not touch. In practice the pattern went the other way: the raw material arrives (a transcript, a dump, a half-formed idea) and the agent is the one who turns it into something readable. A read-only bucket blocked exactly the work it was meant to hold, so it is gone — one place for documents now, with the protection moved from *who owns the folder* to *what the folder is for*.

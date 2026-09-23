@@ -1,0 +1,27 @@
+{
+  "name": "junjak-ai-harness",
+  "version": "1.28.0",
+  "description": "Codex workflows for project analysis, implementation, and systematic debugging",
+  "author": {
+    "name": "Junjak",
+    "email": "haring157@gmail.com",
+    "url": "https://github.com/JunjaK"
+  },
+  "homepage": "https://github.com/JunjaK/ai-harness",
+  "repository": "https://github.com/JunjaK/ai-harness",
+  "license": "MIT",
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "AI Harness for Codex",
+    "shortDescription": "Project analysis, implementation, and debugging workflows",
+    "longDescription": "Use three focused Codex skills to profile a repository, implement a cross-cutting change, or investigate a bug.",
+    "developerName": "Junjak",
+    "category": "Productivity",
+    "capabilities": ["Read", "Write"],
+    "defaultPrompt": [
+      "Use $harness-init to profile this repository.",
+      "Use $harness-team to implement this change and verify it.",
+      "Use $harness-debug to investigate this failing test."
+    ]
+  }
+}
