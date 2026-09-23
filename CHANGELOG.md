@@ -4,6 +4,19 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## Codex adapter v1.30.0 — 2026-09-23 (unreleased)
+
+The published `v1.30.0` tag contains the Claude release below; this later
+commit brings the Codex package manifest to `1.30.0`. No tag, push, or GitHub
+Release is included in this commit.
+
+### Added
+- Opt-in Codex `PreToolUse(Bash)` guardrail hook. It shares the Claude branch evaluator, denies protected writes, converts every branch `ask` to `deny`, and checks `forbiddenCommands` prefixes in the project guardrails config. Codex-packaged copies of the three presets and focused adapter tests are included.
+
+### Changed
+- `$harness-team` uses a single Phase 4 `VERIFY_PASS` / `VERIFY_FAIL` / `VERIFY_BLOCKED` pass, then records up to five Deferred QA cases and a scoped document sweep after a pass. It promotes project-valid learnings and uses Mermaid for branching flows, state changes, and interactions. Optional subagent routing chooses a smaller model only for simple deterministic work and otherwise the strongest available model, without a version pin.
+- The Claude guardrail entry point now calls the same branch evaluator packaged inside `codex/`; its policy and output are unchanged, as checked by the 36-case Claude suite. Codex reads the current Claude session-state layout for handoffs without writing Claude run files.
+
 ## v1.30.0 — 2026-09-23
 
 Folds in the unpublished v1.29.0 work (lightweight team verification + batched `/team-qa`). The Codex adapter stays at v1.28.0; this release changes the Claude workflow only.

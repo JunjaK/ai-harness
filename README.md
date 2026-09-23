@@ -171,9 +171,19 @@ settings itself. See [OpenAI's plugin packaging and local marketplace guide](htt
 | Codex entry point | Supported behavior |
 |---|---|
 | `$harness-init` | Scans an existing project and writes `.codex/project-profile/index.md` from observed files. |
-| `$harness-team` | Plans, implements, tests, and reviews a cross-cutting change; uses Codex subagents for independent tasks when available. |
+| `$harness-team` | Implements a cross-cutting change, runs one lightweight verification pass (`VERIFY_PASS` / `VERIFY_FAIL` / `VERIFY_BLOCKED`), records up to five Deferred QA scenarios, and sweeps only the run's changed documents. It routes independent subagents by task complexity when available. |
 | `$harness-debug` | Reproduces, traces, fixes, and verifies a bounded bug; escalates broad contract changes to the team skill. |
 | Codex plugin `SessionStart` hook | Read-only reminder about stale `_docs/active/` documents, after Codex hook trust review. |
+| Codex plugin `PreToolUse(Bash)` hook | Opt-in project guardrails: protected branch writes and configured forbidden command prefixes are denied. Claude `ask` rules also deny in Codex. |
+
+The Codex adapter is at v1.30.0. `$harness-team` now follows Claude's
+lightweight Phase 4 verdict and Phase 5 deferred QA/document contract, but
+Codex does not have a separate `/team-qa` command; request execution of the
+archived QA scenarios later. Codex does not write Claude session-state files.
+If reading an existing Claude handoff, the current layout is
+`.claude/session-state/sessions/<session_id>/` and
+`.claude/session-state/runs/<plan-id>.json` (`owner_session`, `startedAt`,
+`baseRef`); the old root files are retired.
 
 The Codex adapter does not promise parity with Claude's `/team-new`,
 `/team-brainstorm`, `/checkpoint`, personal `brain-connect`, 14 slash commands,
@@ -181,10 +191,12 @@ The Codex adapter does not promise parity with Claude's `/team-new`,
 Claude `skills/` are intentionally not exposed to Codex as a set: several call
 `Agent()`, `Skill()`, `Workflow()`, or Claude-only plugins. Codex subagents use
 the runtime's own delegation tools rather than the Claude agent definitions.
-Codex's informational hook does not run Claude's `Stop`, `PreCompact`, or
-`PostToolUse` handlers, which use `.claude/session-state` and Claude tool input.
-Codex requires the user to review and trust a plugin hook before it runs; the
-three skills work without hook trust. No new package dependency is required.
+Codex does not run Claude's `Stop`, `PreCompact`, or `PostToolUse` handlers,
+which use Claude session state and tool input. Codex requires the user to
+review and trust a plugin hook before it runs; the three skills work without
+hook trust, but the guardrail is active only after hook trust. The branch
+evaluator uses `bash` and `jq`; the Codex wrapper uses Python 3 standard
+library. No package dependency is added.
 Direct repository discovery requires Git symlink support; the plugin package
 contains regular skill files.
 
@@ -228,7 +240,7 @@ cp "<plugin>/hooks/guardrails/presets/default.json" .claude/project-profile/guar
 - `pattern` is a bash glob; when several rows match a branch, the strictest value wins. An omitted action is `allow`.
 - **commit** covers `commit`, `merge`, `rebase`, `cherry-pick`, `revert`, `am`, `pull` on the current branch; **push** uses the refspec's destination (the current branch when omitted); **merge** is `gh pr merge`, judged by the PR's base branch (looked up with a 5 s limit).
 - `cd dir && …`, `git -C dir`, and `git checkout/switch` earlier in the same command are followed. Anything the hook cannot resolve — `$(…)`, backticks, `sh -c`, `eval`, `xargs`, subshells, `cd "$VAR"`, detached HEAD, a failed PR lookup — gets the strictest rule for that action.
-- `ask` becomes `deny` under `bypassPermissions` or `dontAsk`, where no prompt can be shown.
+- In Claude, `ask` becomes `deny` under `bypassPermissions` or `dontAsk`, where no prompt can be shown. In Codex, every `ask` becomes `deny` because its `PreToolUse` hook does not support a confirmation decision.
 - An invalid config blocks git/gh commands until it is fixed.
 
 Forbidden commands that do not depend on the branch belong in Claude Code's own rules, which already split compound commands and subshells — for example in `.claude/settings.json`:
@@ -237,7 +249,20 @@ Forbidden commands that do not depend on the branch belong in Claude Code's own 
 { "permissions": { "deny": ["Bash(pnpm test)", "Bash(pnpm test -- *)"] } }
 ```
 
-Limits: the hook targets mistakes, not deliberate evasion (a script file or alias that runs `git push` is not seen). Keep server-side branch protection. Codex support and a generator command are planned. Windows Git Bash is not yet verified — run `bash hooks/guardrails/tests/run.sh` there first.
+For Codex, put branch-independent bans in the same project's
+`.claude/project-profile/guardrails.json` as `"forbiddenCommands"`, an array of
+literal command prefixes (the prefix covers any following arguments). For
+example, add `"forbiddenCommands": ["pnpm test"]` beside `"repos"`. The
+Codex hook checks compound commands, shell `-c` wrappers, substitutions, and
+`xargs` for these prefixes. Codex `.rules` alone cannot cover commands that
+stay inside its sandbox. To install a preset from the Codex plugin, copy
+`<codex-plugin>/hooks/presets/default.json` (or `light.json` / `toy.json`) to
+the project config path; the Claude plugin uses
+`<claude-plugin>/hooks/guardrails/presets/`. If no config exists, neither hook
+changes command behavior. Run `python3 codex/hooks/tests/run.py` and
+`bash hooks/guardrails/tests/run.sh` to check both adapters.
+
+Limits: the hook targets mistakes, not deliberate evasion (a script file or alias that runs `git push` is not seen). Codex tool hooks are not a complete enforcement boundary, and most subagent tool calls do not run this hook; keep server-side branch protection. Windows Git Bash and Codex Windows hook invocation are not yet verified. A generator command is still planned.
 
 ### Document Storage (3 buckets)
 
@@ -380,7 +405,9 @@ team verification with batched `/team-qa`, opt-in branch guardrails
 (`PreToolUse(Bash)` + presets), two-tier model routing (`sonnet` for small
 deterministic work, `opus` otherwise), per-session `.claude/session-state/`
 with team-run ownership, run-scoped docs sweep and learnings promotion, and
-Mermaid diagrams as the doc-state SSOT. The Codex adapter remains at v1.28.0.
+Mermaid diagrams as the doc-state SSOT. The Codex adapter is now at v1.30.0
+in this post-release commit; the published v1.30.0 tag predates this adapter
+update.
 
 ## License
 

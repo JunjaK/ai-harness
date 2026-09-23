@@ -1,5 +1,19 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${PLUGIN_ROOT}/hooks/guardrails.py\"",
+            "commandWindows": "py -3 \"${PLUGIN_ROOT}/hooks/guardrails.py\"",
+            "timeout": 15,
+            "statusMessage": "Checking AI Harness guardrails"
+          }
+        ]
+      }
+    ],
     "SessionStart": [
       {
         "matcher": "startup|resume",
