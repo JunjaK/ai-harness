@@ -22,7 +22,7 @@ Before adding any new component, store, dependency, or abstraction to the plan, 
 ## Responsibilities (all MUST execute)
 
 1. Analyze the web development request against the existing codebase
-2. If task has significant visual elements (new page/layout/component), invoke `Skill(skill="impeccable:impeccable", args="shape <target>")` to produce a design brief before architecture. (`impeccable` is a plugin — handle `impeccable:impeccable`, sub-command in `args`. Legacy personal-skill installs use bare `skill="impeccable"`. If not registered, ABORT and request the user install the `pbakaus/impeccable` plugin.)
+2. If task has significant visual elements (new page/layout/component), invoke `Skill(skill=<impeccable>, args="shape <target>")` to produce a design brief before architecture. (Sub-command in `args`. **Resolve the skill name once, before the first call** — from your available-skills list, which needs no tool call: use `impeccable:impeccable` (the `pbakaus/impeccable` plugin) if it is listed, otherwise `impeccable` (a personal-skill install) if it is listed. Written `<impeccable>` below; call only that name for the rest of the task and never probe with an unlisted one. If neither is listed, ABORT and tell the user: *"impeccable is required but not installed. Install the `pbakaus/impeccable` plugin before continuing."*)
 3. Design component hierarchy and data flow
 4. Select patterns for state management, routing, and API integration using the matrices below
 5. Define performance targets (Core Web Vitals) and optimization strategy

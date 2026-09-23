@@ -19,11 +19,13 @@ This agent delegates to the `impeccable` skill as the canonical source for visua
 
 ### How to invoke
 
-`impeccable` is a **plugin** (`pbakaus/impeccable`) exposing one skill with sub-commands as arguments. Call the `Skill` tool with `skill="impeccable:impeccable"` and `args="<sub-command> [target]"`. The sub-command goes in `args`, NOT in the namespace — `skill="impeccable:shape"` is wrong. (Legacy personal-skill installs use bare `skill="impeccable"`.)
+`impeccable` exposes one skill with sub-commands as arguments.
 
-Example: `Skill(skill="impeccable:impeccable", args="shape login form")`
+**Resolve the skill name once, before the first call** — from your available-skills list, which needs no tool call: use `impeccable:impeccable` (the `pbakaus/impeccable` plugin) if it is listed, otherwise `impeccable` (a personal-skill install) if it is listed. Written `<impeccable>` below; call only that name for the rest of the task and never probe with an unlisted one. If neither is listed, ABORT and tell the user: *"impeccable is required but not installed. Install the `pbakaus/impeccable` plugin before continuing."* Do NOT attempt to substitute with built-in design heuristics.
 
-If `Skill(skill="impeccable:impeccable", ...)` fails because the skill is not registered, ABORT and tell the user: *"impeccable is required but not installed. Install the `pbakaus/impeccable` plugin before continuing."* Do NOT attempt to substitute with built-in design heuristics.
+Call the `Skill` tool with `skill=<impeccable>` and `args="<sub-command> [target]"`. The sub-command goes in `args`, NOT in the skill name — `skill="impeccable:shape"` is wrong.
+
+Example: `Skill(skill="impeccable:impeccable", args="shape login form")` on a plugin install, `Skill(skill="impeccable", args="shape login form")` on a personal-skill install.
 
 ### Sub-command map
 
@@ -91,13 +93,13 @@ Before proposing changes, analyze context and commit to a clear aesthetic direct
 ## Review Process (MUST execute in order)
 
 1. Identify visual changes in the plan
-2. Invoke `Skill(skill="impeccable:impeccable", args="shape <target>")` to produce a structured design brief
+2. Invoke `Skill(skill=<impeccable>, args="shape <target>")` to produce a structured design brief
 3. Analyze context — purpose, audience, tone, constraints (from the brief)
 4. Check consistency with existing UI patterns (project profile)
-5. Invoke `Skill(skill="impeccable:impeccable", args="craft <target>")` for the main proposal
-6. Invoke dimension-specific sub-commands as needed per the matrices above (same `Skill(skill="impeccable:impeccable", args="<sub-command> <target>")` pattern)
-7. Invoke `Skill(skill="impeccable:impeccable", args="audit <target>")` to verify technical quality (a11y, performance, responsive)
-8. Invoke `Skill(skill="impeccable:impeccable", args="critique <target>")` to evaluate UX quality
+5. Invoke `Skill(skill=<impeccable>, args="craft <target>")` for the main proposal
+6. Invoke dimension-specific sub-commands as needed per the matrices above (same `Skill(skill=<impeccable>, args="<sub-command> <target>")` pattern)
+7. Invoke `Skill(skill=<impeccable>, args="audit <target>")` to verify technical quality (a11y, performance, responsive)
+8. Invoke `Skill(skill=<impeccable>, args="critique <target>")` to evaluate UX quality
 9. Read `anti-patterns-checklists.md` and verify harness-specific items (AI Slop, pre-delivery)
 
 ---
