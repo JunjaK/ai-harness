@@ -31,12 +31,12 @@ If no task description provided, ask the user for one.
 5. **Phase 3 — Implementation** (autonomous):
    - Spawn Designer x N in parallel worktrees with TDD enforcement
    - Merge all worktrees after completion
-6. **Phase 4 — Verification** (autonomous):
-   - Spawn Tester x N in parallel
-   - Loop until all tests pass (max 3 retries)
+6. **Phase 4 — Lightweight Verification** (autonomous, one pass):
+   - Run one Tester on the merged tree: changed unit/integration tests, relevant type/lint/build gates, and at most one existing smoke E2E per affected user-facing flow
+   - Failed or blocked required checks end this run with an incomplete report and a fix/unblock list; no automatic QA-to-implementation loop
 7. **Phase 5 — Final Review** (autonomous):
    - Spawn Architect C for security audit
-   - SHIP or escalate
+   - Reconcile plan/index/wiki with final code and checks, write 3–5 deferred QA items into the completed plan, then SHIP or escalate
 
 ## Escalation
 
@@ -54,10 +54,13 @@ Task: [description]
 Phases completed: 5/5
 Files modified: [list]
 Tests: [pass count] pass, 0 fail
+Unverified: [checks and reasons, or none]
+Deferred QA: [pending count and completed plan path; run /team-qa later]
 ```
 
 ## Related
 - `/team-run` — Autonomous mode (no user involvement)
+- `/team-qa` — Run accumulated deferred QA items later
 - `/team-brainstorm` — Planning only mode (no implementation)
 - `team-workflow` skill — Full orchestration logic
 - `/plan-visualizer` — render the plan as an HTML diagram, if you want one (never automatic)

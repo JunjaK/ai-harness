@@ -17,7 +17,9 @@ Three layers (Karpathy LLM Wiki): **raw sources** (`_docs/` project — lifecycl
 - `schema.md` — structure + conventions (read before any operation).
 - `<page>.md` — entity / concept / overview / comparison pages.
 
-**Core rule: link, don't duplicate.** A page routes to and synthesizes the SSOT (code, `_docs/`); it never restates a fact that lives elsewhere. A duplicated fact goes stale. (`continuous-learning` §7.)
+**Core rule: link, don't duplicate.** A page routes to and synthesizes the SSOT (code, `_docs/`); it never restates a fact that lives elsewhere. A duplicated fact goes stale. (`continuous-learning` §5.)
+
+The wiki is optional until the project has bootstrapped it. A team run does not create a page for every task, deferred QA scenario, QA retry, or transient failure. Update an existing page only when its routing or stable claim changed; create a new page when a durable concept needs its own navigation entry. A completed implementation archive may contain `pending` deferred QA; neither the archive's `status: complete` nor a wiki link to it establishes QA passage.
 
 ## Operation: ingest
 
@@ -34,20 +36,35 @@ User-driven, **one source at a time, supervised** (the preferred flow). Trigger:
 
 Sources: `_docs/` — lifecycle docs on completion, plus collection buckets (`intent/` and any project-declared one) which are **append-only: read for context, never reorganize** — `.claude/session-state/learnings/`, and external docs the user provides.
 
+## Operation: maintain after a code or document change
+
+This is the automatic **same-change** upkeep of existing knowledge, distinct from supervised source ingest. At implementation merge, required lightweight verification, the completion archive/link transaction, and a later standalone `/team-qa` result, search the wiki for touched symbols, paths, commands, APIs, and moved `_docs/` links. If no existing page makes a claim about the change, record **no wiki update needed** in that boundary's document check; do not create one just to log the run.
+
+For each affected page:
+
+1. Follow its source links to the current code, project-profile, or `_docs/` document. Check the specific claim and link target; an old date or a prior PASS is not evidence of current behavior.
+2. Repair invalid claims and moved links in the same change. A failed or blocked required implementation check must not become a wiki claim of working behavior; keep its transient details in the active plan. Later deferred QA verdicts belong in the completed archive's `## Deferred QA` entries. A `pending`, `failed`, or `blocked` QA entry must not be restated as a verified wiki claim; link to the entry and correct any affected existing page when the observed result contradicts it.
+3. Keep the page's summary and cross-links in `index.md` aligned with the page. Add/remove a catalog row only when the page set changes; revise a row when its description or target changed.
+4. Append a concise `## [<date>] lint | <scope>` entry to `log.md` only when wiki content was checked or repaired. Name the source checked and pages changed; do not append an ingest entry for routine maintenance.
+
+The orchestrator serializes edits to shared wiki pages, `index.md`, and `log.md` after parallel worktrees merge, as it does for `_docs/index.md`. A later `/team-qa` run performs the same freshness check against its archive and observed evidence, updating shared wiki files only when a stable claim or route actually changes. Collection source documents remain read-only for synthesis; only a reference rewrite required by `docs-lifecycle` may change a link inside one.
+
 ## Operation: query
 
 1. Read `index.md` to find relevant pages.
-2. Drill into those pages; follow cross-links.
+2. Drill into those pages; follow cross-links and verify cited paths, commands, and behavioral claims against the current source before relying on them.
 3. Answer **with citations** (the page + the SSOT it links to).
 4. **File good answers back.** A useful comparison, analysis, or discovered connection is a new wiki page — do not let it vanish into chat. Update `index.md` + append `## [<date>] query | <question>` to `log.md`.
 
 ## Operation: lint
 
-Periodic health check (when a page feels stale, at workflow completion, or on request). This IS the `continuous-learning` §7 self-audit applied to the wiki — reuse it, do not reinvent.
+Periodic health check (when a page feels stale, at workflow completion, or on request). This IS the `continuous-learning` §5 self-audit applied to the wiki — reuse it, do not reinvent.
 
 Check for:
 - **Contradictions** between pages.
 - **Stale claims** newer sources/code have superseded — follow a page's claims to the code and flag any that no longer hold (**verify it still exists**).
+- **Catalog drift** — `index.md` entries missing, pointing to deleted pages, or summarizing a claim the page no longer makes.
+- **Broken source links** after `_docs/` moves, including links into lifecycle and collection buckets.
 - **Orphans** — pages with no inbound links.
 - **Missing cross-references** between related pages.
 - **Concept gaps** — important concepts mentioned but lacking their own page; data gaps a search could fill.
@@ -58,8 +75,8 @@ Output: fixes applied + suggested new questions/sources to investigate. Append `
 
 - **continuous-learning** owns the lifecycle of reusable *patterns* (HOW to work) — learnings, confidence scoring, skill evolution.
 - **wiki** owns the synthesis of *knowledge/facts* (WHAT is true) about a domain/codebase.
-- `learnings/` is **one ingest source** for the wiki. A high-confidence, project-stable learning MAY be promoted to a wiki page (in parallel with §6 profile promotion — routing, not duplication).
-- continuous-learning **§7 governs** wiki maintenance (link-don't-duplicate, same-change-same-update, self-audit = lint).
+- `learnings/` is **one ingest source** for the wiki. A high-confidence, project-stable learning MAY be promoted to a wiki page (in parallel with §4 profile promotion — routing, not duplication).
+- continuous-learning **§5 governs** wiki maintenance (link-don't-duplicate, same-change-same-update, self-audit = lint).
 
 ## Scale note
 

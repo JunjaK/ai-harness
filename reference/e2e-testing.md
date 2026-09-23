@@ -1,17 +1,17 @@
 ---
 name: e2e-testing
-description: "Playwright E2E testing patterns. Use in Phase 4 (Verification) by Tester agents. Covers Page Object Model, test structure, configuration, flaky test strategies, artifact management, and CI/CD integration."
+description: "Playwright E2E testing patterns for focused implementation checks and optional /team-qa regression specs. Covers Page Object Model, test structure, configuration, flaky test strategies, artifact management, and CI/CD integration."
 ---
 
 # E2E Testing Patterns
 
 Playwright patterns for stable, fast, maintainable E2E tests.
 
-> This is the **deterministic** layer. For the exploratory goal-verification + test-generation layer above it (Phase 4.5), see the `agentic-testing` skill — its Generator emits specs that MUST follow the conventions here.
+> This is the **deterministic** layer. Implementation runs use focused E2E/smoke checks; later `/team-qa` verifies deferred outcomes. `agentic-testing` generates a durable spec using these conventions only when `--crystallize` is explicitly requested.
 
 ## Preconditions — provision the E2E account + test data FIRST
 
-Any E2E run that executes **without a human driving it** (Phase 4, Phase 4.5, `/team-run`, a scheduled or looped run) MUST have its fixtures in place **before the first browser action**. Provisioning mid-run is the failure this gate prevents: a half-seeded run reports failures that are really missing data, and an agent that improvises a login invents credentials.
+Any E2E run that executes **without a human driving it** (focused implementation checks, `/team-qa`, `/team-run`, or a scheduled run) MUST have its fixtures in place **before the first browser action**. Provisioning mid-run is the failure this gate prevents: a half-seeded run reports failures that are really missing data, and an agent that improvises a login invents credentials.
 
 **Order — do not start the run until every step below is settled:**
 
@@ -200,4 +200,4 @@ export default defineConfig({
 
 ## See also
 
-- `skills/agent-browser-e2e/SKILL.md` — **run its gate before driving anything**: when the `agent-browser` CLI + skill are installed it is the default driver for E2E/QA/smoke/exploration and headless (Auth-Vault) login. This deterministic Playwright layer is the fallback driver AND the permanent crystallization target — whatever drove the exploration, the committed suite is Playwright.
+- `skills/agent-browser-e2e/SKILL.md` — **run its gate before driving anything**: when the `agent-browser` CLI + skill are installed it is the default driver for E2E/QA/smoke/exploration and headless (Auth-Vault) login. This deterministic Playwright layer is the fallback driver and the optional `--crystallize` target — whatever drove the exploration, a committed web regression suite is Playwright.

@@ -17,6 +17,7 @@
 | ponytail-yagni | plan | complete | 2026-06-23 | [complete/ponytail-yagni/2026-06-23-ponytail-yagni.md](complete/ponytail-yagni/2026-06-23-ponytail-yagni.md) |
 | scenario-to-e2e | impl | complete | 2026-07-06 | [complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md](complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md) |
 | team-new | plan | complete | 2026-06-25 | [complete/team-new/2026-06-25-team-new.md](complete/team-new/2026-06-25-team-new.md) |
+| team-quality | plan | complete | 2026-09-23 | [complete/team-quality/2026-09-23-team-quality-plan.md](complete/team-quality/2026-09-23-team-quality-plan.md) |
 | test-scenario-doc | plan | complete | 2026-06-24 | [complete/test-scenario-doc/2026-06-24-test-scenario-doc.md](complete/test-scenario-doc/2026-06-24-test-scenario-doc.md) |
 
 ## Handoffs (flat, keep-latest-per-stream)
@@ -53,5 +54,6 @@ The authoritative topic list. A doc's `topic` MUST be one of these; add a new en
 | `ponytail-yagni` | ponytail YAGNI decision-ladder integration |
 | `scenario-to-e2e` | test-scenario-doc(SCENARIOS SSOT) → Playwright e2e 생성 스킬 (grounded 실측+green-gate, scaffold 폴백) |
 | `team-new` | `/team-new` greenfield project bootstrap (research → scaffold → profile) |
+| `team-quality` | Claude team QA event routing, integration verification, and document freshness gates |
 | `test-scenario-doc` | Human QA checklist skill + `/test-scenario-doc` command |
 | `project-bootstrap` | **RESERVED** for `/team-new` greenfield bootstrap — feature work MUST NOT reuse |

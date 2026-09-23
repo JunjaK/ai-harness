@@ -46,8 +46,8 @@ A Workflow `agent()` **inherits the session model** (Opus, in ultracode) when `o
 | Task class (examples) | `opts.model` | `opts.effort` |
 |----------------------|-------------|--------------|
 | Read-only locate / scan / extract — code-location analysis, grep/read sweep, locale-gap collection, completeness-critic listing | `haiku` | `low` |
-| Deterministic transform / verify / review / test / translate / rule-based classify — Phase 4 Tester, `web-reviewer`, adversarial verify/refute, Phase 4.5 generator (crystallize), i18n translation, **Phase 3 Designer (TDD implement against an approved plan)** | `sonnet` | (default) |
-| Generative reasoning / architecture / security / judge-synthesis / ambiguous classify — Phase 1 architects, cross-review·judge, security audit, Phase 4.5 explorer (explore-gate) | `opus` | `xhigh` (`max` for hard) |
+| Deterministic transform / verify / review / test / translate / rule-based classify — Phase 4 Tester, `web-reviewer`, adversarial verify/refute, `/team-qa --crystallize` test generation, i18n translation, **Phase 3 Designer (TDD implement against an approved plan)** | `sonnet` | (default) |
+| Generative reasoning / architecture / security / judge-synthesis / ambiguous classify — Phase 1 architects, cross-review·judge, security audit, on-demand `/team-qa` goal exploration | `opus` | `xhigh` (`max` for hard) |
 
 Rules:
 - Omit `opts.model` **only** for the Opus row — inheriting the session model is correct there; every other stage MUST pass an explicit `haiku`/`sonnet`.

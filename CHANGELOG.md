@@ -4,6 +4,17 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.29.0 — 2026-09-23
+
+### Added
+- `/team-qa` collects pending scenarios from completed team plans and runs a bounded batch later. Its default is verification only; `--crystallize` opts into deterministic test generation.
+- Completed plan archives hold up to five deferred QA scenarios with independent pending/passed/failed/blocked verdicts and evidence.
+
+### Changed
+- `/team` and `/team-run` use one lightweight merged-tree pass for affected unit/integration tests, relevant build/type/lint gates, and a limited existing smoke E2E. Failure or a required blocked check ends the run with evidence; no automatic QA-to-implementation loop or Phase 4.5 agentic pass.
+- Phase 5 reconciles the completed implementation record with final code, quick-verification and security evidence, document index, and affected wiki links. Pending QA remains visible without preventing implementation completion.
+- The Codex adapter remains at v1.28.0; this release changes the Claude workflow only.
+
 ## v1.28.0 — 2026-09-23
 
 ### Added

@@ -22,7 +22,7 @@ Same as `/team` but with key differences:
    - Team Leader makes ALL decisions without asking user
    - No user review of plan (Leader self-approves rough plan)
    - Still saves plan to project docs
-2. **Phases 2-5**: Identical to `/team`
+2. **Phases 2-5**: Identical to `/team`: one lightweight merged-tree verification pass, final documentation freshness gate, and deferred QA items for `/team-qa`
 
 ## Key Difference from /team
 
@@ -57,10 +57,13 @@ Phases completed: 5/5
 Escalations: [count]
 Files modified: [list]
 Tests: [pass count] pass, 0 fail
+Unverified: [checks and reasons, or none]
+Deferred QA: [pending count and completed plan path; run /team-qa later]
 ```
 
 ## Related
 - `/team` — Interactive mode (user involved in planning)
+- `/team-qa` — Run accumulated deferred QA items later
 - `/team-brainstorm` — Planning only mode (no implementation)
 - `team-workflow` skill — Full orchestration logic
 - `/plan-visualizer` — render the plan as an HTML diagram, if you want one (never automatic)

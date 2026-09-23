@@ -1,6 +1,6 @@
 ---
 name: team-workflow
-description: "Multi-agent team workflow orchestration with 5 phases, escalation loops, and TDD enforcement. Use when /team or /team-run commands are invoked. Coordinates Team Leader, Architects (FE/BE/Infra), UI/UX Master, Designers (TDD developers), and Testers through Planning → UI/UX → Gate → Implementation → Verification → Final Review."
+description: "Multi-agent team workflow orchestration with 5 phases and TDD enforcement. Use when /team or /team-run commands are invoked. Coordinates planning, parallel implementation, a lightweight merged-tree verification pass, final security review, and deferred QA item capture. Run accumulated QA later with /team-qa."
 ---
 
 # Team Workflow Orchestration
@@ -29,17 +29,9 @@ graph TD
   P3 -->|in-phase retry gate| P3
   P3 -->|Fundamental, or ambiguous| P1
   P3 -->|Fundamental, globalCycle cap| ABORT
-  P3 -->|all Designers merged| P4[Phase 4: Verification]
-  P4 -->|in-phase retry gate| P4
-  P4 -->|Fundamental: impl violates plan| P3
-  P4 -->|Fundamental: plan itself wrong| P1
-  P4 -->|plan-wrong, globalCycle cap| ABORT
-  P4 -.->|blocking external dep / user cancels| ABORT
-  P4 -->|PASS + user-facing flow changed| P4.5[Phase 4.5: Agentic Testing]
-  P4 -->|PASS, no user-facing change| P5[Phase 5: Final Security Review]
-  P4.5 -->|goals met, specs green| P5
-  P4.5 -->|unmet/distrusted: Fundamental| P3
-  P4.5 -->|unmet/distrusted: Fundamental| P1
+  P3 -->|all Designers merged| P4[Phase 4: Lightweight Verification]
+  P4 -->|VERIFY_PASS| P5[Phase 5: Final Security Review]
+  P4 -->|VERIFY_FAIL or VERIFY_BLOCKED| ABORT
   P5 -->|SHIP| DONE[Complete]
   P5 -->|in-phase retry gate: security, code-local| P3
   P5 -->|Fundamental: security, architectural| P1
@@ -61,7 +53,7 @@ Before starting any phase, verify `.claude/project-profile/index.md` exists.
 selectMode: **ULTRACODE** iff `workflow()` is callable AND ultracode is active (runtime signal or `CLAUDE_HARNESS_ULTRACODE=1`) AND the step has 2+ independent units; else **STANDARD**. Record the mode in the plan's Orchestration field. Workflow unavailable → STANDARD (hard fallback). See CLAUDE.md "Ultracode Orchestration" for fan-out points and guards.
 
 - **STANDARD**: spawn agents via `Agent()` (the steps below, as written).
-- **ULTRACODE**: run the named fan-outs (Phase 1 architects, Phase 3 designers+merge, Phase 4 testers, Phase 4.5 agentic pipeline) via the Workflow tool — `parallel()` / `pipeline()`. Keep the max-5-worktree cap + types→backend→frontend→tests merge order; serialize the shared Playwright MCP browser.
+- **ULTRACODE**: run the independent Phase 1 architects and Phase 3 designers+merge via the Workflow tool — `parallel()` / `pipeline()`. Phase 4 has one integrated Tester pass; deferred QA is invoked separately via `/team-qa`. Keep the max-5-worktree cap + types→backend→frontend→tests merge order.
 
 ## Phase 1: Planning
 
@@ -176,40 +168,29 @@ where `MAIN=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)"
 3. Resolve any conflicts
 4. Commit merged result
 
+Record the pre-task base ref and the merged HEAD. Phase 4 verifies the **integrated** tree, including contracts between assignments; individual Designer test reports do not establish a quick-verification PASS.
+
 ### Step 4: Update _docs/
 
-Update `_docs/active/processing/<created>/<created>-<topic>-plan.md` with implementation notes. Transition `planning → processing` per `docs-lifecycle` (move to `active/processing/`, bump `updated`, update `index.md`). This `git mv` + `index.md` edit is **orchestrator-serialized** — Designers write their own doc content files to the primary tree by absolute path, but only the orchestrator moves docs and touches `index.md` (see `docs-lifecycle` → Concurrency).
+Update `_docs/active/processing/<created>/<created>-<topic>-plan.md` with implementation notes, merged HEAD, and any deviations from the approved plan. Transition `planning → processing` per `docs-lifecycle` (move to `active/processing/`, bump `updated`, update `index.md`). This `git mv` + `index.md` edit is **orchestrator-serialized** — Designers write their own doc content files to the primary tree by absolute path, but only the orchestrator moves docs and touches `index.md` (see `docs-lifecycle` → Concurrency).
 
-## Phase 4: Verification
+## Phase 4: Lightweight Verification
 
-### Step 1: Spawn Testers (parallel)
+### Step 1: Spawn one Tester
 
-> **Ultracode**: run one Tester per Designer as a Workflow `parallel()` fan-out. Standard: the `Agent()` call below.
-
-Testing is scoped to this task's changes by default (see `verification-loop` §Phase 4 and `team-tester` Steps 1/5) — pass the base ref (the pre-task HEAD the worktrees branched from, per Phase 3 Step 3) so Tester can compute the diff. Only add the full-run line when the user's current request explicitly asked for a full/total test run; omit it entirely otherwise so Tester defaults to scoped.
+Run one `team-tester` on the merged HEAD. Scope it to changed unit/integration tests, changed contracts, authoritative type/lint/build gates, and at most one **existing** smoke E2E for each affected user-facing flow (see `team-tester` and `reference/verification-loop.md`). Do not dispatch parallel Testers, perform goal exploration, write broad regression suites, or generate E2E specs here. Pass the pre-task base ref and merged HEAD. If the user explicitly requested a full deterministic suite in this task, pass that request; deeper exploratory QA still waits for `/team-qa`.
 
 ```
 Agent(
   subagent_type="team-tester",
-  prompt="Implementation reports:\n[reports]\n\nPlan:\n[plan]\n\nBase ref (scope tests to changes since this commit): [base-ref]\n\n[User explicitly requested a FULL/total test run this time — run the complete suite. Omit this line entirely for the default scoped run.]\n\nVerify all tests pass.",
+  prompt="Implementation reports:\n[reports]\n\nPlan:\n[plan]\n\nBase ref: [base-ref]\nMerged HEAD: [merged-head]\n\n[User explicitly requested a FULL deterministic suite this time. Omit this line entirely for the default scoped run.]\n\nRun one lightweight integrated verification pass: affected unit/integration, type/lint/build, and at most one existing smoke E2E per affected user-facing flow. Report evidence and unavailable checks. Do not run deferred QA.",
   mode="bypassPermissions"
 )
 ```
 
-### Step 2: Collect Results
+### Step 2: Record the quick-verification result
 
-If all tests pass → append test results to the `_docs/` plan (status stays `processing` until ship) → proceed to Phase 4.5.
-If failures → check escalation rules (resources/escalation.md).
-
-## Phase 4.5: Agentic Testing (conditional)
-
-Trigger: Phase 4 = PASS AND a user-facing flow changed.
-
-1. Enforce the `agentic-testing` precondition (project-profile present + adapter section + not stale). If unmet → instruct `/team-init`, skip Phase 4.5 (non-blocking).
-2. **STANDARD mode**: `Agent(subagent_type="team-agentic-tester", prompt="Plan + team-tester report + adapter from testing.md. Explore goals, verify, crystallize specs.", mode="bypassPermissions")` (sequential).
-3. Consume its report: unmet/distrusted goals → escalate; green generated specs join the deterministic suite.
-
-(Ultracode mode runs the agentic-testing Workflow pipeline instead — see "Orchestration Mode".)
+The orchestrator checks the single Tester report against the merged HEAD and records command, exit/count, baseline comparison, smoke scope, and unavailable checks in the active plan. Reuse checks already run on that exact HEAD; run a missing authoritative check once, without a second broad test pass. `VERIFY_PASS` requires every required quick check to run with no net-new failure against a reliable baseline; record any proven pre-existing failure. `VERIFY_FAIL` or `VERIFY_BLOCKED` ends this run with an incomplete report and an actionable fix/unblock list. Do not automatically return to Phase 3 or Phase 1 from Phase 4. The user can address the issue through `/debug` or a new `/team` task; `/team-qa` is for deeper deferred scenarios after implementation completes.
 
 ## Phase 5: Final Security Review
 
@@ -223,7 +204,7 @@ Agent(
 )
 ```
 
-- SHIP → transition the plan `processing → complete` per `docs-lifecycle` (apply the **merge rule**: consolidate spec + plan + metrics + findings into one `complete/` doc, `git rm` sidecars, update `index.md`). **The intent is NOT a sidecar** — it stays in `_docs/intent/`; the archive links back to it via `related:`. Then report success to user
+- SHIP → first reconcile the plan against the final HEAD, quick-verification/security evidence, remaining unverified checks, and changed code/contracts. Resolve stale statements and links; run the `docs-lifecycle` freshness check and `wiki` update-or-confirm check. Consider the Tester's QA candidates and derive **up to five** risk-ordered scenarios from acceptance criteria that the quick checks did not cover. Write them under `## Deferred QA` using the exact `docs-lifecycle` entry contract, with IDs based on the final archive filename stem. For a task with no behavior needing later QA, write `- No scenarios: <specific reason>` under that heading instead of inventing scenarios. Do not execute these scenarios here. Then transition the plan `processing → complete` per `docs-lifecycle` (apply the **merge rule**: consolidate spec + plan + metrics + findings into one `complete/` doc, `git rm` sidecars, update `index.md`). **The intent is NOT a sidecar** — it stays in `_docs/intent/`; the archive links back to it via `related:`. Run `/docs-sweep --lint-only` on the completed tree and resolve any index/link defects before reporting implementation completion. The report states quick checks, unverified checks, pending QA count, completed plan path, and `/team-qa` as the later execution entry point. `status: complete` means implementation completed, not that deferred QA passed.
 - Issues found → escalate per escalation rules
 
 ## Escalation Handling

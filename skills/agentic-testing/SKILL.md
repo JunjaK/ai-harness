@@ -1,110 +1,51 @@
 ---
 name: agentic-testing
-description: "Agentic E2E testing layer (Phase 4.5). Use AFTER deterministic E2E passes and BEFORE human final review. An agent explores a goal via the stack's UI/API driver, verifies goal achievement, and crystallizes the path into a deterministic test. Stack-agnostic via project-profile adapters (web/TS base, Spring-Kotlin, Flutter)."
+description: "On-demand, adapter-based agent QA. Verify archived /team-qa scenarios or a directly supplied outcome through a real UI/API driver; record passed, failed, or blocked evidence. Test generation is opt-in via --crystallize."
 ---
 
 # Agentic Testing
 
-> **Tests enforce journeys. Agents verify goals. Explore once, regress forever.**
-> Position: **Phase 4.5** — after `team-tester` Phase 4 = PASS, before Phase 5. Complements (never replaces) deterministic E2E.
+> Tests enforce journeys. Agents verify goals. `/team-qa` invokes this skill **after** team implementation has reported completion; direct goal verification can invoke it independently.
 
-Two roles, one loop: at the late-stage checkpoint an agent (1) explores a goal to **verify** it (catching goal-level failures deterministic E2E missed → report to human) and (2) **crystallizes** the discovered path into a reusable deterministic test that joins the cheap CI layer.
+The default is **verify-only**. The implementation run performs unit tests and focused E2E/smoke checks, then records a small deferred QA queue. This skill performs the deeper, later verification only when asked. It never starts a team phase loop or treats a QA failure as permission to edit implementation.
 
-## Precondition (MUST — abort if unmet)
+## Profile and adapter gate
 
-1. MUST read `.claude/project-profile/{index.md, stack.md, testing.md}`. If absent → **ABORT**: "Run /team-init first."
-2. MUST read `testing.md` → "Agentic Testing Adapter". If missing → require `/team-init --update`.
-3. Staleness: if `Profile-Generated-At` is far behind HEAD → require `/team-init --update` before running.
+1. Read `.claude/project-profile/{index.md, stack.md, testing.md}`. If absent, report the missing profile (`/team-init`); a scenario that needs the unknown adapter or fixture is `blocked`, not `failed`.
+2. Read `testing.md` → "Agentic Testing Adapter". If absent or stale relative to the current stack, report `/team-init --update` and mark affected scenarios `blocked`.
+3. Read the selected archive's `## Deferred QA` cards and `Source` criteria. For direct use without an archive, take explicit user goals and acceptance criteria. Ground actions and expectations in current code or docs; an ungrounded criterion is `blocked` with what to clarify.
 
-## Adapter resolution (stack-agnostic; base = web/TS)
+## Adapter resolution
 
-Resolve the adapter from `testing.md`'s "Agentic Testing Adapter" (derived from `stack.md`). The pipeline is fixed; the driver, emitter, and concurrency swap per surface. The emitter reuses each stack's existing testing skill as house style (link, don't duplicate).
+Resolve the adapter from `testing.md`; use the existing test style only for optional crystallization. A driver must exercise the real surface, not merely inspect code.
 
-| Surface | Explorer driver | Generator emitter (house-style skill) | Concurrency | Status |
-|---|---|---|---|---|
-| **web/TS (base)** | `agent-browser` (default — run the `agent-browser-e2e` gate first); Playwright MCP (`mcp__plugin_playwright_playwright__*`) when the gate fails | `.spec.ts` ← `reference/e2e-testing.md` | Playwright MCP = one shared browser → **serialize Explorer**; agent-browser concurrency per its own core guide | ready |
-| **Spring/Kotlin (backend API)** | HTTP calls | `WebTestClient`/`@SpringBootTest` + Testcontainers ← `springboot-tdd`·`kotlin-testing` | stateless → **true parallel** (per-worker DB isolation) | ready |
-| **Flutter/Dart (mobile UI)** | maestro · Patrol · mobile MCP — **on a booted simulator/emulator** (see gate below) | `integration_test` · maestro yaml | single device → **serialize per device** | **driver-gated** |
-| Cross-journey (Flutter→Spring) | UI drive + backend assert | both layers | depends on above | later |
+| Surface | Verification driver | Optional deterministic emitter | Concurrency |
+|---|---|---|---|
+| web/TS | `agent-browser` after the `agent-browser-e2e` gate; Playwright MCP if that gate fails | existing Playwright `.spec.ts` conventions in `reference/e2e-testing.md` | sequential when a browser is shared |
+| Spring/Kotlin API | HTTP calls against a verified local target | project's `WebTestClient`/`@SpringBootTest` + Testcontainers style | isolate data per worker |
+| Flutter/Dart UI | maestro, Patrol, or mobile MCP on a booted device | project's integration-test or maestro style | sequential per device |
 
-- **Driver unavailable** (e.g. mobile, no maestro/Patrol/MCP): do NOT run the goal — report `driver unavailable` (no silent skip).
-- CLI execution model is a non-goal (article reliability). MCP-first.
+Driver unavailable is `blocked` with the missing tool/device stated. For mobile, verify on a booted simulator or emulator; do not infer iOS behavior from Android. On Windows/Linux, iOS Simulator is unavailable; record iOS as blocked and leave the iOS result unverified.
 
-### Mobile: simulator/emulator is the verification surface, and the host OS gates it
+## Fixtures and target before the first action
 
-App UI work is verified on a **booted simulator/emulator**, never by reading code and asserting it "should work". Boot the device (or confirm one is already running) and select it explicitly before the first goal — for Flutter that means `flutter devices` → `flutter run -d <device-id>`, through the project's version pin (`fvm flutter …` when `.fvmrc` exists).
+Read `testing.md` → "E2E Fixtures" and `reference/e2e-testing.md` → "Preconditions". Use the project's existing dedicated E2E account, credential source, and idempotent seed path. Never invent credentials or test data. Confirm the target is local and any shared seed/reset operation is coordinated. Missing account, seed, target, or access is `blocked` with the prerequisite and next action; it is not evidence that the feature failed. Do not run automated writes against production or staging.
 
-| Host OS | iOS | Android |
-|---|---|---|
-| **macOS** | ✅ iOS Simulator (Xcode) | ✅ Android Emulator |
-| **Windows / Linux** | ❌ **impossible** — the iOS Simulator requires Xcode, which is macOS-only | ✅ Android Emulator |
+## Verify-only pipeline
 
-**On Windows, an iOS claim is structurally unverifiable.** MUST NOT infer iOS behavior from a green Android run, and MUST NOT report iOS as `됐다`: report it as **미검증 (iOS: host cannot run the simulator)** and leave it for the macOS machine. Platform-divergent surfaces — permissions, safe-area/notch insets, keyboard behavior, deep links, sign-in providers, file pickers, push — are exactly where that inference breaks.
+1. Select the requested goals; `/team-qa` defaults to at most five pending archived scenarios, risk ordered. This skill never autonomously expands that batch.
+2. Apply a per-goal run gate: the outcome is observable, the target is reachable, and the actions are bounded (roughly 25 steps). If a gate fails, record `blocked` and the reason. Existing passing tests may inform evidence, but do not claim this run passed without a fresh check.
+3. Explore the goal through the adapter. Record the actual path and outcome. For data changes, confirm persistence after reload or through the authoritative data source. Apply `reference/verification-loop.md`'s vacuity guard to every `passed` claim.
+4. Report `passed` only for observed outcomes, `failed` for a reproducible mismatch between expected and observed, and `blocked` when verification could not be completed. Include date, environment, method, evidence/artifact path, and actionable follow-up. A response code or absence of an error is not a pass.
+5. For `/team-qa`, return each verdict under its exact scenario ID and archive path. The command writes `Status`/`Evidence` back to that same completed archive. Preserve earlier dated evidence when a named scenario is rechecked. No team escalation counter, rollback, automatic implementation fix, or recursive retry applies.
 
-Per-project device targets live in the profile's `testing.md` → "E2E Fixtures". No device bootable → report `driver unavailable` and stop; do not fall back to static reasoning and call it verified.
+## Optional crystallization
 
-## Goal derivation
+Only when the user explicitly requests `--crystallize`: after a goal is **passed**, emit a deterministic regression test for an outcome worth rerunning and assertable without fragile timing. Follow the project's existing emitter conventions; for web, use `reference/e2e-testing.md` (`getByRole` before test IDs, response/element waits rather than fixed sleeps). Run the generated test. Allow at most two test-only repairs; discard it if it stays red. A green QA verdict and a green generated spec are distinct claims. Specs belong in the project's test directory; transient screenshots/traces/reports belong under its gitignored `_workspace/e2e/<run>/` layout.
 
-Source = plan/spec acceptance criteria. Express goals as **outcomes** (not UI steps), risk-ordered (auth/payment/data first).
+## See also
 
-## Run-at-all gate (autonomous, NOT dollar-gated)
-
-Run a goal only if ALL hold; else log the skip reason:
-- **VALUE**: no overlap with an existing passing test for this flow.
-- **TIME**: bounded steps (~25) and target reachable.
-- **NOISE**: deterministically assertable (subjective/aesthetic → defer to `web-reviewer`/`impeccable`).
-
-(This harness runs on a Claude Code subscription, not metered API — gate on value/time/noise, not cost.)
-
-## Preconditions (before the Explorer's first action)
-
-This phase runs unattended, so fixtures cannot be improvised mid-run. Confirm from the profile's `testing.md` → "E2E Fixtures": dedicated E2E account provisioned via the project's own idempotent seed path, test data the goals assume already seeded, target verified-local. No invented credentials, no committed passwords, prd/stg provisioning human-executed. Any unresolved row → STOP and report `E2E fixtures unresolved: [what]` instead of exploring a half-seeded app and blaming the feature. Rules: `reference/e2e-testing.md` → "Preconditions".
-
-## Pipeline (Explorer → Generator)
-
-1. **Explorer** (Sonnet + adapter driver): goal → adapt → verify. Record `met?`, the observed path, and evidence.
-2. **Generator** (Opus): crystallize the path via the emitter house-style skill → **RUN the generated test** → keep ONLY if green (self-repair ≤2 attempts, else DISCARD). `met=false` → no spec, escalate to human.
-
-Generated tests MUST obey the emitter skill's conventions (e.g. `e2e-testing`: `getByRole` > … > `getByTestId`; `waitForResponse`/`waitFor`, never `waitForTimeout`).
-
-## Orchestration mode (standard vs ultracode)
-
-The mode switch lives at the **orchestration layer** (`team-workflow` / `team-leader`) — a skill or spawned subagent cannot call the Workflow tool. `agents/team-agentic-tester.md` is the **standard-mode executor**.
-
-```
-selectMode(ctx):
-  IF NOT workflowCallable():              RETURN STANDARD   # hard fallback
-  IF NOT ultracodeActive(ctx):            RETURN STANDARD
-  IF derivedGoalCount(ctx) < 2:           RETURN STANDARD   # 1 goal → fan-out buys nothing
-  IF NOT targetReachable(ctx):            RETURN STANDARD
-  RETURN ULTRACODE
-```
-
-| Aspect | Standard (default/fallback) | Ultracode |
-|---|---|---|
-| Execution | single `team-agentic-tester`, goals sequential | orchestrator runs a Workflow `pipeline()` fan-out (adapter concurrency policy) |
-| Verdict trust | single judgment | perspective-diverse verify (skeptic + criteria-judge, agree to accept) + `verification-loop` vacuity guard |
-| Generated spec | generate→run→repair ×2, discard non-green | same; headless spec-runs fan out |
-| Edge sweep | none | bounded completeness-critic (≤2 rounds) |
-
-**Shared-driver caveat**: web's Playwright MCP is one browser — under ultracode, serialize the Explorer lane (mutex); only Generator + headless runs fan out. Backend HTTP is stateless → Explorer may fan out too.
-
-## Output (extends the team-tester report)
-
-Per goal: `id`, `outcome`, `met`, `trustworthy` (ultracode verify), `green`, `specPath|null`, `skipReason|null`. Sections: Verified+crystallized / Verified-not-crystallizable / Unmet (→ human escalation) / Distrusted verdicts.
-
-**Artifacts**: runtime artifacts (screenshots/traces/reports) follow the `_workspace/` gitignored **Artifact Layout** in `e2e-testing` (E2E output → `_workspace/e2e/<run>/`); crystallized specs are committed **code** in the project's test dir, not `_workspace/`.
-
-## See also (link, do not duplicate)
-- `skills/agent-browser-e2e/SKILL.md` — **the default driver for this phase's web Explorer** + headless Auth Vault login. Run its gate before driving; Playwright MCP is the fallback, not the first choice
-- `reference/e2e-testing.md` — deterministic layer + web emitter conventions (the crystallization target regardless of which driver explored)
-- `reference/verification-loop.md` — vacuity guard (applied to "met" claims)
-- `skills/team-workflow/SKILL.md` — Phase 4.5 + Orchestration Mode
-
-## Dry-run acceptance runbook (run in a real web/TS project)
-
-1. `/team-init` → confirm `testing.md` has the Agentic Testing Adapter (Surface: web).
-2. Pick one existing user-facing flow with acceptance criteria.
-3. Standard mode: dispatch `team-agentic-tester`.
-4. Confirm: (a) goal-verification report produced; (b) a generated `*.spec.ts` re-runs GREEN deterministically.
-5. Negative: rename `.claude/project-profile` → confirm ABORT with "Run /team-init first."
+- `commands/team-qa.md` — deferred queue selection and archive update contract
+- `agents/team-agentic-tester.md` — scenario executor/report format
+- `skills/agent-browser-e2e/SKILL.md` — web driver gate and login handling
+- `reference/e2e-testing.md` — fixture, artifact, and optional test-emitter conventions

@@ -1,11 +1,13 @@
 ---
 name: verification-loop
-description: "6-phase verification system (+ an opt-in human comprehension quiz gate) with checkpoint support and reliability gates. Use in Phase 4-5 of team workflow, before creating PRs, or after completing feature implementations. Covers build, type check, lint, test, security scan, diff review, a human-understanding gate, checkpoints, and reliability gates."
+description: "Full verification reference with checkpoint support and reliability gates. Team Phase 4 uses only its bounded one-pass subset; deeper QA runs through /team-qa."
 ---
 
 # Verification Loop
 
 Systematic quality assurance in 6 sequential phases (plus an opt-in human comprehension gate) with checkpoint tracking and reliability gates. Stop on CRITICAL failure.
+
+In the team workflow, this is a reference for authoritative commands and baseline comparison. `agents/team-tester.md` defines the bounded Phase 4 pass: affected unit/integration tests, at most one already existing smoke E2E per affected flow, and relevant build/type/lint gates. The full deterministic loop runs only when explicitly requested; `/team-qa` separately verifies deferred scenarios. Neither is an automatic team phase.
 
 **Package manager**: Commands below use Bun (default). If project has `pnpm-lock.yaml`, translate `bun run` → `pnpm run`, `bunx` → `pnpm exec`. If `package-lock.json`, translate to `npm run` / `npx`.
 
@@ -20,9 +22,9 @@ Run the `contract-sync` skill (regenerate → isolate churn → authoritative ty
 Verify the project builds without errors.
 ```bash
 # Adapt to your build system
-bun run build 2>&1 | tail -20
+bun run build
 ```
-**Pass**: Exit code 0
+**Pass**: Build command exit code 0. If displaying only the last lines, preserve the build command's exit status (`set -o pipefail`) or inspect its captured exit code; a successful `tail` is not a successful build.
 **Common failures**: Missing imports, circular dependencies, env issues
 
 ### Phase 2: Type Check
@@ -32,7 +34,7 @@ Run the project's **authoritative** type-check command — the one that actually
 #   tsc --noEmit -p tsconfig.app.json       (app-scoped, not the empty root)
 #   vue-tsc -p .nuxt/tsconfig.app.json       (Nuxt/Vue)
 #   pyright / mypy --strict / go vet ./...    (non-TS)
-<authoritative-typecheck-command> 2>&1 | head -50
+<authoritative-typecheck-command>
 ```
 **Pass**: Zero **net-new** type errors vs the recorded baseline (see §"Baseline & Net-New"). Absolute zero only for greenfield projects with no baseline.
 **Common failures**: Type mismatches, missing properties, incorrect generics
@@ -45,12 +47,14 @@ Run the project's **authoritative** type-check command — the one that actually
 ### Phase 3: Lint
 Run the project's authoritative linter (from project-profile; `bunx eslint .` / `bunx biome check` / etc.).
 ```bash
-<authoritative-lint-command> --max-warnings=0 2>&1 | head -30
+<authoritative-lint-command> --max-warnings=0
 ```
 **Pass**: Zero **net-new** errors vs baseline (see §"Baseline & Net-New"). Warnings acceptable if the project configures them as such.
 **Common failures**: Unused imports, formatting issues, rule violations
 
 ### Phase 4: Tests
+The commands below are examples for broader standalone deterministic verification. Team Phase 4 follows `agents/team-tester.md`: selected affected unit/integration tests and at most one ready, existing smoke E2E per affected flow. It does not run broad coverage instrumentation unless the project already requires that gate or the user explicitly requests it.
+
 **Default: scoped to this task's changes, not the full suite.** On a large repo, an unscoped run on every verification pass is the dominant CPU/time cost. Vitest and Playwright both detect affected tests via git + the import graph natively — use that instead of a custom scope calculation. Run the full suite only when the user explicitly asks for it in the current request (e.g. "run the full suite", "전체 테스트 돌려줘", "total test").
 
 Use command from project-profile `testing.md`. Default for Vitest 4.x / Playwright, scoped:
@@ -69,6 +73,10 @@ npx playwright test 2>&1
 **Pass**: All tests run (scoped or full, per above) pass, coverage ≥ 80% (lines, functions, branches, statements) on the files actually run
 **Common failures**: Broken assertions, missing mocks, flaky tests
 **Caveat**: both flags are heuristics over the import graph (static imports only; `--changed` needs `forceRerunTriggers` for config-driven reruns, `--only-changed` won't see dynamically-loaded fixtures). Not a substitute for an occasional full run — that's what the explicit-request escape hatch is for, not an automatic periodic one.
+
+**After parallel implementation merges**: verify the merged tree, not only each Designer's isolated worktree. In team Phase 4, run the relevant gates once after the last merge. Review shared contracts across Designer boundaries (imports, generated clients, API shapes, migrations, route wiring); select a focused integration check where the changed-test heuristic misses a dependency. A green worktree report does not replace this merged-tree gate.
+
+For team Phase 4, classify the one-pass result using `skills/team-workflow/resources/escalation.md`'s verification outcomes. A failed or blocked required check ends that run with evidence; it does not trigger a QA retry or return to implementation. Record omitted optional smoke checks and the pending `/team-qa` case; do not silently turn a required check into an optional one.
 
 ### Phase 5: Security Scan
 Check changed files for:
@@ -147,7 +155,7 @@ Save to `.claude/session-state/checkpoints/`:
 | Build | ✅/❌ | ... |
 | Type Check | ✅/❌ | ... |
 | Lint | ✅/❌ | ... |
-| Tests | ✅/❌ | X pass, Y fail, Z% coverage |
+| Tests | ✅/❌/unverified | X pass, Y fail, Z% coverage; selected test count |
 | Security | ✅/❌ | ... |
 | Diff Review | ✅/⚠️/❌ | ... |
 
@@ -168,12 +176,12 @@ Save to `.claude/session-state/checkpoints/`:
 
 ## Reliability Gates
 
-Two hard thresholds, measured by re-running the loop — no other metric is required:
+For a separately requested full verification run, these reliability gates apply. They do not cause the team Phase 4 pass to repeat:
 
-- **Tests: ≥ 80% of runs green** (one pass; below that treat the suite as flaky, not the code as broken).
+- **Tests: every required final-gate check green on the merged result.** A retry can diagnose a flaky test but does not convert its first failure into a pass; record the cause, fix it, and rerun. Do not quarantine a newly failing required test merely to make the gate green.
 - **Security scan: 100% of 3 runs clean** — any single failing run blocks the merge.
 
-A test that passes on retry but not on first run is **flaky**: quarantine it (`.skip` or a separate suite) with the root cause recorded, and fix it — a flaky test never counts as a pass.
+A test that passes on retry but not on first run is **flaky**: record the first failure and its cause, then repair it. An unresolved flaky test never counts as a pass; a new `.skip` is not a repair.
 
 ## Output Format
 
@@ -183,21 +191,21 @@ A test that passes on retry but not on first run is **flaky**: quarantine it (`.
 | Build | ✅/❌ | ... |
 | Type Check | ✅/❌ | ... |
 | Lint | ✅/❌ | ... |
-| Tests | ✅/❌ | X pass, Y fail, Z% coverage |
+| Tests | ✅/❌/unverified | X pass, Y fail, Z% coverage; selected test count |
 | Security | ✅/❌ | ... |
 | Diff Review | ✅/⚠️/❌ | ... |
 
 **Overall: READY / NEEDS FIXES**
 **Checkpoint**: {name} (delta from previous: ...)
-**Reliability**: tests X/Y runs green · security 3/3 clean
+**Reliability**: required final checks green on merged tree · security 3/3 clean
 ```
 
 ## When to Run
 
 - After completing a feature or significant code change
 - Before creating a PR
-- After Phase 3 (Implementation) in team workflow
-- As Phase 4-5 checkpoint in team workflow
-- After resolving escalation issues
+- As the command and baseline reference for the bounded team Phase 4 pass
+- During a separately requested `/team-qa` run
+- In a later, explicitly requested verification run after resolving an issue
 - When comparing quality between checkpoints
 - Before merging a large / long-horizon change you couldn't fully explain from the diff — run Phase 7 (comprehension quiz)

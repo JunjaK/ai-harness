@@ -22,8 +22,9 @@ Generate a self-contained interactive HTML test-scenario / QA checklist for a **
 
 ## Position in the testing stack
 
-Human final-acceptance layer: **vitest** (unit) → **e2e / agentic-testing** (automated) → **/test-scenario-doc (human manual QA)**. Complements `agentic-testing` (agent verifies goals) with a human-run checklist. Human-requested, not workflow-wired.
+Implementation uses **unit + focused E2E** and archives deferred QA scenarios. `/team-qa` later runs agent verification of that queue. `/test-scenario-doc` creates a human-run checklist on demand, including from archived scenarios if requested; it does not execute or change `/team-qa` statuses. Human-requested, not workflow-wired.
 
 ## Related
 - `test-scenario-doc` skill — the engine (data model, scenario-writing guide, versioning)
 - `agentic-testing` skill — the automated layer directly below this
+- `/team-qa` — on-demand agent QA of completed team archives

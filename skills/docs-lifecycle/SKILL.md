@@ -109,6 +109,8 @@ revived: YYYY-MM-DD   # only present after a deprecated→active revive
 
 **Three facts stored twice, kept in lockstep:** `status`==bucket; `topic`==topic folder (for `complete`/`reference`); `created`==date folder (for `active`). When they disagree a reader can't trust any of them — so a transition always moves the file **and** fixes frontmatter **and** updates the index, in one commit.
 
+`updated` records the last substantive review or change, not a claim that implementation or QA passed. A failed required implementation check leaves a lifecycle doc in `active/processing/`; record the evidence and next action there. Deferred QA is independent: a completed implementation stays in `complete/` while its QA scenarios are `pending`, `failed`, or `blocked`. A date alone never proves that a doc's claims are current.
+
 > Write docs in the project's working language (match existing `_docs/`), keeping code identifiers, paths, and API routes verbatim.
 
 ## Controlled topic vocabulary (SSOT in index.md)
@@ -124,11 +126,11 @@ revived: YYYY-MM-DD   # only present after a deprecated→active revive
 
 | Trigger | Action |
 |---------|--------|
-| Brainstorm settled on what to build | write `_docs/intent/<today>-<topic>-intent.md` (`kind: intent`), register in `index.md` §① + §④. No folder movement afterwards — it stays put for good |
+| Brainstorm settled on what to build | write `_docs/intent/<today>-<topic>-intent.md` (`kind: intent`), register its row in `index.md` §① (`intent/` itself is already declared in §④). No folder movement afterwards — it stays put for good |
 | Intent rejected or superseded | move to `_docs/intent/deprecated/` (in place; NOT the global `deprecated/`), set `status: deprecated` |
 | New spec/plan written | `status: planning`, place in `active/planning/<created>/`, assign topic from vocabulary |
 | First implementation commit (or first task → in-progress) | `planning → processing`: reference-safe move to `active/processing/<created>/` (date leaf unchanged), bump `updated` |
-| Implemented + verified + merged | `processing → complete`: apply the **merge rule** → `complete/<topic>/` |
+| Implementation integrated, applicable required lightweight checks and final security review passed | `processing → complete`: apply the **merge rule** → `complete/<topic>/`; deferred QA may still be pending |
 | Abandoned / superseded | decision rationale useful later → `deprecated/`; pure noise → `git rm` |
 | Revived | `deprecated → active/planning/<today>/`: keep original `created`, add `revived:` |
 | Consolidating completed work | write a new consolidated doc into `reference/<topic>/` |
@@ -162,6 +164,21 @@ DOCS="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/_doc
 - Worktree agents **read** plans/specs from `"$DOCS/…"`, and **write** their own doc **content** files there directly by absolute path — each owning **distinct** files (no-overlap, same rule as code). Such writes land in the main tree instantly, so a plan is readable from main with no cd and no merge round-trip.
 - **`index.md` edits and status-moves (`git mv`) are serialized through the team-leader/orchestrator** — `index.md` is the one shared mutable doc. The orchestrator performs every `git mv` + `index.md` edit + commit after worktrees finish; rows sort by `(topic, date, kind)` to shrink merge-conflict surface; `_docs/index.md` is part of the parallelization **merge-order** as a shared mutable file. Auto-`rmdir` only when the folder is empty and unlocked.
 
+## Evidence-driven updates during a team run
+
+The active plan is the compact record of what was attempted and what remains. At each phase boundary, the orchestrator checks the affected plan/spec against the **current** diff, test report, security report, and project-profile. Correct a contradicted claim in the same change that reveals it; do not defer it to `/docs-sweep`. Record evidence links or command + scope + outcome, not copied terminal logs or a new document per retry. If a claim cannot be checked, mark it **unverified** with the missing evidence and owner/next action; never infer PASS from implementation, a stale plan, or another platform's result.
+
+| Event | Required document action |
+|-------|--------------------------|
+| Phase 1 plan accepted | Create or update the intent and planning plan, their `related:` links, and `index.md` rows. Check existing claims against current code/profile before reusing them. |
+| Phase 3 implementation begins or the merged code changes the plan | Move `planning → processing` by the reference-safe transaction; update decisions, actual implementation scope, and any invalidated spec/plan claims. |
+| Required lightweight verification finishes | Add a short dated result to the **existing processing plan**: base ref and merged HEAD or changed scope, unit tests and focused lightweight E2E/smoke checks, environment, relevant event code(s) from `team-workflow/resources/escalation.md`, evidence location, affected acceptance criteria, and next action. Record each distinct issue and its route. A failed check identifies fix/retest work; an unavailable check identifies the missing dependency and the check still unrun. Keep `status: processing` and its index row until required checks pass. Later attempts do not erase earlier findings. |
+| Final security review finds an implementation or required-check issue | Record the issue, affected claim, decision/owner and required recheck in the processing plan; keep it active until required checks and review pass. |
+| Implementation completion is ready | Reconcile the active plan with final integrated code, required lightweight verification and security evidence. A required check that could not run remains labeled unverified and ends the run without a completion claim. Draft up to five task-specific deferred QA scenarios in the plan, then carry them into the completion archive; for a non-behavioral task with none, record why. Update affected project-profile/ADR/wiki pointers and perform the completion merge and index/link transaction. Report implementation complete with the number and path of pending QA scenarios; do not report them as QA PASS. |
+| Standalone `/team-qa` run finishes later | Update each selected scenario's `Status` and `Evidence` in the **same** `complete/<topic>/` archive. Bump its `updated` frontmatter, check affected code/docs/wiki claims against observed results, and repair index/link targets only if their path, status, or summary changed. Record a failed/blocked scenario and its follow-up there; a defect needing code work opens a linked fix task rather than silently relabeling implementation completion or recreating an active plan. |
+
+Only create a separate findings or reference doc when its information remains useful beyond this task. A retry, routine PASS, or transient infrastructure block belongs in the current plan or completed archive, according to the phase. `index.md` changes when a file/row/topic/status or indexed summary changes, not for each content-only QA result; verify its path and status still match the document after every phase. If a code or contract change invalidates an existing `.claude/wiki/` page, use the `wiki` skill to repair that page and its catalog in the same change. Do not generate a new wiki page for every run.
+
 ## Merge rule (REQUIRED on completion)
 
 When a task produced **multiple sidecar docs** (spec, plan, metrics, findings, sub-reports), merge them into **one** on the move to `complete/` — do not archive a scatter.
@@ -172,13 +189,33 @@ When a task produced **multiple sidecar docs** (spec, plan, metrics, findings, s
    - `## Plan` — meaningful decisions and phase outcomes (not the full step list)
    - `## Findings & Metrics` — what was discovered, measured, design lessons
    - `## Final Summary` — PR link, commit range, one-line impact
+   - `## Deferred QA` — up to five task-specific unrun scenarios; for a non-behavioral task with none, state the reason under this heading
 3. **Before any `git rm`**, enumerate sidecars via `related:` + a same-`(topic,date)` grep, and run the cross-bucket reference-rewrite so every inbound link (intent/handoff/wiki `related:`) repoints to the consolidated doc — never delete-then-leave-dangling (I5/I6). **Sidecars means lifecycle docs only** — a collection doc sharing the `(topic, date)` is never merged or removed.
-4. Clear `related:` (now one self-contained file).
+4. Remove `related:` entries for merged sidecars; retain a valid link to the durable intent and any independent source record. The archive body remains self-contained without copying collection content.
 5. `git rm` the original sidecars (history preserves them).
 6. Update `index.md`: remove originals from the active list, add the consolidated file under Complete.
 7. One commit: `docs: archive <topic> to complete (merged spec + plan + metrics)`.
 
-**Exception**: a task with a single active doc and no sidecars → just a reference-safe move to `complete/<topic>/`, body unchanged.
+**Exception**: a task with a single active doc and no sidecars → add its `## Deferred QA` section, then reference-safe move to `complete/<topic>/` without merging sidecars.
+
+### Deferred QA entry contract
+
+Before moving to `complete/`, add `## Deferred QA` to the plan. Carry the same section into the merged archive; for a single-doc move, add it before moving. Each scenario has a stable ID based on the final archive filename stem (`<plan-id>`), so later `/team-qa` runs update the same entry rather than creating another document:
+
+```markdown
+## Deferred QA
+
+### QA-<plan-id>-01 — <scenario title>
+- Priority: P0 | P1 | P2
+- Preconditions: <environment, account/data and setup needed>
+- Actions: <reproducible user or API steps>
+- Expected: <observable outcome, including failure behavior where relevant>
+- Source: <acceptance criterion or code/issue link>
+- Status: pending
+- Evidence: —
+```
+
+Use one scenario per heading and increment `01`–`05`; use at most five per task, with no filler cases. For a non-behavioral task with no manual QA worth deferring, keep the heading and write `- No scenarios: <specific reason>`. `Source` must identify the claim being checked; `Expected` must be observable, not "works correctly." Valid `Status` values are exactly `pending`, `passed`, `failed`, and `blocked`. A standalone `/team-qa` run selects pending entries by default, records the run date, method/environment, observed outcome and artifact path (or explicit reason no artifact exists) in `Evidence`, and changes `Status` to the observed verdict. Re-run a failed/blocked entry only when requested or after its dependency/fix changes, preserving prior evidence in that entry. Deferred QA results update the completed archive's `updated` date; they do not create a new lifecycle bucket or imply that `status: complete` means QA passed.
 
 ## Orphan-mode invariants (lint enforces — see `/docs-sweep`)
 
@@ -236,5 +273,8 @@ The handoff contract (location, naming, `related:` link-don't-duplicate, keep-la
 
 - **Phase 1 complete**: plan written → `active/planning/<created>/`, `status: planning`, topic assigned, indexed.
 - **Phase 3 start**: `planning → processing` (reference-safe move).
-- **Phase 5 complete (merged)**: apply the merge rule → `complete/<topic>/`. If several PRs follow one plan, merge once at series completion (or per-PR if the user prefers).
+- **Required lightweight verification result**: apply the evidence-driven update above before routing the next phase; a failed or blocked required check remains `processing` with a fix/retest or unblock action.
+- **Implementation complete (integrated)**: add the deferred QA entries, then apply the merge rule → `complete/<topic>/`. If several PRs follow one plan, merge once at series completion (or per-PR if the user prefers).
+- **Before reporting implementation completion**: compare the archive and linked knowledge pages with final code, required lightweight verification and security evidence; run `/docs-sweep --lint-only` (all six invariants) and fix broken paths/index rows. State the pending QA count and completed archive path in the report.
+- **Later `/team-qa`**: update selected scenario verdicts and evidence in the same archive, refresh `updated`, and check documentation freshness at this boundary; preserve `status: complete` while tracking a new fix task for any implementation defect.
 - All `_docs/` moves are orchestrator-serialized (above). The plan doc path is `_docs/active/<status>/<created>/…` / `_docs/complete/<topic>/…` — the old flat `_docs/{category}/plan-{feature}.md` layout is retired.

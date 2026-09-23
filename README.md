@@ -8,7 +8,8 @@ The following overview and slash commands describe the Claude Code workflow.
 
 Specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code. Beyond the core team workflow, the harness adds:
 
-- **Testing stack** — unit (Vitest) → deterministic E2E (Playwright) → **agentic E2E** (Phase 4.5: an agent verifies goals and crystallizes deterministic tests) → **human QA** (`/test-scenario-doc`, an interactive checklist). When the [`agent-browser`](https://agent-browser.dev/) CLI + skill are installed, it becomes the **default browser driver** for every browser-driving task — E2E / QA / smoke / exploration, Phase 4 driving and Phase 4.5 exploration included — including headless login via its encrypted **Auth Vault** (the password never reaches the LLM) — and otherwise falls back to the Playwright path.
+- **Testing stack** — `/team` runs changed unit/integration tests and at most one existing smoke E2E per affected user-facing flow, then reports implementation completion. It records up to five pending scenarios in the completed plan. Later, `/team-qa` collects those items across tasks and runs a bounded batch; `--crystallize` also turns verified paths into deterministic tests. `/test-scenario-doc` remains the on-demand HTML checklist for human QA. When [`agent-browser`](https://agent-browser.dev/) CLI + skill are installed, it is the default browser driver for any browser-driving task, including smoke and deferred QA.
+- **Separate QA budget** — Phase 4 is one merged-tree verification pass. A failed or blocked required quick check ends that run with evidence and a fix/unblock list; it does not start an automatic QA→implementation loop. Deferred QA verdicts live with their scenario entries and do not rewrite the implementation-complete status.
 - **Document storage (3 buckets)** — `_docs/` (project) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge) · `_workspace/` (throwaway run output, gitignored but for its layout `README.md`), classified by a portable ownership discriminator. Inside `_docs/`, **lifecycle** buckets ride `planning → processing → complete`; **collection** buckets (`intent/`, `handoff/`, plus whatever a project declares) are append-only records the agent may add to but never reorganize.
 - **Code minimalism** — a harness-owned YAGNI decision ladder (`coding-standards` §4), applied by the architect agents at design time and gated once, at the Phase 1 plan approval.
 - **Renewal Mode Gate** — every non-trivial refactor / fix / redesign starts by choosing **A (compatible)** or **B (destructive renewal)**; Mode B requires a risk block + explicit approval, then a full anti-drift commitment so back-compat scaffolding never creeps back in.
@@ -26,14 +27,14 @@ Specialized AI agents collaborate through defined phases to implement features, 
 | Architect C (Infra/Security) | `team-architect-infra` | opus | Phase 1 (on-demand) + Phase 5 (always) |
 | UI/UX Master | `team-uiux-master` | sonnet | Phase 2 (conditional) |
 | Designer x N | `team-designer` | sonnet | Phase 3 (parallel, worktree isolated); → opus on full-stack / auth·payment·PII / post-fail |
-| Tester x N | `team-tester` | sonnet | Phase 4 (parallel) |
-| Agentic Tester | `team-agentic-tester` | opus | Phase 4.5 (conditional, after Tester PASS) |
+| Tester | `team-tester` | sonnet | Phase 4 (one lightweight merged-tree pass) |
+| Agentic Tester | `team-agentic-tester` | opus | `/team-qa` (deferred, on demand) |
 | Web Architect | `web-architect` | opus | Web architecture (standalone or complements FE) |
 | Web Reviewer | `web-reviewer` | sonnet | Web quality audit (a11y, CWV, SEO, AI-slop) |
 
 ### Workflow Phases
 
-Phase 1 (Planning) → Phase 2 (UI/UX, conditional) → Leader Approval Gate → Phase 3 (Implementation, TDD) → Phase 4 (Verification) → Phase 4.5 (Agentic Testing, conditional) → Phase 5 (Final Security Review).
+Phase 1 (Planning) → Phase 2 (UI/UX, conditional) → Leader Approval Gate → Phase 3 (Implementation, TDD) → Phase 4 (Lightweight Verification) → Phase 5 (Final Security Review + deferred QA item capture). Run accumulated QA later with `/team-qa`.
 
 - **Visual** (phase graph, mermaid): `skills/team-workflow/SKILL.md` → "Orchestration Flow"
 - **Rules** (routing, classification, counters, abort thresholds): `skills/team-workflow/resources/escalation.md` → "Phase Transition Table"
@@ -41,6 +42,8 @@ Phase 1 (Planning) → Phase 2 (UI/UX, conditional) → Leader Approval Gate →
 ### Escalation
 
 Classification (simple fix vs fundamental issue), routing, retry/global-cycle caps, and report formats are all defined in `skills/team-workflow/resources/escalation.md` — the single source of truth. Both `/team` and `/team-run` report escalation events to the user.
+
+Phase 4 records `VERIFY_PASS`, `VERIFY_FAIL`, or `VERIFY_BLOCKED` with the exact quick-check evidence. Only `VERIFY_PASS` reaches Phase 5. A failed or blocked run reports incomplete implementation and stops; later QA scenarios are generated only for completed work. Phase 5 reconciles the active plan and `_docs/index.md` with final code and quick-check evidence, refreshes affected wiki links, and archives the pending QA items with the implementation record.
 
 ## Commands
 
@@ -50,6 +53,7 @@ Classification (simple fix vs fundamental issue), routing, retry/global-cycle ca
 | `/team-init` | Analyze an existing project → generate profile (run first on a project with code!) |
 | `/team` | Interactive mode — user participates in planning phase |
 | `/team-run` | Autonomous mode — full auto-execution |
+| `/team-qa` | Later, collect pending scenarios from completed plans and run a bounded QA batch (`--all` for every pending item, `--crystallize` to generate deterministic tests) |
 | `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
 | `/debug` | Solo systematic debug of a bug / test failure (Iron Law: root cause before fix); layers the TS/LSP `debug` skill, escalates to `/team` when Fundamental |
 | `/checkpoint` | Save / restore work state across sessions, branches, and compactions |
@@ -120,7 +124,7 @@ Alongside the env flags above, the harness uses a few external tools. Each row s
 | Tool | Used for | Without it |
 |------|----------|-----------|
 | **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | **default** browser driver for E2E / QA / smoke / exploration (requested or not) + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `reference/e2e-testing.md` / `agentic-testing` path — never to `claude-in-chrome` |
-| **Playwright** (`@playwright/test`, or the Playwright MCP) | the committed `.spec.ts` E2E suite, and the fallback driver when `agent-browser` is absent | with neither Playwright nor `agent-browser`, Phase 4 has no browser driver: E2E is reported `미검증`, never inferred green |
+| **Playwright** (`@playwright/test`, or the Playwright MCP) | the committed `.spec.ts` E2E suite, and the fallback driver when `agent-browser` is absent | with neither Playwright nor `agent-browser`, an optional Phase 4 smoke is recorded as unverified and queued for later QA; `/team-qa` marks browser-dependent scenarios blocked |
 | **`jq`** | the `PostToolUse` hook reads its file path from the hook's stdin JSON | the post-edit warning hook (`console.*` / `debugger` / collection-bucket write checks) silently no-ops. `session-start.sh` prints one "jq not found" line per session so it fails loudly once instead of quietly forever |
 | **`gh` CLI** | GitHub releases per version bump, and the `git-handler` agent's PR/issue work | do those steps by hand; nothing else is affected |
 
@@ -220,6 +224,8 @@ Collection buckets hold durable records whose value is being unaltered: `intent/
 
 Handoffs live in `_docs/handoff/` — the one collection the agent may prune, since keep-latest-per-stream is its defining contract. `/team-init` bootstraps `_workspace/README.md` and `.claude/wiki/`, and records the project's declared collection buckets in its profile. The rules live in the `docs-lifecycle` and `wiki` skills; `_docs/index.md` is updated on every plan change. Under worktree parallelization, `_docs/` stays in the **primary working tree** — worktree agents read and write doc files there by absolute path, and only `index.md` edits + status-moves are orchestrator-serialized, so plans stay readable from main without cd-ing into a worktree.
 
+During a team run, quick-verification failures and blockers remain in the active `processing` plan with commands, outcomes, and the next fix/unblock action. A completed plan may contain pending `## Deferred QA` entries; `complete` records implementation completion, while each item has its own QA verdict. `/team-qa` updates those entries later with evidence. The wiki links to the record and changed code without copying their facts.
+
 ## Supporting Skills
 
 Skills that agents reference during their workflow phases:
@@ -229,8 +235,8 @@ Skills that agents reference during their workflow phases:
 | `greenfield-bootstrap` | `/team-new` | G0 intake → G1 deep-research → G2 stack decision → G3 user gate → G4 scaffold → G5 seeded profile |
 | `brainstorm` | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design (no auto-commit); solo counterpart to `/team-brainstorm` |
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS), layered on `superpowers:systematic-debugging` |
-| `agentic-testing` | Phase 4.5 | Adapter-based agentic E2E — explore goal → verify → crystallize deterministic test |
-| `agent-browser-e2e` | **Default driver — any browser-driving task, Phase 4 driving + Phase 4.5 exploration included** | `agent-browser` is the first choice for E2E/QA/smoke/exploration/selector resolution, requested or not, plus headless login via its encrypted Auth Vault (no password reaches the LLM). One-time gate (CLI present + skill available), else fall back to Playwright — never silently, and never to `claude-in-chrome`. Playwright still owns the committed `.spec.ts` suite |
+| `agentic-testing` | `/team-qa` | Adapter-based deferred QA: verify goals; generate deterministic tests when `--crystallize` is requested |
+| `agent-browser-e2e` | **Default driver — any browser-driving task** | `agent-browser` is the first choice for E2E/QA/smoke/exploration/selector resolution, requested or not, plus headless login via its encrypted Auth Vault (no password reaches the LLM). One-time gate (CLI present + skill available), else fall back to Playwright — never silently, and never to `claude-in-chrome`. Playwright still owns the committed `.spec.ts` suite |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `plan-visualizer` | **On-demand only** (`/plan-visualizer`) | HTML diagram of a plan (team, phases, files, deps) — fills the self-contained skeleton in `skills/plan-visualizer/resources/template.html`. No workflow phase generates one |
@@ -247,7 +253,7 @@ Methodology bodies that agents cite by section rather than dispatch. They carry 
 |----------|---------|----------|
 | `reference/coding-standards.md` | Architects, Designers (Phase 1/3) | Universal code quality baseline (strict TS); §4 = YAGNI decision ladder |
 | `reference/e2e-testing.md` | Testers (Phase 4) | Playwright E2E patterns, Page Object Model, flaky-test strategy |
-| `reference/verification-loop.md` | Testers, Leader (Phase 4-5) | 6-phase quality gate (build, type, lint, test, security, diff) + baseline-vs-net-new rules, reliability gates (tests green in ≥ 80% of runs, security 3/3 clean), opt-in human comprehension quiz |
+| `reference/verification-loop.md` | Testers, Leader (Phase 4-5) | Changed-code quality gate (build, type, lint, unit/integration, one existing smoke E2E per affected flow, security, diff) + baseline-vs-net-new rules and explicit unavailable checks |
 | `reference/plan-review.md` | Leader (Phase 1) | Critical plan review + pre-plan elicitation |
 | `reference/token-optimization.md` | Any orchestrator | Model routing (incl. per-`agent()` Workflow routing), effort levels, compaction; §6 = 3-cycle retrieval protocol + six-element briefing contract |
 
@@ -275,11 +281,12 @@ junjak-ai-harness/
 │   ├── team-agentic-tester.md
 │   ├── web-architect.md
 │   └── web-reviewer.md
-├── commands/                    # 14 slash commands
+├── commands/                    # 15 slash commands
 │   ├── team-new.md              # /team-new
 │   ├── team-init.md             # /team-init
 │   ├── team.md                  # /team
 │   ├── team-run.md              # /team-run
+│   ├── team-qa.md               # /team-qa
 │   ├── team-brainstorm.md       # /team-brainstorm
 │   ├── debug.md                 # /debug
 │   ├── checkpoint.md            # /checkpoint
@@ -323,9 +330,9 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). Latest: **v1.28.0** adds
-Codex-specific skills, plugin metadata, and a separate informational hook while
-preserving the Claude Code workflow.
+Full history: [CHANGELOG.md](./CHANGELOG.md). The source version of the Claude
+plugin is **v1.29.0**: lightweight team verification and separate, batched
+`/team-qa` with deferred scenarios. The Codex adapter remains at v1.28.0.
 
 ## License
 

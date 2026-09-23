@@ -43,6 +43,8 @@ Applies to all agents, skills, and direct use at the start of any task that chan
 | UI/UX design quality | `impeccable` plugin + the uiux/web agent definitions |
 | Code minimalism (YAGNI) | `coding-standards` §4 + architect/build-agent defs + `plan-review` → Phase 1 gate (design-time only; Phase 4 does NOT audit it) |
 | Escalation criteria + retry caps | `skills/team-workflow/resources/escalation.md` (per-phase retries max 3; global re-plan cycles max 3 → ABORT) |
+| Phase 4 quick verification + deferred QA | `skills/team-workflow/resources/escalation.md` → "Phase 4 verification outcomes"; `reference/verification-loop.md` → "Phase 4"; `/team-qa` for later scenario execution |
+| Phase-boundary evidence + document freshness | `skills/docs-lifecycle/SKILL.md` → "Evidence-driven updates during a team run"; `skills/wiki/SKILL.md` → "maintain after a code or document change" |
 | Parallelization, contract-sync, docs-lifecycle, checkpoint, … | the matching skill (loads on invoke) |
 
 **`reference/<name>.md` are documents, not skills** — `coding-standards`, `e2e-testing`, `verification-loop`, `plan-review`, `token-optimization`. A citation like "(`verification-loop` §Baseline & Net-New)" means **Read that file**; MUST NOT pass these names to the Skill tool. Rules that must fire unconditionally are inlined at their call sites.
