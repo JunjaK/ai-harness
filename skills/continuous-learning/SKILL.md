@@ -162,9 +162,8 @@ The agent wiki (`.claude/wiki/`) is maintained by the separate `wiki` skill, but
 ## Quick Reference
 
 ```
-State file:    .claude/session-state/current.md (format + lifecycle → `checkpoint` skill)
-Learnings:     .claude/session-state/learnings/{topic}.md
-Archive:       .claude/session-state/archive/ (auto-managed by hooks)
+State file:    .claude/session-state/sessions/$CLAUDE_CODE_SESSION_ID/current.md (format + lifecycle → `checkpoint` skill)
+Learnings:     .claude/session-state/learnings/{topic}.md (gitignored; project-valid ones move to _docs/reference/)
 Extract:       After milestones — identify, validate, generalize, score, store
 Reuse:         At task start, load matching learnings; route them into agent briefings; index when >10
 Promote:       Project-stable learning → project-profile (read by default)

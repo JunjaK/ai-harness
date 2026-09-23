@@ -21,7 +21,7 @@ The failures this prevents: **resuming blind** (reading the handoff but not the 
 
 | | `take-over` | `checkpoint` |
 |---|---|---|
-| Consumes | `_docs/handoff/` (project-owned doc) | `.claude/session-state/checkpoints/` (agent session-state) |
+| Consumes | `_docs/handoff/` (project-owned doc) | `.claude/session-state/sessions/<session_id>/checkpoints/` (agent session-state) |
 | For | cross-agent / cross-session **work intake** | your own **session recovery** across compaction/branch |
 | Verifies state claims | **yes — against git/test evidence** | reconciles branch/files only |
 | Fate of the source | **graduates** it into a durable `_docs` doc (complete/plan) — never a bare delete | keeps latest + history |

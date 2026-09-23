@@ -1,32 +1,42 @@
 #!/bin/bash
-# Pre-Compact Hook — Auto-saves checkpoint + reminds Claude to update state
-# Triggered: Before compaction (Notification with autocompact matcher)
+# Pre-Compact Hook — snapshot this session's state and remind Claude to update it
+# Triggered: PreCompact (auto)
+# Layout (SSOT: checkpoint skill → Storage): .claude/session-state/sessions/<session_id>/
 
-STATE_DIR=".claude/session-state"
-CHECKPOINT_DIR="$STATE_DIR/checkpoints"
-mkdir -p "$STATE_DIR" "$CHECKPOINT_DIR"
+INPUT=$(cat)
+SID=${CLAUDE_CODE_SESSION_ID:-}
+[ -n "$SID" ] || SID=$(printf '%s' "$INPUT" | sed -n 's/.*"session_id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' | head -1)
 
-# --- Auto-save checkpoint if current.md exists ---
-if [ -f "$STATE_DIR/current.md" ]; then
+# Primary working tree, so a session started inside a linked worktree uses the same state.
+PROJECT="${CLAUDE_PROJECT_DIR:-.}"
+COMMON=$(git -C "$PROJECT" rev-parse --path-format=absolute --git-common-dir 2>/dev/null) && PROJECT=$(dirname "$COMMON")
+STATE_ROOT="$PROJECT/.claude/session-state"
+REL_DIR=".claude/session-state/sessions/${SID:-<session_id>}"
+SESSION_DIR="$STATE_ROOT/sessions/${SID:-unknown}"
+CHECKPOINT_DIR="$SESSION_DIR/checkpoints"
+
+if [ -n "$SID" ] && [ -f "$SESSION_DIR/current.md" ]; then
+  mkdir -p "$CHECKPOINT_DIR"
   TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-  cp "$STATE_DIR/current.md" "$CHECKPOINT_DIR/checkpoint-$TIMESTAMP.md"
-  cp "$STATE_DIR/current.md" "$CHECKPOINT_DIR/latest.md"
-  echo "[pre-compact] Auto-checkpoint saved: checkpoint-$TIMESTAMP.md"
-
-  # Clean old checkpoints (keep max 10)
-  CKPT_COUNT=$(ls -1 "$CHECKPOINT_DIR"/checkpoint-*.md 2>/dev/null | wc -l)
-  if [ "$CKPT_COUNT" -gt 10 ]; then
-    ls -1t "$CHECKPOINT_DIR"/checkpoint-*.md | tail -n +11 | xargs rm -f
-  fi
+  cp "$SESSION_DIR/current.md" "$CHECKPOINT_DIR/checkpoint-$TIMESTAMP.md"
+  cp "$SESSION_DIR/current.md" "$CHECKPOINT_DIR/latest.md"
+  echo "[pre-compact] Auto-checkpoint saved: $REL_DIR/checkpoints/checkpoint-$TIMESTAMP.md"
+  ls -1t "$CHECKPOINT_DIR"/checkpoint-*.md 2>/dev/null | tail -n +11 | while IFS= read -r f; do rm -f "$f"; done
 fi
 
-# --- team-run.json (orchestrator run-state) survives compaction via the filesystem, not this hook ---
-if [ -f "$STATE_DIR/team-run.json" ]; then
-  echo "[pre-compact] team-run.json exists — re-read it after compaction (phase/retries/globalCycle) before resuming the workflow."
+# Team runs this session owns survive compaction on disk; point Claude back at them.
+if [ -n "$SID" ] && [ -d "$STATE_ROOT/runs" ]; then
+  for f in "$STATE_ROOT/runs"/*.json; do
+    [ -f "$f" ] || continue
+    if grep -q "\"owner_session\"[[:space:]]*:[[:space:]]*\"$SID\"" "$f"; then
+      echo "[pre-compact] Team run .claude/session-state/runs/$(basename "$f") is owned by this session — re-read it after compaction (phase/retries/globalCycle) before resuming."
+    fi
+  done
 fi
 
 echo ""
-echo "COMPACTION IMMINENT — Update .claude/session-state/current.md before context is compressed."
+echo "COMPACTION IMMINENT — Update $REL_DIR/current.md before context is compressed."
+echo "(In Bash: .claude/session-state/sessions/\$CLAUDE_CODE_SESSION_ID/current.md)"
 echo ""
 echo "Ensure the following are captured:"
 echo "1. Current task progress and remaining steps"
@@ -36,9 +46,8 @@ echo "4. Key decisions made during this session"
 echo "5. Next steps (concrete, actionable)"
 echo ""
 
-# Show existing state for reference
-if [ -f "$STATE_DIR/current.md" ]; then
+if [ -n "$SID" ] && [ -f "$SESSION_DIR/current.md" ]; then
   echo "--- Current session state (update if stale) ---"
-  cat "$STATE_DIR/current.md"
+  cat "$SESSION_DIR/current.md"
   echo "--- End of state ---"
 fi

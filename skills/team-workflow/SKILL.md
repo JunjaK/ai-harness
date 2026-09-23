@@ -215,11 +215,12 @@ On any escalation, route via `resources/escalation.md`'s transition table — it
 
 ## State Tracking
 
-Run state is **persisted to disk**, not held in orchestrator memory — path `$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/.claude/session-state/team-run.json` (the primary-tree-anchored absolute path — same resolution idiom used for `_docs/` elsewhere in this harness; a linked worktree's relative `.claude/session-state/` is a *different, empty* directory and MUST NOT be used, or the foreign-`runId` guard below never sees the live record). Schema + storage rules: `checkpoint` skill's team-workflow integration table. This is a read/write contract:
+Run state is **persisted to disk**, not held in orchestrator memory — one file per plan at `$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/.claude/session-state/runs/<plan-id>.json`, where `<plan-id>` is the plan filename stem. Use that primary-tree absolute path: a linked worktree's relative `.claude/session-state/` is a different, empty directory. The session's own id is `$CLAUDE_CODE_SESSION_ID`. Layout: `checkpoint` skill → Storage. This is a read/write contract:
 
+- **Create** the file in Phase 1 as soon as the plan file's name is fixed: `runId`, `owner_session: $CLAUDE_CODE_SESSION_ID`, `updated_at`, `phase: "P1"`, all `retries` zeroed, `globalCycle: 1`.
 - **Read** the file on every phase entry. Never rely on in-context recall for `phase`, `retries`, or `globalCycle`.
-- **Write** the file on every transition (every phase entry/exit and every escalation), applying the counter effect from the matching `escalation.md` transition-table row.
+- **Owner check before every write**: if `owner_session` is not this session's id, STOP and ask the user — another session is driving this run, or a crashed one left it. Change `owner_session` to this session only when the user says to take the run over. No time threshold decides this; the user does.
+- **Write** the file on every transition (every phase entry/exit and every escalation), applying the counter effect from the matching `escalation.md` transition-table row and refreshing `updated_at`.
 - **Abort decisions** are made by reading the file's current counters, never from conversation memory.
-- **Missing file at P1** (fresh run): create it — `runId`, `phase: "P1"`, all `retries` zeroed, `globalCycle: 1`.
-- **Missing file at any non-P1 phase entry** (post-`git clean -xdf`, cwd/session change, resumed run): STOP and surface — the counters are unrecoverable. Do NOT recreate with zeroed counters; that silently resets the very abort caps this file exists to enforce.
-- **Foreign `runId` found on read, with `phase ∉ {DONE, ABORT}`**: STOP and surface to the user (a live parallel run or a crashed one) — do NOT silently overwrite. Per this repo's parallel-session safety rule (root `CLAUDE.md` → "Parallel sessions share the working tree — commit only what you changed, never revert what you didn't").
+- **Missing file at any phase after P1** (post-`git clean -xdf`, cwd change, resumed run): STOP and surface — the counters are unrecoverable. Do NOT recreate with zeroed counters; that silently resets the very abort caps this file exists to enforce.
+- Different plans use different files, so parallel team runs in one tree do not collide. Per the parallel-session safety rule (root `CLAUDE.md` → "Parallel sessions share the working tree — commit only what you changed, never revert what you didn't"), never edit another plan's run file.

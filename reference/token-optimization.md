@@ -79,10 +79,10 @@ Subagents get their own context window. Use them to:
 ### Compaction Checklist (MUST execute all steps)
 
 Before compacting:
-1. Write current state to `.claude/session-state/current.md` (task progress, verified approaches, decisions, remaining steps)
+1. Write current state to `.claude/session-state/sessions/$CLAUDE_CODE_SESSION_ID/current.md` (task progress, verified approaches, decisions, remaining steps)
 2. Verify no mid-task variable names or intermediate state will be lost
 3. Execute compaction
-4. Re-read `.claude/session-state/current.md` to restore context
+4. Re-read that `current.md` to restore context
 
 ### Auto-Compact Configuration
 

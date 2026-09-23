@@ -24,10 +24,10 @@ Invoke the `checkpoint` skill, which owns the checkpoint format, storage layout,
 
 | Argument | Route to `checkpoint` skill |
 |----------|-----------------------------|
-| *(none)* | **Restore Checkpoint** → Load Process, source `latest.md` (fall back to `.claude/session-state/last-session.md`; if neither exists, report "No checkpoint available") |
+| *(none)* | **Restore Checkpoint** → Load Process, source this session's `sessions/$CLAUDE_CODE_SESSION_ID/checkpoints/latest.md`; if it has none, list the other sessions' `latest.md` newest first and let the user pick; if there are none at all, report "No checkpoint available" |
 | `save [title]` | **Save Checkpoint** → Manual Save, using `[title]` as the checkpoint title |
 | `load [id]` | **Restore Checkpoint** → Load Process, matching `[id]` against checkpoint timestamps or titles |
-| `list` | **Storage** layout → list `.claude/session-state/checkpoints/`, parse each header, display as a table of #, timestamp, title, branch |
+| `list` | **Storage** layout → list `.claude/session-state/sessions/*/checkpoints/`, parse each header, display as a table of #, session (this one marked), timestamp, title, branch |
 
 ## Auto-Save Triggers
 

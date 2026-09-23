@@ -340,7 +340,8 @@ junjak-ai-harness/
 ├── hooks/
 │   ├── hooks.json               # Plugin hook registration
 │   ├── session-start.sh
-│   ├── session-stop.sh
+│   ├── session-stop.sh          # Stop: stray-artifact warning only
+│   ├── session-end.sh           # SessionEnd: snapshot this session's state, prune old sessions
 │   ├── pre-compact.sh
 │   ├── post-edit-warn.sh
 │   ├── guardrails.sh            # PreToolUse(Bash) branch rules (opt-in)

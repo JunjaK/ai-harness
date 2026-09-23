@@ -83,7 +83,7 @@ The single normative graph for the workflow — routing, classification, counter
 - `globalCycle` increments on every entry into P1 after the first (i.e., every re-plan cycle) — not on every escalation.
 - Neither counter ever decrements or resets within a single `runId`.
 - The abort check is evaluated on **every write** to the counters — not deferred to a separate check step.
-- Counters are persisted, not recalled from context: `.claude/session-state/team-run.json` (schema + storage rules: `checkpoint` skill's team-workflow integration table; read/write contract: `team-workflow/SKILL.md` → "State Tracking").
+- Counters are persisted, not recalled from context: `.claude/session-state/runs/<plan-id>.json` in the primary tree (layout: `checkpoint` skill → Storage; read/write contract: `team-workflow/SKILL.md` → "State Tracking").
 
 ## Retry Limits (hard caps)
 
@@ -96,7 +96,7 @@ Counters increment only as specified by the transition row. Resetting counters i
 
 ## Escalation Report Format (REQUIRED outside P4)
 
-For Phase 4, use the one-pass verification report in `agents/team-tester.md`, including failed-check evidence or blocked prerequisites. The escalation report below applies to other phases. **Agents emit only the first block** — a Designer cannot know orchestrator-level state (`Global cycle`, cross-phase retry counts); requiring it in the agent-emitted block would guarantee either a fabricated number or a blank field. The orchestrator appends the second block itself, read from `.claude/session-state/team-run.json` — never from an agent's report, never from memory.
+For Phase 4, use the one-pass verification report in `agents/team-tester.md`, including failed-check evidence or blocked prerequisites. The escalation report below applies to other phases. **Agents emit only the first block** — a Designer cannot know orchestrator-level state (`Global cycle`, cross-phase retry counts); requiring it in the agent-emitted block would guarantee either a fabricated number or a blank field. The orchestrator appends the second block itself, read from `.claude/session-state/runs/<plan-id>.json` — never from an agent's report, never from memory.
 
 ### Agent-emitted block
 
@@ -131,7 +131,7 @@ Retry counts: P1=N/3, P2=N/3, P3=N/3, P4=N/3, P5=N/3
 Global cycle: [N/3]
 ```
 
-Both `/team` and `/team-run` MUST emit this status update. Values come from `.claude/session-state/team-run.json`, not from conversation recall.
+Both `/team` and `/team-run` MUST emit this status update. Values come from `.claude/session-state/runs/<plan-id>.json`, not from conversation recall.
 
 ## Abort Conditions (workflow MUST stop)
 

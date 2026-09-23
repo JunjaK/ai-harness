@@ -141,7 +141,7 @@ A checkpoint is an explicit verification snapshot taken at milestones. It saves 
 
 ### Checkpoint Format
 
-Save to `.claude/session-state/checkpoints/`:
+Save to `.claude/session-state/sessions/$CLAUDE_CODE_SESSION_ID/checkpoints/`:
 
 ```markdown
 # Checkpoint: {name}

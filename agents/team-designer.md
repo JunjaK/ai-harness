@@ -138,7 +138,7 @@ Classification and the full phase transition table live in `skills/team-workflow
 
 ### Escalation Report Format (REQUIRED — agent-emitted block only)
 
-The orchestrator appends `Global cycle` and cross-phase retry counts itself, read from `.claude/session-state/team-run.json` — a Designer cannot know orchestrator-level state and MUST NOT report it (see `escalation.md` → "Escalation Report Format").
+The orchestrator appends `Global cycle` and cross-phase retry counts itself, read from `.claude/session-state/runs/<plan-id>.json` — a Designer cannot know orchestrator-level state and MUST NOT report it (see `escalation.md` → "Escalation Report Format").
 
 ```markdown
 ⚠ ESCALATION from Designer
