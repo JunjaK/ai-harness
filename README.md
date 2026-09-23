@@ -174,7 +174,7 @@ settings itself. See [OpenAI's plugin packaging and local marketplace guide](htt
 | Codex plugin `SessionStart` hook | Read-only reminder about stale `_docs/active/` documents, after Codex hook trust review. |
 | Codex plugin `PreToolUse(Bash)` hook | Opt-in project guardrails: protected branch writes and configured forbidden command prefixes are denied. Claude `ask` rules also deny in Codex. |
 
-The Codex adapter is at v1.31.2. `$harness-team` now follows Claude's
+The Codex adapter is at v1.32.0. `$harness-team` now follows Claude's
 lightweight Phase 4 verdict and Phase 5 deferred QA/document contract, but
 Codex does not have a separate `/team-qa` command; request execution of the
 archived QA scenarios later. Codex does not write Claude session-state files.
@@ -401,8 +401,10 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.31.2** — the UI/UX
-agents accept a personal-skill `impeccable` install instead of stalling on the
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.32.0** — no more
+`superpowers` dependency: `/debug` carries its own root-cause-first method and
+red flags, and the guardrails log slow or timed-out checks for diagnosis.
+v1.31.2: the UI/UX agents accept a personal-skill `impeccable` install instead of stalling on the
 plugin name. v1.31.1: the Codex
 `forbiddenCommands` guardrail now catches launch wrappers, backticks, variable
 program names, and visible forbidden commands inside programs it cannot

@@ -4,6 +4,20 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.32.0 — 2026-09-24
+
+The harness no longer depends on the `superpowers` plugin, which was uninstalled on this machine and left `/debug` aborting. The Claude plugin and the Codex adapter ship together at 1.32.0.
+
+### Added
+- The guardrails Claude entry point records rare slow checks: a check that takes 3 s or longer is appended to `.claude/session-state/guardrails-slow.log` (elapsed time, exit code, `index.lock`, load average, session, cwd, command), and a check the hook timeout kills leaves an in-flight marker that the next check logs as `unfinished`. A timed-out hook lets its command run, so these lines are the only trace; they exist to find the cause before fixing it. Fast checks pay about 35 ms extra, and only for git/gh commands in a project with `guardrails.json`.
+
+### Changed
+- `/debug` carries the whole root-cause-first method itself — frame and reproduce, investigate, one stated hypothesis at a time, failing test first, verify by running — plus a red-flags list for guessing, and no longer calls `superpowers:systematic-debugging` or aborts when it is missing. The `debug` skill states the Iron Law and its reproduce step in its own words. The Codex `$harness-debug` skill is self-contained the same way.
+- `CLAUDE.md` names `impeccable` as the only delegated plugin; parallel-agent decisions point to the `parallelization` skill and code review to Claude Code's built-in `/code-review`. README dependencies, the brain-connect settings template, and the recommended settings no longer enable `superpowers`.
+
+### Removed
+- The `superpowers` hard dependency (debugging methodology, code-review dispatch, parallel-agent dispatch).
+
 ## v1.31.2 — 2026-09-23
 
 ### Fixed
