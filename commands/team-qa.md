@@ -19,7 +19,7 @@ Run the QA scenarios saved by `/team` or `/team-run` **after** their implementat
 
 ## Scenario contract
 
-Read the archived plan's `## Deferred QA` entries, each with `### QA-<plan-id>-<nn> — <title>` and `Priority`, `Preconditions`, `Actions`, `Expected`, `Source`, `Status`, `Evidence`. `<plan-id>` is the completed archive's filename stem. `- No scenarios: <specific reason>` means the team intentionally queued zero cases; skip that archive. Use the written source and current code to resolve exact behavior; do not invent URLs, credentials, fixture data, or acceptance criteria. A scenario without executable actions or an observable expected outcome is `blocked` with the missing detail named in Evidence.
+Status values and allowed transitions: `docs-lifecycle` → Deferred QA entry contract (diagram). Read the archived plan's `## Deferred QA` entries, each with `### QA-<plan-id>-<nn> — <title>` and `Priority`, `Preconditions`, `Actions`, `Expected`, `Source`, `Status`, `Evidence`. `<plan-id>` is the completed archive's filename stem. `- No scenarios: <specific reason>` means the team intentionally queued zero cases; skip that archive. Use the written source and current code to resolve exact behavior; do not invent URLs, credentials, fixture data, or acceptance criteria. A scenario without executable actions or an observable expected outcome is `blocked` with the missing detail named in Evidence.
 
 ## Run
 

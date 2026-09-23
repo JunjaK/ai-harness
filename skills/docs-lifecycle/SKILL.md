@@ -83,7 +83,7 @@ _docs/
 └── index.md                    # ① status list ② handoffs ③ TOPIC VOCABULARY ④ COLLECTIONS (SSOT)
 ```
 
-Lifecycle: `planning → processing → complete → (consolidate) → reference`, or from anywhere `→ deprecated`; and `deprecated → active/planning` (revive). `reference/` and `complete/` are **never flat dumps** — always grouped by topic subfolder. Collection buckets never enter this cycle.
+Lifecycle transitions: the diagram in **Status transitions**. `reference/` and `complete/` are **never flat dumps** — always grouped by topic subfolder. Collection buckets never enter this cycle.
 
 **`exempt` means exempt from date/topic SUBFOLDERING and status-lockstep ONLY.** `deprecated/`, every collection bucket, and links *pointing into* `reference/` are still fully **in-scope for the reference-rewrite sweep and the dangling-link lint**. Nothing is exempt from "links must resolve."
 
@@ -136,17 +136,30 @@ Keep a plain numbered list for a linear sequence of steps. The diagram and the t
 
 ## Status transitions
 
-| Trigger | Action |
-|---------|--------|
-| Brainstorm settled on what to build | write `_docs/intent/<today>-<topic>-intent.md` (`kind: intent`), register its row in `index.md` §① (`intent/` itself is already declared in §④). No folder movement afterwards — it stays put for good |
-| Intent rejected or superseded | move to `_docs/intent/deprecated/` (in place; NOT the global `deprecated/`), set `status: deprecated` |
-| New spec/plan written | `status: planning`, place in `active/planning/<created>/`, assign topic from vocabulary |
-| First implementation commit (or first task → in-progress) | `planning → processing`: reference-safe move to `active/processing/<created>/` (date leaf unchanged), bump `updated` |
-| Implementation integrated, applicable required lightweight checks and final security review passed | `processing → complete`: apply the **merge rule** → `complete/<topic>/`; deferred QA may still be pending |
-| Abandoned / superseded | decision rationale useful later → `deprecated/`; pure noise → `git rm` |
-| Revived | `deprecated → active/planning/<today>/`: keep original `created`, add `revived:` |
-| Consolidating completed work | write a new consolidated doc into `reference/<topic>/` |
-| Promoting a session learning (`continuous-learning` §4) | `reference/<topic>/<date>-<topic>-findings.md` with `status: reference`, or a dated section in that topic's existing reference doc; register new files in `index.md` |
+```mermaid
+stateDiagram-v2
+  [*] --> planning: spec or plan written
+  planning --> processing: first implementation commit
+  processing --> complete: integrated, required checks and security review passed
+  complete --> reference: consolidated into reference/topic
+  planning --> deprecated: abandoned or superseded
+  processing --> deprecated: abandoned or superseded
+  deprecated --> planning: revived
+  state "intent/ (collection)" as intent {
+    [*] --> live: brainstorm settled
+    live --> rejected: rejected or superseded
+  }
+```
+
+What the diagram does not carry:
+
+- **planning** — `active/planning/<created>/`, topic from the vocabulary.
+- **→ processing** — reference-safe move to `active/processing/<created>/` (same date leaf); bump `updated`.
+- **→ complete** — apply the **merge rule** into `complete/<topic>/`. Deferred QA may still be pending.
+- **→ deprecated** — only when the decision rationale is useful later; pure noise is `git rm`'d instead.
+- **revived** — lands in `active/planning/<today>/`, keeps the original `created`, adds `revived:`.
+- **reference** also receives new docs directly: a consolidated synthesis of completed work, or a promoted session learning (`continuous-learning` §4) as `reference/<topic>/<date>-<topic>-findings.md` (`status: reference`) or a dated section in that topic's existing reference doc. Register new files in `index.md`.
+- **intent** — written as `_docs/intent/<today>-<topic>-intent.md` with `status: reference`, registered in `index.md` §① (the bucket is already declared in §④); it never moves while live. Rejected or superseded → `_docs/intent/deprecated/` in place (never the global `deprecated/`) with `status: deprecated`.
 
 ## Reference-safe move transaction (REQUIRED for every move)
 
@@ -228,7 +241,22 @@ Before moving to `complete/`, add `## Deferred QA` to the plan. Carry the same s
 - Evidence: —
 ```
 
-Use one scenario per heading and increment `01`–`05`; use at most five per task, with no filler cases. For a non-behavioral task with no manual QA worth deferring, keep the heading and write `- No scenarios: <specific reason>`. `Source` must identify the claim being checked; `Expected` must be observable, not "works correctly." Valid `Status` values are exactly `pending`, `passed`, `failed`, and `blocked`. A standalone `/team-qa` run selects pending entries by default, records the run date, method/environment, observed outcome and artifact path (or explicit reason no artifact exists) in `Evidence`, and changes `Status` to the observed verdict. Re-run a failed/blocked entry only when requested or after its dependency/fix changes, preserving prior evidence in that entry. Deferred QA results update the completed archive's `updated` date; they do not create a new lifecycle bucket or imply that `status: complete` means QA passed.
+`Status` values and their transitions:
+
+```mermaid
+stateDiagram-v2
+  state verdict <<choice>>
+  [*] --> pending: Phase 5 writes the entry
+  pending --> verdict: /team-qa runs it
+  verdict --> passed: outcome observed
+  verdict --> failed: reproducible mismatch
+  verdict --> blocked: prerequisite missing
+  passed --> verdict: named recheck
+  failed --> verdict: named recheck
+  blocked --> verdict: named recheck
+```
+
+Use one scenario per heading and increment `01`–`05`; use at most five per task, with no filler cases. For a non-behavioral task with no manual QA worth deferring, keep the heading and write `- No scenarios: <specific reason>`. `Source` must identify the claim being checked; `Expected` must be observable, not "works correctly." A standalone `/team-qa` run selects pending entries by default (a named recheck selects its entry whatever the status), records the run date, method/environment, observed outcome and artifact path (or explicit reason no artifact exists) in `Evidence`, and changes `Status` to the observed verdict. Re-run a failed/blocked entry only when requested or after its dependency/fix changes. Every run appends a dated result to `Evidence` and never overwrites the earlier ones. Deferred QA results update the completed archive's `updated` date; they do not create a new lifecycle bucket or imply that `status: complete` means QA passed.
 
 ## Orphan-mode invariants (lint enforces — see `/docs-sweep`)
 
