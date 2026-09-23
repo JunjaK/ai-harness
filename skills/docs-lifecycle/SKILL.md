@@ -267,6 +267,15 @@ Static pass over `_docs/**` + `.claude/wiki/**`; report + auto-fix where safe:
 | I5 | no `active/` sidecar sharing `(topic,date)` with a `complete/<topic>` doc | propose merge |
 | I6 | no dangling `_docs/` link from `.claude/wiki/`; no collection doc outside its bucket | wiki: yes; collection: report-only |
 
+### Scoped sweep — `--since <ref>`
+
+A team run sweeps only what it touched, so it never reorganizes another session's documents.
+
+- **Scope** = `_docs/` files changed since `<ref>` in the primary tree: `git diff --name-only <ref> -- _docs` plus `git status --porcelain -- _docs` (uncommitted and untracked).
+- **REAP** evaluates in-scope `active/` docs only. In autonomous mode the orchestrator decides for docs this run created or moved — its own work is the strong signal. Out-of-scope docs are left alone.
+- **LINT** checks every invariant over the whole tree, but auto-fixes only when the fix edits in-scope files or their own `index.md` rows. Anything else is reported, not fixed.
+- Collection buckets stay out of REAP, as always.
+
 ### Detection — `SessionStart` hook
 
 `hooks/session-start.sh` does a cheap mtime scan of `_docs/active/`; if any doc is older than the threshold it emits **one** non-blocking nudge line (`exit 0`, stdout) — `⚠ N stale active docs (untouched >14d) — run /docs-sweep`. Silent when clean; exits 0 silently when `_docs/active` is absent (so it never false-alarms in repos that haven't adopted the layout).
@@ -287,6 +296,6 @@ The handoff contract (location, naming, `related:` link-don't-duplicate, keep-la
 - **Phase 3 start**: `planning → processing` (reference-safe move).
 - **Required lightweight verification result**: apply the evidence-driven update above before routing the next phase; a failed or blocked required check remains `processing` with a fix/retest or unblock action.
 - **Implementation complete (integrated)**: add the deferred QA entries, then apply the merge rule → `complete/<topic>/`. If several PRs follow one plan, merge once at series completion (or per-PR if the user prefers).
-- **Before reporting implementation completion**: compare the archive and linked knowledge pages with final code, required lightweight verification and security evidence; run `/docs-sweep --lint-only` (all six invariants) and fix broken paths/index rows. State the pending QA count and completed archive path in the report.
+- **Before reporting implementation completion**: compare the archive and linked knowledge pages with final code, required lightweight verification and security evidence; run `/docs-sweep --since <run baseRef>` (reap + all six invariants, fixes limited to this run's docs) and fix broken paths/index rows. State the pending QA count and completed archive path in the report.
 - **Later `/team-qa`**: update selected scenario verdicts and evidence in the same archive, refresh `updated`, and check documentation freshness at this boundary; preserve `status: complete` while tracking a new fix task for any implementation defect.
 - All `_docs/` moves are orchestrator-serialized (above). The plan doc path is `_docs/active/<status>/<created>/…` / `_docs/complete/<topic>/…` — the old flat `_docs/{category}/plan-{feature}.md` layout is retired.

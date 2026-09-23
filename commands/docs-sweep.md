@@ -12,7 +12,10 @@ Keep `_docs/` honest as it grows: drain `active/` of stale docs and re-verify th
 /docs-sweep              # reap + lint
 /docs-sweep --lint-only  # invariant check only (no reaping)
 /docs-sweep --reap-only  # staleness reaping only (no lint)
+/docs-sweep --since <ref>  # reap + lint, acting only on _docs files changed since <ref> (team runs use their baseRef)
 ```
+
+`--since` combines with `--lint-only` / `--reap-only`. Its scope rules: `docs-lifecycle` → **Scoped sweep**.
 
 ## What It Does
 
