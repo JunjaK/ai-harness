@@ -144,7 +144,7 @@ Team workflow → Leader + 2-3 Designers in worktrees
 
 **Maximum (5+ agents)**:
 ```
-Large feature → Leader + Architects + Designers + Testers
+Large feature → Leader + Architects + Designers + one Tester
 Only when tasks are truly independent with no shared files
 ```
 

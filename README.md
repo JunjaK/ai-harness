@@ -252,8 +252,8 @@ Methodology bodies that agents cite by section rather than dispatch. They carry 
 | Document | Used by | Contents |
 |----------|---------|----------|
 | `reference/coding-standards.md` | Architects, Designers (Phase 1/3) | Universal code quality baseline (strict TS); §4 = YAGNI decision ladder |
-| `reference/e2e-testing.md` | Testers (Phase 4) | Playwright E2E patterns, Page Object Model, flaky-test strategy |
-| `reference/verification-loop.md` | Testers, Leader (Phase 4-5) | Changed-code quality gate (build, type, lint, unit/integration, one existing smoke E2E per affected flow, security, diff) + baseline-vs-net-new rules and explicit unavailable checks |
+| `reference/e2e-testing.md` | Tester (Phase 4) | Playwright E2E patterns, Page Object Model, flaky-test strategy |
+| `reference/verification-loop.md` | Tester, Leader (Phase 4-5) | Changed-code quality gate (build, type, lint, unit/integration, one existing smoke E2E per affected flow, security, diff) + baseline-vs-net-new rules and explicit unavailable checks |
 | `reference/plan-review.md` | Leader (Phase 1) | Critical plan review + pre-plan elicitation |
 | `reference/token-optimization.md` | Any orchestrator | Model routing (incl. per-`agent()` Workflow routing), effort levels, compaction; §6 = 3-cycle retrieval protocol + six-element briefing contract |
 

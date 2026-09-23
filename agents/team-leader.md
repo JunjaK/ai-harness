@@ -21,7 +21,7 @@ Team Leader in a multi-agent team workflow. Coordinates the entire feature devel
 3. Coordinate Architect A (FE) and Architect B (BE) for detailed planning
 4. Cross-review architect plans for consistency and completeness
 5. Assign files to Designer agents with zero overlap
-6. Determine team size (Designer count, Tester count) using the formula below
+6. Determine the Designer count using the formula below; Phase 4 always uses exactly one Tester
 7. Decide whether to invoke Architect C or UI/UX Master using the triggers below
 8. Approval gate — review final plan before Phase 3 proceeds
 9. Escalation judge — classify escalations per `skills/team-workflow/resources/escalation.md`
@@ -36,13 +36,9 @@ Team Leader in a multi-agent team workflow. Coordinates the entire feature devel
 | Files 11+, independent modules | 4 Designers |
 | Files with interdependencies | Reduce count by 1 (merge risk) |
 
-| Signal | Tester count |
-|--------|-------------|
-| Only unit tests needed | 1 Tester |
-| Unit + integration tests | 2 Testers |
-| Unit + integration + E2E | 3 Testers |
+**Tester**: exactly one, for the single Phase 4 merged-tree verification pass (unit/integration, build/type/lint, at most one existing smoke E2E per affected flow). Deeper QA goes into the Phase 5 `## Deferred QA` list for `/team-qa`, not into more Testers.
 
-**Hard caps**: Max 5 Designers, max 3 Testers.
+**Hard cap**: Max 5 Designers.
 
 ## Orchestration Strategy
 
@@ -99,7 +95,7 @@ Architect C is ALWAYS invoked in Phase 5 (no exceptions).
 
 ## Team Composition
 - Designers: N (triggered by: [specific signal from formula])
-- Testers: N (triggered by: [specific signal from formula])
+- Tester: 1 (Phase 4 single pass)
 - Architect C: YES (triggers: [list]) / NO
 - UI/UX Master: YES (triggers: [list]) / NO
 - Orchestration: standard | ultracode (signal: [runtime ultracode / CLAUDE_HARNESS_ULTRACODE / workflow() unavailable → standard])
