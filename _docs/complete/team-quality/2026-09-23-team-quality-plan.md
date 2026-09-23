@@ -55,8 +55,8 @@ Strengthen the Claude team harness's verification and document updates using the
 - Actions: Run `/team-run` on a small user-facing change, then inspect its agent dispatch, test report, and completed `_docs` archive.
 - Expected: One Phase 4 Tester checks changed unit/integration tests and no more than one existing smoke E2E for the changed flow; no Phase 4.5 agent is dispatched. The completion report links an archive containing pending `## Deferred QA` entries.
 - Source: `skills/team-workflow/SKILL.md` Phase 4 and Phase 5; `commands/team-run.md`.
-- Status: pending
-- Evidence: —
+- Status: passed
+- Evidence: 2026-09-23 · target: disposable Bun + TS fixture (1 `bun:test` unit, 1 Playwright smoke E2E, profile from `/team-init`) with the plugin loaded via `claude -p --plugin-dir <this repo>` at `0383cc4` (installed 1.28.0 disabled in the fixture's local settings), `--permission-mode auto`, `disableAllHooks: true` · method: `/junjak-ai-harness:team-run` on "show today's date under the greeting", stream-json log inspected for `Agent` dispatches · observed: success in 42 turns / 12m38s; dispatches = team-leader, architect-fe, architect-infra (P1), uiux-master, 1 designer, **1 team-tester**, architect-infra (P5); **0 team-agentic-tester**; Tester ran `bun test test/` 5/0, `tsc` exit 0, `playwright home.spec.ts` 2 passed (the existing smoke + the E2E the Designer added for the new flow); report emitted `Verification: VERIFY_PASS — …` and linked `_docs/complete/home/2026-09-23-home-plan.md` with 4 pending Deferred QA entries · follow-ups found: the Leader proposed 2 Testers from a stale sizing formula (fixed in `8ea27d9`); consumer projects are not told to gitignore `.claude/session-state/` (pre-existing, not fixed) · artifact: session scratch logs only, not retained
 
 ### QA-2026-09-23-team-quality-plan-02 — Deferred batch verdicts
 - Priority: P1
@@ -64,5 +64,5 @@ Strengthen the Claude team harness's verification and document updates using the
 - Actions: Invoke `/team-qa` without arguments, inspect selected IDs and updated archives, then invoke an exact QA ID for a recheck.
 - Expected: The default run selects at most five pending entries in P0→P2 order and records each verdict/evidence in its original archive; unselected entries stay pending. A named recheck appends dated evidence without changing the archive's lifecycle status from `complete`.
 - Source: `commands/team-qa.md`; `skills/docs-lifecycle/SKILL.md` Deferred QA entry contract.
-- Status: pending
-- Evidence: —
+- Status: passed
+- Evidence: 2026-09-23 · target: copy of the same fixture with 6 seeded pending entries across two archives (P0×1, P1×2, P2×3; one expected pass set, one deliberate expectation mismatch, one missing-credential case), plugin via `--plugin-dir` at `8ea27d9`, same flags as QA-…-01 · method: `/junjak-ai-harness:team-qa` without arguments, then `/junjak-ai-harness:team-qa QA-2026-09-10-serve-plan-01`; archive diffs checked with git · observed: one `team-agentic-tester` dispatch; selected exactly 5 in P0→P1→P2 order with oldest archive first; verdicts 3 passed / 1 failed (reproducible mismatch with expected-vs-observed and repro steps) / 1 blocked (missing `STAGING_URL` and vault account, owner named); the sixth entry stayed `pending`; `updated` bumped, `status: complete` and `index.md` unchanged; `TEAM QA COMPLETE` report block emitted · recheck: only the named entry changed, `Status: failed` kept, new dated result appended after the original Evidence (`‖ recheck 2026-09-23 …`), lifecycle status unchanged · artifact: session scratch logs only, not retained
