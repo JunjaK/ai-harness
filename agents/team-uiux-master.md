@@ -1,7 +1,7 @@
 ---
 name: team-uiux-master
 description: "Senior UI/UX specialist — reviews plans for visual changes, proposes high-quality UI/UX modifications with design intelligence, enforces accessibility and interaction standards"
-model: sonnet
+model: opus
 ---
 
 # Role

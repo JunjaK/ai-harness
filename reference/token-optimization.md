@@ -1,73 +1,33 @@
 ---
 name: token-optimization
-description: "Model routing (incl. per-agent Workflow / ultracode routing), effort levels, context efficiency, compaction strategy, and subagent orchestration (3-cycle retrieval cap + briefing contract). Use when spawning agents, authoring Workflow fan-outs, selecting models, choosing effort levels, or managing context window pressure."
+description: "Two-tier model routing (sonnet only when a dispatch is read-only or small, contract-free, and deterministic; opus otherwise), session-inherited effort, context efficiency, compaction strategy, and subagent orchestration (3-cycle retrieval cap + briefing contract). Use when spawning agents, authoring Workflow fan-outs, selecting models, choosing effort levels, or managing context window pressure."
 ---
 
 # Token Optimization
 
-Minimize token spend while maintaining output quality. Five pillars: model routing, effort level selection, context efficiency, strategic compaction, subagent orchestration.
+Keep agent runs fast and focused without losing output quality. Pillars: model routing, effort, context efficiency, strategic compaction, background processes, subagent orchestration.
 
 ## 1. Model Routing
 
-Select the cheapest model that meets the task's minimum capability:
+Two tiers, chosen per dispatch. In the team workflow the Leader writes the choice for every role into the plan's **Team Composition**, and the orchestrator applies it. Name tiers by alias only (`sonnet`, `opus`) — never a model version, so a model release changes nothing here.
 
-| Task Complexity | Model | Use when |
-|----------------|-------|----------|
-| File search, exploration, simple edits | Haiku | Read-only work, pattern matching, simple string ops |
-| Code implementation, review, testing | Sonnet | 90% of coding tasks, default balance |
-| Architecture, security audit, multi-file refactor | Opus | 5+ file changes, complex reasoning, critical decisions |
+Use **`sonnet`** only when **all three** hold; otherwise use **`opus`**:
 
-## 2. Effort Level (Opus)
+1. Read-only work, or edits to at most 2 files within one domain.
+2. No auth / payment / secrets / PII, and no contract change (API shape, DB schema, generated client).
+3. Deterministic work that follows an approved plan or checklist without design judgment — running given checks, a mechanical edit, rename/format, string translation, a locate/scan sweep.
 
-Current Opus provides `xhigh` between `high` and `max`. Claude Code defaults to `xhigh`.
+Re-dispatch on `opus` when a `sonnet` dispatch fails once, or when the work turns out to break any condition above.
 
-| Effort | Use when |
-|--------|----------|
-| `high` | Mechanical edits (rename, import fix, formatting) |
-| `xhigh` | Default for coding and agent workflows |
-| `max` | Multi-step autonomous tasks, architecture, debugging hard failures |
+Applying it:
 
-**Rule**: Start with `xhigh`. Upgrade to `max` only if `xhigh` fails to resolve the task in 2 attempts. Downgrade to `high` only for trivial mechanical work.
+- **Standard `Agent()`**: pass `model` on every call; it overrides the agent's frontmatter. Frontmatter defaults: `team-leader` is `inherit` (it follows the session model the user chose); every other agent is `opus`, so a call without `model` lands on the "otherwise" tier.
+- **Ultracode `agent()`**: pass `opts.model` the same way. `opts.agentType` does not apply the agent's frontmatter tier, so always pass `opts.model`.
+- The `opus` alias resolves to the session's own model when the session already runs on Opus (including a `[1m]` context suffix).
 
-### Agent Model Assignment
+## 2. Effort
 
-```
-Exploration agents (Glob, Grep, Read only) → Haiku
-Implementation agents (code changes) → Sonnet
-Architecture/planning agents → Opus
-Code review agents → Sonnet
-Security review agents → Opus
-```
-
-### Workflow `agent()` routing (ultracode)
-
-A Workflow `agent()` **inherits the session model** (Opus, in ultracode) when `opts.model` is omitted — so an un-annotated fan-out silently runs *every* stage on Opus. That is the "everything is Opus" waste (e.g. a 5-agent read-only locale-gap audit at ~150k Opus tokens each). MUST route each `agent()` by task class instead:
-
-| Task class (examples) | `opts.model` | `opts.effort` |
-|----------------------|-------------|--------------|
-| Read-only locate / scan / extract — code-location analysis, grep/read sweep, locale-gap collection, completeness-critic listing | `haiku` | `low` |
-| Deterministic transform / verify / review / test / translate / rule-based classify — Phase 4 Tester, `web-reviewer`, adversarial verify/refute, `/team-qa --crystallize` test generation, i18n translation, **Phase 3 Designer (TDD implement against an approved plan)** | `sonnet` | (default) |
-| Generative reasoning / architecture / security / judge-synthesis / ambiguous classify — Phase 1 architects, cross-review·judge, security audit, on-demand `/team-qa` goal exploration | `opus` | `xhigh` (`max` for hard) |
-
-Rules:
-- Omit `opts.model` **only** for the Opus row — inheriting the session model is correct there; every other stage MUST pass an explicit `haiku`/`sonnet`.
-- `opts.agentType` does **not** guarantee that agent's frontmatter tier is applied — set `opts.model` explicitly even when passing `agentType` (e.g. `team-tester` → `sonnet`).
-- Same upgrade/downgrade triggers below still apply per-stage (a "Sonnet" stage that fails twice or turns cross-cutting → upgrade to Opus).
-- **Designer → Opus** specifically when a worktree spans the full types→backend→frontend stack, touches auth/payment/PII, or after a failed Phase 4 cycle; routine single-domain feature implementation stays `sonnet`. (the Sonnet tier covers plan-driven TDD implementation; the design reasoning already happened upstream in Phase 1.)
-
-### Upgrade Triggers (MUST upgrade when ANY applies)
-
-- First attempt fails or produces incorrect output
-- Task spans 5+ files with cross-dependencies
-- Security-critical code (auth, payment, secrets, PII)
-- Architectural decisions with long-term impact
-- Debugging issue that survived 2 resolution attempts
-
-### Downgrade Triggers (MAY downgrade when ALL apply)
-
-- Task is read-only or a single-file mechanical edit
-- No cross-file reasoning required
-- Output shape is deterministic (not generative)
+Every subagent inherits the session effort that the user set (`/effort`, or `effortLevel` / `modelSettings` in settings). A standard `Agent()` call has no per-call effort parameter, and an agent's frontmatter `effort` is fixed per definition, so the harness does not keep per-effort variant agents. Under ultracode, omit `opts.effort` so stages inherit the session effort too.
 
 ## 3. Context Efficiency
 
@@ -166,12 +126,12 @@ A subagent receives a literal prompt but none of the semantic context driving it
 Never accept first output. Budget **at most 3 retrieval cycles** per agent, then escalate (do NOT retry a 4th time).
 
 ```
-Cycle 1 — Broad retrieval (haiku): initial file/module overview.
+Cycle 1 — Broad retrieval: initial file/module overview.
   GATE A: files returned match the task scope?
   GATE B: output carries enough context to proceed?
   Both PASS → skip to execution. Either FAILS → Cycle 2.
 
-Cycle 2 — Contextual query (sonnet): ask "given [X], what context do you need?",
+Cycle 2 — Contextual query: ask "given [X], what context do you need?",
   supply the exact files/snippets named, re-check GATE A + GATE B.
   Both PASS → Cycle 3. Either still FAILS → ESCALATE (this subagent lacks the information).
 
@@ -179,7 +139,7 @@ Cycle 3 — Refined execution: agent works with focused context; orchestrator va
   against the task requirements. Accept, or reject → escalate (reject ≠ retry).
 ```
 
-Escalate the model along with the context: haiku (broad search) → sonnet (read/analyze specific files) → opus (multi-file changes with architectural impact).
+Pick each cycle's model by §1: a read-only sweep qualifies for `sonnet`; move to `opus` once the work needs cross-file reasoning or design judgment.
 
 For TypeScript targets, prefer LSP over grep in Cycle 1-2 (`findReferences`, `goToDefinition`, `documentSymbol`, `workspaceSymbol`); use grep only when the target is a string pattern (comment, string literal, config key), not a symbol.
 
@@ -201,8 +161,8 @@ Brief like a smart colleague who just walked in: they haven't seen this conversa
 ## Quick Reference
 
 ```
-Model:        Haiku (search) → Sonnet (code) → Opus (architecture)
-Effort:       high (mechanical) → xhigh (default) → max (hard problems)
+Model:        sonnet only if read-only/≤2 files + no contract/sensitive + deterministic; else opus
+Effort:       inherited from the session (no per-call effort)
 Context:      <10 MCPs, <80 tools, slim CLAUDE.md
 Compaction:   After milestones. NEVER mid-task. Save state first.
 Background:   Builds, tests, long searches → run_in_background: true

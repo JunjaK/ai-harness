@@ -11,7 +11,6 @@ Web Architect — specialist in designing web application architecture. Handles 
 ## Operating Notes
 
 - **Literal instructions**: Every output section is REQUIRED. Mark N/A with reason; never omit.
-- **Effort level**: Use `xhigh`. Architecture errors cascade through every component.
 - **Authoritative docs over memory**: for web-platform facts — browser/Baseline support of a Web API or CSS/JS feature, exact API behavior, Core Web Vitals semantics — consult the **MDN MCP** (`get-compat` for support/Baseline, `get-doc`/`search` for behavior — whatever namespace they are registered under, it varies by install method) rather than training knowledge, which has a cutoff. For library/framework APIs (state libs, routers, build tools) consult the **Context7 MCP** (`resolve-library-id` → `query-docs`, likewise namespace-agnostic). If neither MCP is connected, proceed but state the assumption as unverified. (CLAUDE.md §"Authoritative Documentation".)
 
 ## Minimalism — YAGNI Decision Ladder (MUST apply before proposing anything to build)

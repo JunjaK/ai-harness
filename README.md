@@ -14,23 +14,24 @@ Specialized AI agents collaborate through defined phases to implement features, 
 - **Code minimalism** — a harness-owned YAGNI decision ladder (`coding-standards` §4), applied by the architect agents at design time and gated once, at the Phase 1 plan approval.
 - **Renewal Mode Gate** — every non-trivial refactor / fix / redesign starts by choosing **A (compatible)** or **B (destructive renewal)**; Mode B requires a risk block + explicit approval, then a full anti-drift commitment so back-compat scaffolding never creeps back in.
 - **Continuous learning** — `continuous-learning` extracts reusable, validated, non-obvious patterns from sessions, reuses them at task start, and evolves stable ones into skills / commands / agents.
-- **Ultracode orchestration** — when enabled, fan-out phases run via the Workflow tool, with **per-agent model routing** (read-only scan → Haiku, TDD-implement / verify / review / translate → Sonnet, architecture / security → Opus) so a fan-out isn't silently all-Opus.
+- **Two-tier model routing** — the Leader assigns every dispatch `sonnet` (read-only or ≤2 files in one domain, no auth/payment/PII or contract change, deterministic) or `opus` (everything else), and the orchestrator applies it per call in standard and ultracode modes. The Leader follows your session model; every agent inherits the session effort.
+- **Ultracode orchestration** — when enabled, fan-out phases run via the Workflow tool, with the same per-stage model routing.
 - **Unknowns-first collaboration** — `brainstorm` opens with a **Blindspot Pass** (surface unknown-unknowns before designing); `verification-loop` closes with an opt-in **human comprehension quiz** (merge only what you can explain); Designers keep a **Deviations log** when implementation departs from the plan.
 
 ### Team Roles
 
-| Role | Agent | Model | When Called |
+| Role | Agent | Model (default) | When Called |
 |------|-------|-------|------------|
-| Team Leader | `team-leader` | opus | Always (Phase 1, Gate, Escalation) |
+| Team Leader | `team-leader` | session model (`inherit`) | Always (Phase 1, Gate, Escalation) |
 | Architect A (Frontend) | `team-architect-fe` | opus | Phase 1 (parallel with B) |
 | Architect B (Backend) | `team-architect-be` | opus | Phase 1 (parallel with A) |
 | Architect C (Infra/Security) | `team-architect-infra` | opus | Phase 1 (on-demand) + Phase 5 (always) |
-| UI/UX Master | `team-uiux-master` | sonnet | Phase 2 (conditional) |
-| Designer x N | `team-designer` | sonnet | Phase 3 (parallel, worktree isolated); → opus on full-stack / auth·payment·PII / post-fail |
-| Tester | `team-tester` | sonnet | Phase 4 (one lightweight merged-tree pass) |
+| UI/UX Master | `team-uiux-master` | opus | Phase 2 (conditional) |
+| Designer x N | `team-designer` | opus | Phase 3 (parallel, worktree isolated) |
+| Tester | `team-tester` | opus | Phase 4 (one lightweight merged-tree pass) |
 | Agentic Tester | `team-agentic-tester` | opus | `/team-qa` (deferred, on demand) |
 | Web Architect | `web-architect` | opus | Web architecture (standalone or complements FE) |
-| Web Reviewer | `web-reviewer` | sonnet | Web quality audit (a11y, CWV, SEO, AI-slop) |
+| Web Reviewer | `web-reviewer` | opus | Web quality audit (a11y, CWV, SEO, AI-slop) |
 
 ### Workflow Phases
 

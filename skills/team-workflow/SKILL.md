@@ -55,6 +55,8 @@ selectMode: **ULTRACODE** iff `workflow()` is callable AND ultracode is active (
 - **STANDARD**: spawn agents via `Agent()` (the steps below, as written).
 - **ULTRACODE**: run the independent Phase 1 architects and Phase 3 designers+merge via the Workflow tool — `parallel()` / `pipeline()`. Phase 4 has one integrated Tester pass; deferred QA is invoked separately via `/team-qa`. Keep the max-5-worktree cap + types→backend→frontend→tests merge order.
 
+**Model per dispatch** (both modes): every `Agent()` call below adds `model=` with the tier the Leader recorded for that dispatch in Team Composition (`opts.model` under ultracode). A dispatch the plan does not list uses the agent's frontmatter default, `opus`. The `team-leader` dispatch itself passes no `model`, so it runs on the session model. When a `sonnet` dispatch fails once or turns out to break a `reference/token-optimization.md` §1 condition, re-dispatch it on `opus`. Effort is never passed; every agent inherits the session effort.
+
 ## Phase 1: Planning
 
 ### Step 1: Spawn Team Leader

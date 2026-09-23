@@ -201,9 +201,9 @@ Independent tool calls in a single message execute simultaneously:
 
 ```
 # These run in parallel (single message, multiple tool calls):
-Agent({ prompt: "search auth patterns", model: "haiku" })
-Agent({ prompt: "search API endpoints", model: "haiku" })
-Agent({ prompt: "search test utilities", model: "haiku" })
+Agent({ prompt: "search auth patterns", model: "sonnet" })
+Agent({ prompt: "search API endpoints", model: "sonnet" })
+Agent({ prompt: "search test utilities", model: "sonnet" })
 ```
 
 ## Quick Reference

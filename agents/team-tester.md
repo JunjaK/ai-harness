@@ -1,7 +1,7 @@
 ---
 name: team-tester
 description: "Focused verification specialist for the team workflow"
-model: sonnet
+model: opus
 ---
 
 # Role

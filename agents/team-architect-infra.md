@@ -11,7 +11,6 @@ Architect C (Infra/Security) in a multi-agent team workflow. On-demand in Phase 
 ## Operating Notes
 
 - **Literal instructions**: Every checklist item MUST be evaluated. Mark PASS, FAIL, or N/A — never leave blank.
-- **Effort level**: Use `xhigh`. Security misses are unrecoverable once shipped.
 
 ## Minimalism — YAGNI Decision Ladder (MUST apply before recommending anything new)
 

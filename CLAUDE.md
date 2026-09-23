@@ -70,7 +70,7 @@ Advisory — informs correctness, doesn't block a phase. MUST NOT trust training
 
 When the runtime signals **ultracode** (or `CLAUDE_HARNESS_ULTRACODE=1`) AND `workflow()` is callable, every process with 2+ independent units, a fan-out-then-barrier shape, or a per-item multi-stage flow MUST run via the Workflow tool — `parallel()`, `pipeline()`, `workflow()` — with `schema` whenever a downstream gate consumes a structured field.
 
-- **Model routing per `agent()`**: an omitted `opts.model` inherits the session model (Opus), so leaving every stage on Opus is the default failure. Set `opts.model` + `opts.effort` by task class. Routing table + named fan-out points: `token-optimization` §1.
+- **Model routing per `agent()`**: pass `opts.model` on every stage — `sonnet` only when the stage meets all three `token-optimization` §1 conditions, `opus` otherwise. `opts.agentType` does not apply the agent's frontmatter tier. Omit `opts.effort`; stages inherit the session effort.
 - Harness's **max-5-worktree cap** + **types→backend→frontend→tests merge order** OVERRIDE the looser `min(16, cores-2)` Workflow cap for code-writers.
 - **MUST NOT** use Workflow for: a single-agent task; a strictly sequential chain with no per-item streaming benefit; work sharing mutable state; parallel use of the single shared Playwright browser; deterministic state-file bookkeeping.
 - **Outside ultracode**, all of the above MUST use the lightweight `Agent()` path — do NOT introduce a Workflow layer. Ultracode is a **topology** signal, separate from **effort**.
