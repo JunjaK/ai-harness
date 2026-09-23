@@ -4,22 +4,26 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
-## v1.30.0 — unreleased
+## v1.30.0 — 2026-09-23
 
-Planned single release: the v1.29.0 entry below has not been published and will be folded into this one when it ships.
+Folds in the unpublished v1.29.0 work (lightweight team verification + batched `/team-qa`). The Codex adapter stays at v1.28.0; this release changes the Claude workflow only.
 
 ### Added
+- `/team-qa` collects pending scenarios from completed team plans and runs a bounded batch later. Its default is verification only; `--crystallize` opts into deterministic test generation.
+- Completed plan archives hold up to five deferred QA scenarios with independent pending/passed/failed/blocked verdicts and evidence.
 - Opt-in branch guardrails: a `PreToolUse(Bash)` hook reads `.claude/project-profile/guardrails.json` and denies or asks for `git commit`-class writes, `git push` destinations, and `gh pr merge` base branches that match protected patterns, per repository (submodules and linked worktrees included). Unresolvable forms get the strictest rule; `ask` becomes `deny` under `bypassPermissions`/`dontAsk`. Presets: `default` (production deny, stage/dev ask), `light`, `toy`. No config file means no change.
 - Harness projects without a guardrails config get a one-line preset suggestion at session start; any config file, including `toy`, silences it.
 - `hooks/guardrails/tests/run.sh`: table-driven hook tests (bash 3.2 compatible).
 
 ### Changed
+- `/team` and `/team-run` use one lightweight merged-tree pass for affected unit/integration tests, relevant build/type/lint gates, and a limited existing smoke E2E. Failure or a required blocked check ends the run with evidence; no automatic QA-to-implementation loop or Phase 4.5 agentic pass.
+- Phase 5 reconciles the completed implementation record with final code, quick-verification and security evidence, document index, and affected wiki links. Pending QA remains visible without preventing implementation completion.
+- Completion reports state the Phase 4 verdict and any pre-existing failures instead of a fixed `0 fail`; a Phase 4 `VERIFY_FAIL`/`VERIFY_BLOCKED` emits `WORKFLOW ABORTED` with the verdict, the active plan path, and a next step. `/team-qa` ends with a fixed `TEAM QA COMPLETE` report. `/team` now states the same "up to five, or a `No scenarios` reason" QA count as the workflow skill. The Leader's team-sizing rules plan exactly one Phase 4 Tester instead of the old 1–3 Tester formula.
 - `docs-lifecycle` gains a **Diagrams in docs** rule: intents, specs, plans, handoffs, and findings draw branching flows (`flowchart`), state changes (`stateDiagram-v2`), and component interactions (`sequenceDiagram`) as inline Mermaid; linear steps stay a list. `brainstorm` and `/team-brainstorm` follow it instead of forbidding diagrams; `/plan-visualizer` stays the on-request HTML view.
 - A live intent's `status` is defined as `reference` (`deprecated` once rejected or superseded).
 - `docs-lifecycle` states its two state machines as diagrams: document status transitions (replacing the trigger/action table and the one-line lifecycle summary) and Deferred QA verdicts (`pending → passed | failed | blocked`, named recheck from any verdict). Only what a diagram cannot carry — folder paths, the merge rule, append-only evidence — stays in text; `/team-qa` points to the QA diagram.
 - **Two-tier model routing.** The Leader records `sonnet` or `opus` for every dispatch in Team Composition, and the orchestrator passes it as `model` (`opts.model` under ultracode). `sonnet` requires all of: read-only or ≤2 files in one domain; no auth/payment/secrets/PII or contract change; deterministic plan/checklist work. Everything else — including any doubt about a condition — is `opus`, and a failed `sonnet` dispatch is re-sent on `opus`. `team-leader` now uses `model: inherit` (your session model); every other agent defaults to `opus` (Designer, Tester, UI/UX Master, Web Reviewer were `sonnet`). Haiku is no longer routed. Effort is never set per agent; all inherit the session effort, and the unenforceable per-agent "Effort level" notes are removed. `token-optimization` §1–§2 and the ultracode note in `CLAUDE.md` describe the rule without model versions.
 - **Per-session state (breaking layout change).** `.claude/session-state/` is now `sessions/<session_id>/{current.md, checkpoints/}` plus `runs/<plan-id>.json` and shared `learnings/`, keyed by `$CLAUDE_CODE_SESSION_ID` (kept across `--resume`/`--continue`, new after `/clear`). Concurrent sessions in one tree no longer overwrite each other's state, and parallel team runs on different plans use different run files. A run file carries `owner_session`; a non-owner session stops and asks before writing, and ownership changes only when the user takes the run over. The old root `current.md`, `last-session.md`, `archive/`, `checkpoints/`, and `team-run.json` are no longer read — finish any in-flight `/team-run` before updating.
-
 - **Team runs sweep the documents they touched.** The orchestrator records `baseRef` (`HEAD` before Phase 1) in the run file, and Phase 5 runs `/docs-sweep --since <baseRef>` — reap + all six invariants — instead of `--lint-only`. The new `--since <ref>` scope limits reap decisions and auto-fixes to `_docs` files changed since `<ref>`; findings about other documents are reported, never fixed, so a run cannot reorganize another session's docs. Phase 4 uses the same `baseRef` as its pre-task base.
 - **Project-valid learnings leave session-state.** `.claude/session-state/learnings/` is temporary, so team Phase 5 (and milestone close outside a team run) moves learnings touched in that run: project knowledge with evidence → `_docs/reference/<topic>/<date>-<topic>-findings.md` (or a dated section in the topic's existing reference doc), operational facts every agent needs → project-profile, agent-only know-how stays. The learning file is deleted after the move so the fact lives in one place; wiki pages link to the destination. Run files gain `startedAt` to scope this.
 
@@ -27,17 +31,10 @@ Planned single release: the v1.29.0 entry below has not been published and will 
 - The `Stop` hook ran after **every reply** and moved `current.md` to `last-session.md` each time, so the live state disappeared between turns. State is now snapshotted once by a new `SessionEnd` hook (which also prunes session folders untouched for 14 days); `Stop` keeps only the stray-artifact warning. `PreCompact` snapshots the session's own folder and names the team runs it owns.
 - The consumer project's `.gitignore` now always carries `.claude/session-state/`: `/team-init` adds it, and a team run or `/checkpoint` save appends it before its first write when an older profile left it out.
 
-## v1.29.0 — 2026-09-23
-
-### Added
-- `/team-qa` collects pending scenarios from completed team plans and runs a bounded batch later. Its default is verification only; `--crystallize` opts into deterministic test generation.
-- Completed plan archives hold up to five deferred QA scenarios with independent pending/passed/failed/blocked verdicts and evidence.
-
-### Changed
-- `/team` and `/team-run` use one lightweight merged-tree pass for affected unit/integration tests, relevant build/type/lint gates, and a limited existing smoke E2E. Failure or a required blocked check ends the run with evidence; no automatic QA-to-implementation loop or Phase 4.5 agentic pass.
-- Phase 5 reconciles the completed implementation record with final code, quick-verification and security evidence, document index, and affected wiki links. Pending QA remains visible without preventing implementation completion.
-- Completion reports state the Phase 4 verdict and any pre-existing failures instead of a fixed `0 fail`; a Phase 4 `VERIFY_FAIL`/`VERIFY_BLOCKED` emits `WORKFLOW ABORTED` with the verdict, the active plan path, and a next step. `/team-qa` ends with a fixed `TEAM QA COMPLETE` report. `/team` now states the same "up to five, or a `No scenarios` reason" QA count as the workflow skill. The Leader's team-sizing rules plan exactly one Phase 4 Tester instead of the old 1–3 Tester formula.
-- The Codex adapter remains at v1.28.0; this release changes the Claude workflow only.
+### Removed
+- Phase 4.5 automatic agentic QA and the QA→implementation loop inside `/team` and `/team-run` (deferred scenarios now run later through `/team-qa`).
+- The Haiku tier from harness model routing, and the per-agent "Effort level" notes an agent could not act on.
+- The old `.claude/session-state/` root files (`current.md`, `last-session.md`, `archive/`, `checkpoints/`, `team-run.json`) — no longer read or written.
 
 ## v1.28.0 — 2026-09-23
 

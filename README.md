@@ -375,9 +375,12 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). The source version of the Claude
-plugin is **v1.29.0**: lightweight team verification and separate, batched
-`/team-qa` with deferred scenarios. The Codex adapter remains at v1.28.0.
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.30.0** — lightweight
+team verification with batched `/team-qa`, opt-in branch guardrails
+(`PreToolUse(Bash)` + presets), two-tier model routing (`sonnet` for small
+deterministic work, `opus` otherwise), per-session `.claude/session-state/`
+with team-run ownership, run-scoped docs sweep and learnings promotion, and
+Mermaid diagrams as the doc-state SSOT. The Codex adapter remains at v1.28.0.
 
 ## License
 
