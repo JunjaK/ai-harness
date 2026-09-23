@@ -149,5 +149,7 @@ Reason: [cause]
 Phases completed: [list]
 Phases failed: [list]
 Unresolved issues: [list]
-Recommendation for user: [next steps]
+Verification: [P4 abort only — VERIFY_FAIL or VERIFY_BLOCKED, with the failed check or missing prerequisite]
+Plan: [P4 abort only — active plan path holding the evidence; the plan stays in processing/]
+Recommendation for user: [next steps — for VERIFY_FAIL, /debug or a new /team task; for VERIFY_BLOCKED, who provides the prerequisite]
 ```

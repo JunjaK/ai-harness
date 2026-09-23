@@ -36,7 +36,7 @@ If no task description provided, ask the user for one.
    - Failed or blocked required checks end this run with an incomplete report and a fix/unblock list; no automatic QA-to-implementation loop
 7. **Phase 5 — Final Review** (autonomous):
    - Spawn Architect C for security audit
-   - Reconcile plan/index/wiki with final code and checks, write 3–5 deferred QA items into the completed plan, then SHIP or escalate
+   - Reconcile plan/index/wiki with final code and checks, write up to 5 risk-ordered deferred QA items (or `- No scenarios: <reason>`) into the completed plan, then SHIP or escalate
 
 ## Escalation
 
@@ -53,10 +53,12 @@ TEAM WORKFLOW COMPLETE
 Task: [description]
 Phases completed: 5/5
 Files modified: [list]
-Tests: [pass count] pass, 0 fail
+Verification: VERIFY_PASS — [checks run], net-new failures 0, pre-existing failures [list or none]
 Unverified: [checks and reasons, or none]
 Deferred QA: [pending count and completed plan path; run /team-qa later]
 ```
+
+When Phase 4 returns `VERIFY_FAIL` or `VERIFY_BLOCKED`, emit the `WORKFLOW ABORTED` report from `escalation.md` instead, with `Verification:` naming the outcome and the failed check or missing prerequisite, and `Plan:` giving the active plan path that holds the evidence.
 
 ## Related
 - `/team-run` — Autonomous mode (no user involvement)

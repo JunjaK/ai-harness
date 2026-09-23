@@ -10,14 +10,12 @@ Run the QA scenarios saved by `/team` or `/team-run` **after** their implementat
 
 ```
 /team-qa [topic | _docs/complete/<topic>/<archive>.md | QA-<plan-id>-<nn>] [--all] [--crystallize]
-/team-qa QA-<plan-id>-<nn>  # explicit recheck of one named scenario
 ```
 
 - No scope: search `_docs/complete/*/*.md` for `## Deferred QA` scenarios with `Status: pending`.
 - Topic: search that topic's completed archives. Path: inspect only that completed archive. Resolve `_docs` in the primary working tree with `$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/_docs`, including when invoked from a linked worktree. Reject paths outside `_docs/complete/`.
 - Exact QA ID: run only that entry, including a previously `failed` or `blocked` entry requested for recheck; append the new dated evidence instead of replacing the old result. If the ID appears in more than one archive, stop and list the matches rather than choosing one.
 - Default batch: at most **5 pending scenarios**, ordered by `Priority: P0`, then `P1`, then `P2`; within a priority, oldest archive date/path and scenario ID first. `--all` runs every pending scenario in the selected scope. Say how many remain queued. Do not silently expand the batch to unrelated features.
-- A named ID explicitly selects that scenario even if its current status is `failed` or `blocked`; find the matching completed archive and recheck only that ID. Keep the earlier dated Evidence when recording the new result.
 
 ## Scenario contract
 
@@ -32,6 +30,19 @@ Read the archived plan's `## Deferred QA` entries, each with `### QA-<plan-id>-<
 5. Report counts for passed, failed, blocked, and still pending; link the touched archive(s). Failed and blocked items are follow-up work for the user to schedule. Do not start Designer fixes, re-plan, roll back, or recursively invoke `/team` or `/team-run`. Once a fix or prerequisite is ready, the user can request a named recheck; then run only those named IDs and append new evidence.
 
 `--crystallize` is an explicit opt-in after verification: emit a deterministic regression test only for a passed, valuable, assertable scenario, using the project's existing test conventions. Run it and keep it only if green. Its outcome never changes a `passed` QA verdict into a generated-test claim.
+
+## Report
+
+```
+TEAM QA COMPLETE
+Scope: [no scope | topic | archive path | QA ID] [--all] [--crystallize]
+Selected: [IDs, P0→P2]
+Result: [n] passed, [n] failed, [n] blocked
+Still pending: [count in scope, or 0]
+Archives updated: [paths]
+Follow-up: [failed → reproduction + /debug or new /team task; blocked → missing prerequisite and owner; or none]
+Crystallized tests: [paths, or none / not requested]
+```
 
 ## Related
 

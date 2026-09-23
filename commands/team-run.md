@@ -56,10 +56,12 @@ Task: [description]
 Phases completed: 5/5
 Escalations: [count]
 Files modified: [list]
-Tests: [pass count] pass, 0 fail
+Verification: VERIFY_PASS — [checks run], net-new failures 0, pre-existing failures [list or none]
 Unverified: [checks and reasons, or none]
 Deferred QA: [pending count and completed plan path; run /team-qa later]
 ```
+
+When Phase 4 returns `VERIFY_FAIL` or `VERIFY_BLOCKED`, emit the `WORKFLOW ABORTED` report from `escalation.md` instead, with `Verification:` naming the outcome and the failed check or missing prerequisite, and `Plan:` giving the active plan path that holds the evidence.
 
 ## Related
 - `/team` — Interactive mode (user involved in planning)
