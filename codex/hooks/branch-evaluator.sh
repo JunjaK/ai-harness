@@ -452,6 +452,18 @@ handle_gh() {  # args after the program name
   fi
 }
 
+# A segment the walker cannot follow still gets the strictest rule for any write verb in it.
+# need_word=1 requires a git/gh word in the segment (unknown program); 0 does not ($VAR program).
+fail_closed_segment() {  # $1 segment, $2 why, $3 need_word
+  local t
+  # Quoted text is literal here; a $(...) inside double quotes was already caught by the NESTED check.
+  t=$(strip_quotes "$1" 0)
+  if [ "$3" = 1 ]; then has "$t" "$WORD_RE" || return 0; fi
+  has "$t" "$COMMIT_RE" && strict_all commit "$2"
+  has "$t" "$PUSH_RE" && strict_all push "$2"
+  has_gh_merge "$t" && strict_all merge "$2"
+}
+
 LOC=$(canon_dir "$CWD") || LOC=$CWD
 LOC_KNOWN=1
 split_cmd "$CMD"
@@ -462,12 +474,27 @@ for seg in "${SEGS[@]}"; do
   while [ $j -lt ${#TOK[@]} ]; do
     case "${TOK[j]}" in
       [A-Za-z_]*=*) j=$((j + 1)) ;;
-      command | exec | nohup | time | sudo | env) j=$((j + 1)) ;;
       *) break ;;
     esac
   done
   [ $j -lt ${#TOK[@]} ] || continue
   prog=${TOK[j]}
+  # Launch wrappers put their own options and values first; judge the git/gh they start.
+  case "${prog##*/}" in
+    command | exec | nohup | time | sudo | doas | env | timeout | nice | ionice | stdbuf | setsid | chronic | caffeinate)
+      k=$((j + 1))
+      while [ $k -lt ${#TOK[@]} ]; do
+        case "${TOK[k]##*/}" in git | gh) j=$k; prog=${TOK[k]}; break ;; esac
+        k=$((k + 1))
+      done
+      ;;
+  esac
+  case "$prog" in
+    *'$'* | *'`'*)
+      fail_closed_segment "$seg" "the program name comes from a variable" 0
+      continue
+      ;;
+  esac
   case "${prog##*/}" in
     cd | pushd)
       arg=${TOK[j + 1]:-}
@@ -483,6 +510,7 @@ for seg in "${SEGS[@]}"; do
     popd) LOC_KNOWN=0 ;;
     git) handle_git "${TOK[@]:j+1}" ;;
     gh) handle_gh "${TOK[@]:j+1}" ;;
+    *) fail_closed_segment "$seg" "git/gh write inside '${prog##*/}', which the hook does not follow" 1 ;;
   esac
 done
 

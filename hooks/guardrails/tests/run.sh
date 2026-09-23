@@ -112,6 +112,13 @@ use_default
             hook "$PROJ" default 'git -c core.editor=true commit -m y';    check "c24 git -c option" deny
             hook "$PROJ" default 'git push 2>&1 | tail -1';                check "c25 redirection is not a separator" deny
             hook "$PROJ" default 'ls -la';                                 check "c26 non-git command" none
+on feature; hook "$PROJ" default 'timeout 60 git push origin main';          check "c33 timeout wrapper, push to main" deny 'branch "main"'
+            hook "$PROJ" default 'timeout 60 git push origin feature';       check "c34 timeout wrapper, push to a feature branch" none
+            hook "$PROJ" default 'stdbuf -oL git push origin main';          check "c35 stdbuf wrapper" deny
+            hook "$PROJ" default 'G=git; $G push origin main';               check "c36 program from a variable" deny 'variable'
+            hook "$PROJ" default 'ssh deploy@host git push origin main';     check "c37 git inside an unknown program" deny 'does not follow'
+            hook "$PROJ" default 'echo "git push origin main"';              check "c38 quoted text mentioning git push" none
+on main;    hook "$PROJ" default 'nice -n 5 git commit -m x';                check "c39 nice wrapper on main" deny
 on feature; hook "$PROJ" default 'git commit -m "fix && git push origin main"'; check "c27 separators inside quotes" none
             hook "$PROJ" default 'git commit -m "(fix) a"';                check "c28 parentheses inside quotes" none
 cp "$PRESETS/light.json" "$CFG"
