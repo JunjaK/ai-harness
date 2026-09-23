@@ -13,6 +13,8 @@
 | docs-lifecycle | plan | complete | 2026-06-25 | [complete/docs-lifecycle/2026-06-25-docs-lifecycle.md](complete/docs-lifecycle/2026-06-25-docs-lifecycle.md) |
 | docs-sweep | plan | complete | 2026-06-25 | [complete/docs-sweep/2026-06-25-docs-sweep.md](complete/docs-sweep/2026-06-25-docs-sweep.md) |
 | graph-orchestration | plan | complete | 2026-07-30 | [complete/graph-orchestration/2026-07-30-graph-orchestration-plan.md](complete/graph-orchestration/2026-07-30-graph-orchestration-plan.md) |
+| guardrails | intent | reference | 2026-09-23 | [intent/2026-09-23-guardrails-intent.md](intent/2026-09-23-guardrails-intent.md) |
+| guardrails | spec | complete | 2026-09-23 | [complete/guardrails/2026-09-23-guardrails-spec.md](complete/guardrails/2026-09-23-guardrails-spec.md) |
 | harness-v2 | plan | complete | 2026-04-16 | [complete/harness-v2/2026-04-16-harness-v2.md](complete/harness-v2/2026-04-16-harness-v2.md) |
 | ponytail-yagni | plan | complete | 2026-06-23 | [complete/ponytail-yagni/2026-06-23-ponytail-yagni.md](complete/ponytail-yagni/2026-06-23-ponytail-yagni.md) |
 | scenario-to-e2e | impl | complete | 2026-07-06 | [complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md](complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md) |
@@ -50,6 +52,7 @@ The authoritative topic list. A doc's `topic` MUST be one of these; add a new en
 | `docs-lifecycle` | `_docs` lifecycle v2 (buckets + date/topic foldering + orphan defenses) |
 | `docs-sweep` | `/docs-sweep` periodic active-doc reaping + orphan lint + SessionStart nudge |
 | `graph-orchestration` | Team-workflow run-state persistence (F1/F2) + escalation transition-table SSOT (F3/F4) — graph-format engineering, Option B |
+| `guardrails` | Per-project branch guardrails — PreToolUse(Bash) hook + `guardrails.json` presets (Codex follow-up) |
 | `harness-v2` | Harness v2 evolution |
 | `ponytail-yagni` | ponytail YAGNI decision-ladder integration |
 | `scenario-to-e2e` | test-scenario-doc(SCENARIOS SSOT) → Playwright e2e 생성 스킬 (grounded 실측+green-gate, scaffold 폴백) |

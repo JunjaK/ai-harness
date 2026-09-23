@@ -1,0 +1,63 @@
+{
+  "version": 1,
+  "repos": {
+    ".": {
+      "branches": [
+        {
+          "pattern": "main",
+          "commit": "deny",
+          "push": "deny",
+          "merge": "deny"
+        },
+        {
+          "pattern": "master",
+          "commit": "deny",
+          "push": "deny",
+          "merge": "deny"
+        },
+        {
+          "pattern": "prod",
+          "commit": "deny",
+          "push": "deny",
+          "merge": "deny"
+        },
+        {
+          "pattern": "prd",
+          "commit": "deny",
+          "push": "deny",
+          "merge": "deny"
+        },
+        {
+          "pattern": "production",
+          "commit": "deny",
+          "push": "deny",
+          "merge": "deny"
+        },
+        {
+          "pattern": "stage",
+          "commit": "ask",
+          "push": "ask",
+          "merge": "ask"
+        },
+        {
+          "pattern": "staging",
+          "commit": "ask",
+          "push": "ask",
+          "merge": "ask"
+        },
+        {
+          "pattern": "dev",
+          "commit": "ask",
+          "push": "ask",
+          "merge": "ask"
+        },
+        {
+          "pattern": "develop",
+          "commit": "ask",
+          "push": "ask",
+          "merge": "ask"
+        }
+      ]
+    }
+  }
+}

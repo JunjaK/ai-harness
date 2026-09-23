@@ -125,7 +125,7 @@ Alongside the env flags above, the harness uses a few external tools. Each row s
 |------|----------|-----------|
 | **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | **default** browser driver for E2E / QA / smoke / exploration (requested or not) + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `reference/e2e-testing.md` / `agentic-testing` path — never to `claude-in-chrome` |
 | **Playwright** (`@playwright/test`, or the Playwright MCP) | the committed `.spec.ts` E2E suite, and the fallback driver when `agent-browser` is absent | with neither Playwright nor `agent-browser`, an optional Phase 4 smoke is recorded as unverified and queued for later QA; `/team-qa` marks browser-dependent scenarios blocked |
-| **`jq`** | the `PostToolUse` hook reads its file path from the hook's stdin JSON | the post-edit warning hook (`console.*` / `debugger` / collection-bucket write checks) silently no-ops. `session-start.sh` prints one "jq not found" line per session so it fails loudly once instead of quietly forever |
+| **`jq`** | the `PostToolUse` hook reads its file path from the hook's stdin JSON; the guardrails hook parses its config | the post-edit warning hook (`console.*` / `debugger` / collection-bucket write checks) silently no-ops. `session-start.sh` prints one "jq not found" line per session so it fails loudly once instead of quietly forever. In a project with `guardrails.json`, git/gh commands are blocked (exit 2) until jq is installed |
 | **`gh` CLI** | GitHub releases per version bump, and the `git-handler` agent's PR/issue work | do those steps by hand; nothing else is affected |
 
 ```bash
@@ -198,6 +198,45 @@ The agents are framework-agnostic by default. To specialize for your project:
 3. **team-architect-infra.md** — Add your security checklist (auth patterns, env management)
 4. **team-designer.md** — Add your test framework and TDD patterns
 5. **team-tester.md** — Add your test runner commands and E2E setup
+
+### Guardrails (optional)
+
+A `PreToolUse(Bash)` hook blocks or confirms git writes on protected branches, including in `/team-run` subagents. It does nothing until the project has `.claude/project-profile/guardrails.json`; while a harness project has none, each session starts with a one-line suggestion.
+
+```bash
+cp "<plugin>/hooks/guardrails/presets/default.json" .claude/project-profile/guardrails.json
+```
+
+| Preset | Rules (root repo `"."`) |
+|--------|-------------------------|
+| `default.json` (recommended) | `main` `master` `prod` `prd` `production` → commit / push / merge **deny**; `stage` `staging` `dev` `develop` → **ask**; other branches allowed |
+| `light.json` | production branches → **ask** |
+| `toy.json` | no rules; copying it is an explicit opt-out and silences the session notice |
+
+```json
+{
+  "version": 1,
+  "repos": {
+    ".":  { "branches": [ { "pattern": "main", "commit": "deny", "push": "deny", "merge": "deny" } ] },
+    "be": { "branches": [ { "pattern": "stage", "commit": "ask", "push": "ask" } ] }
+  }
+}
+```
+
+- `repos` keys are repository paths relative to the project root, so each submodule can have its own rules. Linked worktrees of a repo use that repo's rules.
+- `pattern` is a bash glob; when several rows match a branch, the strictest value wins. An omitted action is `allow`.
+- **commit** covers `commit`, `merge`, `rebase`, `cherry-pick`, `revert`, `am`, `pull` on the current branch; **push** uses the refspec's destination (the current branch when omitted); **merge** is `gh pr merge`, judged by the PR's base branch (looked up with a 5 s limit).
+- `cd dir && …`, `git -C dir`, and `git checkout/switch` earlier in the same command are followed. Anything the hook cannot resolve — `$(…)`, backticks, `sh -c`, `eval`, `xargs`, subshells, `cd "$VAR"`, detached HEAD, a failed PR lookup — gets the strictest rule for that action.
+- `ask` becomes `deny` under `bypassPermissions` or `dontAsk`, where no prompt can be shown.
+- An invalid config blocks git/gh commands until it is fixed.
+
+Forbidden commands that do not depend on the branch belong in Claude Code's own rules, which already split compound commands and subshells — for example in `.claude/settings.json`:
+
+```json
+{ "permissions": { "deny": ["Bash(pnpm test)", "Bash(pnpm test -- *)"] } }
+```
+
+Limits: the hook targets mistakes, not deliberate evasion (a script file or alias that runs `git push` is not seen). Keep server-side branch protection. Codex support and a generator command are planned. Windows Git Bash is not yet verified — run `bash hooks/guardrails/tests/run.sh` there first.
 
 ### Document Storage (3 buckets)
 
@@ -302,7 +341,11 @@ junjak-ai-harness/
 │   ├── session-start.sh
 │   ├── session-stop.sh
 │   ├── pre-compact.sh
-│   └── post-edit-warn.sh
+│   ├── post-edit-warn.sh
+│   ├── guardrails.sh            # PreToolUse(Bash) branch rules (opt-in)
+│   └── guardrails/
+│       ├── presets/             # default.json · light.json · toy.json
+│       └── tests/run.sh         # table-driven hook tests
 ├── reference/                   # 5 methodology documents — read, never invoked
 │   ├── coding-standards.md
 │   ├── e2e-testing.md

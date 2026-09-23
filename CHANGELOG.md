@@ -4,6 +4,15 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.30.0 — unreleased
+
+Planned single release: the v1.29.0 entry below has not been published and will be folded into this one when it ships.
+
+### Added
+- Opt-in branch guardrails: a `PreToolUse(Bash)` hook reads `.claude/project-profile/guardrails.json` and denies or asks for `git commit`-class writes, `git push` destinations, and `gh pr merge` base branches that match protected patterns, per repository (submodules and linked worktrees included). Unresolvable forms get the strictest rule; `ask` becomes `deny` under `bypassPermissions`/`dontAsk`. Presets: `default` (production deny, stage/dev ask), `light`, `toy`. No config file means no change.
+- Harness projects without a guardrails config get a one-line preset suggestion at session start; any config file, including `toy`, silences it.
+- `hooks/guardrails/tests/run.sh`: table-driven hook tests (bash 3.2 compatible).
+
 ## v1.29.0 — 2026-09-23
 
 ### Added
