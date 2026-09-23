@@ -146,6 +146,7 @@ Keep a plain numbered list for a linear sequence of steps. The diagram and the t
 | Abandoned / superseded | decision rationale useful later → `deprecated/`; pure noise → `git rm` |
 | Revived | `deprecated → active/planning/<today>/`: keep original `created`, add `revived:` |
 | Consolidating completed work | write a new consolidated doc into `reference/<topic>/` |
+| Promoting a session learning (`continuous-learning` §4) | `reference/<topic>/<date>-<topic>-findings.md` with `status: reference`, or a dated section in that topic's existing reference doc; register new files in `index.md` |
 
 ## Reference-safe move transaction (REQUIRED for every move)
 

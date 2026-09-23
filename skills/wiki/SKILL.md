@@ -75,7 +75,7 @@ Output: fixes applied + suggested new questions/sources to investigate. Append `
 
 - **continuous-learning** owns the lifecycle of reusable *patterns* (HOW to work) — learnings, confidence scoring, skill evolution.
 - **wiki** owns the synthesis of *knowledge/facts* (WHAT is true) about a domain/codebase.
-- `learnings/` is **one ingest source** for the wiki. A high-confidence, project-stable learning MAY be promoted to a wiki page (in parallel with §4 profile promotion — routing, not duplication).
+- `learnings/` is **one ingest source** for the wiki. When `continuous-learning` §4 promotes a learning to `_docs/reference/` or the project-profile, a wiki page may link to that destination — the wiki routes to the SSOT and does not keep its own copy of the fact.
 - continuous-learning **§5 governs** wiki maintenance (link-don't-duplicate, same-change-same-update, self-audit = lint).
 
 ## Scale note

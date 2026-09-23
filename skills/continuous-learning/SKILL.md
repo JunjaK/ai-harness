@@ -125,9 +125,21 @@ When spawning an agent for a task that a learning covers, **include the relevant
 
 When `learnings/` grows past ~10 entries, maintain a one-line index (`learnings/index.md`: area → file → hook) so "which learnings apply to area X" is a single read, not a folder scan. This is the router that makes reuse cheap enough to actually happen.
 
-### Promote project-stable learnings into the profile
+### Promote project-valid learnings out of session-state
 
-A high-confidence learning that is a **stable fact about this project** (not a transient finding) belongs in the project-profile (`.claude/project-profile/`) where every agent already reads it — e.g. "the authoritative typecheck command is X", "bulk search caps at N", "store Y must be eagerly initialized." Move it there so it is consumed by default, and leave a pointer in the learning.
+`.claude/session-state/learnings/` is gitignored and temporary. A learning that stays true for this project moves out of it; one that only helps the agent stays.
+
+**When**: at team Phase 5 (learnings created or modified since the run file's `startedAt`), and when you close a milestone outside a team run (learnings touched this session). Older learnings are left for their own session.
+
+**Where it goes** — apply the storage discriminator ("swap this agent CLI for another — still meaningful?") and check that the learning's **Evidence** section is filled (a test run, a measurement, a reproduced failure):
+
+| Learning | Destination |
+|----------|-------------|
+| Project knowledge that stays meaningful without the agent — a codebase convention, a domain rule, a pitfall of this code with its evidence | `_docs/reference/<topic>/<date>-<topic>-findings.md` (`kind: findings`, `status: reference`, topic from the `index.md` vocabulary). If a reference doc for that topic exists, add a dated section to it instead of a new file. Register new files in `index.md`. |
+| An operational fact every agent needs on every task — the authoritative typecheck command, a hard limit, a required startup order | `.claude/project-profile/` (the file that already covers that area) |
+| Agent-only know-how — a tool quirk, a prompting tip — or no evidence yet | stays in `learnings/` |
+
+**Move, don't copy**: after writing the destination, delete the learning file, so the fact lives in one place. Report each promotion (source → destination) in the run or milestone summary.
 
 ## 5. Knowledge-Base Maintenance Contract
 
@@ -144,7 +156,7 @@ For projects that maintain a curated knowledge base (a wiki, a profile, an index
 |-------------------|-------------|
 | API contract / endpoint / DTO | api-layer profile + any contract doc |
 | Authoritative verify command / baseline | `stack.md` "Build & Verify" |
-| A new recurring gotcha is confirmed | a learning (§2), promoted to profile if project-stable (§4) |
+| A new recurring gotcha is confirmed | a learning (§2), promoted per §4 (`_docs/reference/` or profile) once it has evidence |
 | Architecture / module boundary | the architecture overview/wiki page (link to the code, don't restate it) |
 | A documented file/command/flag is renamed or removed | every doc that named it (grep the knowledge base for the old name) |
 
@@ -155,7 +167,7 @@ Periodically (e.g. at workflow completion, or when a doc feels stale): pick a kn
 ### Relationship to the `wiki` skill
 
 The agent wiki (`.claude/wiki/`) is maintained by the separate `wiki` skill, but continuous-learning **feeds and governs** it — no overlap:
-- **Feeds**: `learnings/` is one of the wiki's **ingest sources**. A high-confidence, project-stable learning may be promoted to a wiki page (in parallel with §4 profile promotion — routing, not duplication).
+- **Feeds**: `learnings/` is one of the wiki's **ingest sources**. After §4 moves a learning to `_docs/reference/` or the profile, a wiki page may link to that destination; the wiki never keeps its own copy.
 - **Governs**: this §5 maintenance contract IS the wiki's **lint** discipline (link-don't-duplicate, same-change-same-update, self-audit).
 - **Boundary**: continuous-learning owns *patterns* (HOW to work — learnings, confidence, skill evolution); the wiki owns *knowledge/facts* (WHAT is true). Keep each in its own system.
 
@@ -163,7 +175,7 @@ The agent wiki (`.claude/wiki/`) is maintained by the separate `wiki` skill, but
 
 ```
 State file:    .claude/session-state/sessions/$CLAUDE_CODE_SESSION_ID/current.md (format + lifecycle → `checkpoint` skill)
-Learnings:     .claude/session-state/learnings/{topic}.md (gitignored; project-valid ones move to _docs/reference/)
+Learnings:     .claude/session-state/learnings/{topic}.md (gitignored; project-valid ones move out — §4 Promote)
 Extract:       After milestones — identify, validate, generalize, score, store
 Reuse:         At task start, load matching learnings; route them into agent briefings; index when >10
 Promote:       Project-stable learning → project-profile (read by default)
