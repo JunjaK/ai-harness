@@ -4,18 +4,19 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
-## Codex adapter v1.30.0 — 2026-09-23 (unreleased)
+## v1.31.0 — 2026-09-23
 
-The published `v1.30.0` tag contains the Claude release below; this later
-commit brings the Codex package manifest to `1.30.0`. No tag, push, or GitHub
-Release is included in this commit.
+The Claude plugin and the Codex adapter ship together at 1.31.0: Codex gains the v1.30.0 workflow and guardrails, and both share one branch evaluator.
 
 ### Added
 - Opt-in Codex `PreToolUse(Bash)` guardrail hook. It shares the Claude branch evaluator, denies protected writes, converts every branch `ask` to `deny`, and checks `forbiddenCommands` prefixes in the project guardrails config. Codex-packaged copies of the three presets and focused adapter tests are included.
 
 ### Changed
 - `$harness-team` uses a single Phase 4 `VERIFY_PASS` / `VERIFY_FAIL` / `VERIFY_BLOCKED` pass, then records up to five Deferred QA cases and a scoped document sweep after a pass. It promotes project-valid learnings and uses Mermaid for branching flows, state changes, and interactions. Optional subagent routing chooses a smaller model only for simple deterministic work and otherwise the strongest available model, without a version pin.
-- The Claude guardrail entry point now calls the same branch evaluator packaged inside `codex/`; its policy and output are unchanged, as checked by the 36-case Claude suite. Codex reads the current Claude session-state layout for handoffs without writing Claude run files.
+- The Claude guardrail entry point now calls the same branch evaluator packaged inside `codex/`; its policy and output are unchanged apart from the fix below, as checked by the Claude suite (now 43 cases). Codex reads the current Claude session-state layout for handoffs without writing Claude run files.
+
+### Fixed
+- **Guardrail bypass through launch wrappers (security).** The evaluator only recognised `git`/`gh` as the first word after `command`/`exec`/`nohup`/`time`/`sudo`/`env`, so `timeout 60 git push origin main`, `nice git commit`, `stdbuf -oL git push`, `ssh host git push`, or `G=git; $G push` were allowed on protected branches. Known wrappers (`timeout`, `nice`, `ionice`, `stdbuf`, `setsid`, `doas`, `chronic`, `caffeinate`, plus the old set) are now followed to the git/gh they launch and judged normally; a program name from a variable, or a git/gh write inside a program the hook does not follow, gets the strictest rule. Quoted text stays literal. Applies to both Claude and Codex hooks.
 
 ## v1.30.0 — 2026-09-23
 

@@ -176,7 +176,7 @@ settings itself. See [OpenAI's plugin packaging and local marketplace guide](htt
 | Codex plugin `SessionStart` hook | Read-only reminder about stale `_docs/active/` documents, after Codex hook trust review. |
 | Codex plugin `PreToolUse(Bash)` hook | Opt-in project guardrails: protected branch writes and configured forbidden command prefixes are denied. Claude `ask` rules also deny in Codex. |
 
-The Codex adapter is at v1.30.0. `$harness-team` now follows Claude's
+The Codex adapter is at v1.31.0. `$harness-team` now follows Claude's
 lightweight Phase 4 verdict and Phase 5 deferred QA/document contract, but
 Codex does not have a separate `/team-qa` command; request execution of the
 archived QA scenarios later. Codex does not write Claude session-state files.
@@ -400,14 +400,14 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.30.0** — lightweight
-team verification with batched `/team-qa`, opt-in branch guardrails
-(`PreToolUse(Bash)` + presets), two-tier model routing (`sonnet` for small
-deterministic work, `opus` otherwise), per-session `.claude/session-state/`
-with team-run ownership, run-scoped docs sweep and learnings promotion, and
-Mermaid diagrams as the doc-state SSOT. The Codex adapter is now at v1.30.0
-in this post-release commit; the published v1.30.0 tag predates this adapter
-update.
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.31.0** — the Codex
+adapter catches up with v1.30.0 (guardrail hook with `forbiddenCommands`,
+single-pass verification, deferred QA, scoped docs sweep, learnings promotion)
+on a branch evaluator shared with Claude, and the guardrails no longer let
+launch wrappers (`timeout`, `nice`, `ssh`, `$VAR`) slip past protected-branch
+rules. v1.30.0 brought lightweight team verification with batched `/team-qa`,
+opt-in branch guardrails, two-tier model routing, per-session
+`.claude/session-state/` with team-run ownership, and Mermaid doc-state SSOTs.
 
 ## License
 
