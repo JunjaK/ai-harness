@@ -4,6 +4,17 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.33.0 — 2026-09-28
+
+Opt-in checks backed by TypeSafe Jev, a model that answers typed questions with probabilities. Both are advisory, fail open, and do nothing until a project adds `.claude/project-profile/jev.json` (README → "Jev checks"). The Codex adapter moves to 1.33.0 with no change; it does not run Claude `Stop` hooks.
+
+### Added
+- **`stopGate` (Stop hook, `hooks/jev/stop-gate.sh`).** After a reply that uses completion words (완료, 통과, fixed, verified, passing…), Jev scores whether the reply states verified or working results and whether this turn's tool output contains a check for them. Score = P(claims verified) × (1 − P(evidence supports)); at 0.6 or above Claude gets one `additionalContext` note per turn asking it to run the check, restate the claim as unverified, or name earlier evidence. On 9 probe cases with `jev-1.13.0` the cases that should get a note scored 0.63–0.90 and the rest 0.09–0.42; a single combined question had put an honest "unverified" reply (0.83) next to a false "E2E verified" claim (0.89), so the check asks two questions.
+- **`qaCrossCheck` (`hooks/jev/qa-crosscheck.sh`).** `agentic-testing` sends each scenario's raw evidence for a `passed` / `failed` / `blocked` / `insufficient_evidence` label and reports `agree`, `contested`, or `uncertain` beside its own verdict. The tester's verdict never changes; `/team-qa` writes a contested or uncertain result into the scenario's Evidence and lists contested IDs. `team-agentic-tester`'s report gains a Jev column.
+- The key is read only from `~/.config/typesafe/api-key`, requests go only to `https://api.typesafe.ai/v1/systemone` over HTTPS, and the key reaches `curl` through a file descriptor rather than argv. A committed `jev.json` or a project's `settings.json` environment cannot choose the key, its file, or the endpoint, so a cloned repo cannot read another file as the key, send the key and transcript elsewhere, or route your transcript into its own Jev account. Numeric settings (`threshold`, `timeoutSeconds`) fall back to defaults when they are not plain numbers.
+- Every Jev call is logged to `.claude/session-state/jev.log` (model id, scores, decision) for threshold tuning and model pinning.
+- `hooks/jev/tests/run.sh`: 25 table-driven cases against a fake endpoint (no config, disabled, `stop_hook_active`, no completion words, thresholds, pinned model, network or malformed-response fail-open, key only from the user file with env, `keyFile`, and `endpoint` overrides ignored, key kept off argv, current-turn evidence only, test output kept ahead of long non-check output). It also runs under macOS `/bin/bash` 3.2.
+
 ## v1.32.0 — 2026-09-24
 
 The harness no longer depends on the `superpowers` plugin, which was uninstalled on this machine and left `/debug` aborting. The Claude plugin and the Codex adapter ship together at 1.32.0.
