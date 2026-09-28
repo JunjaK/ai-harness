@@ -127,6 +127,7 @@ Alongside the env flags above, the harness uses a few external tools. Each row s
 | **Playwright** (`@playwright/test`, or the Playwright MCP) | the committed `.spec.ts` E2E suite, and the fallback driver when `agent-browser` is absent | with neither Playwright nor `agent-browser`, an optional Phase 4 smoke is recorded as unverified and queued for later QA; `/team-qa` marks browser-dependent scenarios blocked |
 | **`jq`** | the `PostToolUse` hook reads its file path from the hook's stdin JSON; the guardrails hook parses its config | the post-edit warning hook (`console.*` / `debugger` / collection-bucket write checks) silently no-ops. `session-start.sh` prints one "jq not found" line per session so it fails loudly once instead of quietly forever. In a project with `guardrails.json`, git/gh commands are blocked (exit 2) until jq is installed |
 | **`gh` CLI** | GitHub releases per version bump, and the `git-handler` agent's PR/issue work | do those steps by hand; nothing else is affected |
+| **`python3`** + a TypeSafe key | the Jev MCP tool `qa_crosscheck` (standard library only), configured in `/plugin` → Configure | the tool is missing or returns `skipped`; QA reports say `Jev: not available`. The stop gate needs only `bash`, `jq`, and `curl` |
 
 ```bash
 /plugin marketplace add pbakaus/impeccable && /plugin install impeccable@impeccable
@@ -174,7 +175,7 @@ settings itself. See [OpenAI's plugin packaging and local marketplace guide](htt
 | Codex plugin `SessionStart` hook | Read-only reminder about stale `_docs/active/` documents, after Codex hook trust review. |
 | Codex plugin `PreToolUse(Bash)` hook | Opt-in project guardrails: protected branch writes and configured forbidden command prefixes are denied. Claude `ask` rules also deny in Codex. |
 
-The Codex adapter is at v1.33.1. `$harness-team` now follows Claude's
+The Codex adapter is at v1.34.0. `$harness-team` now follows Claude's
 lightweight Phase 4 verdict and Phase 5 deferred QA/document contract, but
 Codex does not have a separate `/team-qa` command; request execution of the
 archived QA scenarios later. Codex does not write Claude session-state files.
@@ -267,27 +268,30 @@ Limits: the hook targets mistakes, not deliberate evasion (a script file or alia
 
 ### Jev checks (optional)
 
-Two advisory checks use [TypeSafe Jev](https://docs.typesafe.ai/models), a model that answers typed questions with probabilities instead of writing text. Both need two switches: your own consent in `~/.config/typesafe/allowed-projects` (one absolute path per line: the project's primary working tree, which also covers its linked worktrees) and the project's `.claude/project-profile/jev.json`. They skip silently when either is missing, or when the key, `jq`, `curl`, the network, or the response is missing.
+Two advisory checks use [TypeSafe Jev](https://docs.typesafe.ai/models), a model that answers typed questions with probabilities instead of writing text. Turn them on in **`/plugin` → junjak-ai-harness → Configure**:
+
+| Setting | Default | Effect |
+|---|---|---|
+| `jev_api_key` | empty | Your TypeSafe key, masked and stored in the OS credential store. Without it both checks skip. |
+| `jev_qa_crosscheck` | on | `agentic-testing` / `/team-qa` call the plugin's MCP tool `qa_crosscheck` once per scenario. |
+| `jev_stop_gate` | off | The `Stop` hook checks completion claims after each reply. |
+
+Claude Code reads these values only from user or managed settings and the key only from the credential store, so a cloned repository cannot switch a check on or supply a key. Its `.claude/settings.json` `env` cannot replace the key either (checked in a live run). A project can only opt out, and tune, with an optional `.claude/project-profile/jev.json`:
 
 ```json
-{
-  "model": "jev-latest",
-  "stopGate": { "enabled": true, "threshold": 0.6 },
-  "qaCrossCheck": { "enabled": true }
-}
+{ "disabled": false, "model": "jev-1.13.0", "stopGate": { "threshold": 0.6 }, "timeoutSeconds": 5 }
 ```
 
 | Check | When | What it does |
 |---|---|---|
-| `stopGate` | `Stop` hook, after a reply that uses words such as 완료 / 통과 / fixed / verified / passing | Asks whether the reply states verified or working results, and whether this turn's tool output contains a check that exercises them. Score = P(claims verified) × (1 − P(evidence supports)). At or above `threshold` (default 0.6) Claude gets one `additionalContext` note per turn: run the check, restate the claim as unverified, or name the earlier evidence. It never blocks the stop by itself. |
-| `qaCrossCheck` | `agentic-testing` / `/team-qa`, once per scenario | Classifies the raw evidence as `passed` / `failed` / `blocked` / `insufficient_evidence` and reports `agree`, `contested`, or `uncertain` (confidence < 0.5) beside the tester's verdict. The verdict is never changed; a contested result is written to the archive's Evidence for the user to review. |
+| `jev_stop_gate` | `Stop` hook, after a reply that uses words such as 완료 / 통과 / fixed / verified / passing | Asks whether the reply states verified or working results, and whether this turn's tool output contains a check that exercises them. Score = P(claims verified) × (1 − P(evidence supports)). At or above `threshold` (default 0.6) Claude gets one `additionalContext` note per turn: run the check, restate the claim as unverified, or name the earlier evidence. It never blocks the stop by itself. |
+| `jev_qa_crosscheck` | MCP tool `mcp__plugin_junjak-ai-harness_jev__qa_crosscheck` (`mcp/jev_server.py`, Python 3 standard library) | Classifies the raw evidence as `passed` / `failed` / `blocked` / `insufficient_evidence` and returns `agree`, `contested`, `uncertain` (confidence < 0.5), or `skipped` with the reason. The verdict is never changed; a contested result is written to the archive's Evidence for the user to review. An MCP tool is used because the Bash tool never receives plugin settings. |
 
-- The key is read only from `~/.config/typesafe/api-key` (a symlink is fine: `mkdir -p ~/.config/typesafe && ln -s <your key file> ~/.config/typesafe/api-key`), and requests go only to `https://api.typesafe.ai/v1/systemone`. `jev.json` is committed with the project and a project's `.claude/settings.json` can set environment variables, so neither may choose the key, its location, or the endpoint. The key is passed to `curl` through a file descriptor, not the command line.
-- **Data leaves the machine.** `stopGate` sends the last user prompt, the final reply (last 4,000 chars), and this turn's tool output (each result's last 1,500 chars, 12,000 in total) to TypeSafe; `qaCrossCheck` sends the scenario and observation. A committed `jev.json` alone cannot switch sending on, because a cloned repository could ship one; the allowlist entry is your consent. Before sending, common secret shapes in every field are masked (private key blocks; `sk-`, `ghp_`/`gho_`/`github_pat_`, `AKIA`, `xox*-` tokens; JWTs; Bearer/Basic values; credentials in URLs; values after `password`/`secret`/`token`/`api_key`-style names). Masking is best effort: a secret in another shape still goes out, so do not allowlist a project whose sessions print secrets you cannot share. TypeSafe states it does not train on inputs; zero data retention needs an enterprise contract or a gateway that offers it. Enable it only where that is acceptable.
-- `jev-latest` changes without notice. After tuning `threshold`, pin the model id that `.claude/session-state/jev.log` records (for example `"model": "jev-1.13.0"`). The log keeps every score and decision with the session id and time, never prompt, reply, or evidence text, and is the only feedback loop: Jev does not learn from your requests.
-- `stopGate` reads the transcript file for tool output. Its format is internal to Claude Code, so a parse failure skips the check; the file may also lag the newest messages, which can raise a note on a claim that was in fact checked.
-- Jev judges whether the evidence is about the claim, not whether it covers the claim's exact scope. In a live run, a reply claiming an end-to-end check in a real session scored 0.19 because the turn had run the hook script directly. Treat a missing note as "no obvious gap", not as proof.
-- Tests: `bash hooks/jev/tests/run.sh` (fake endpoint, no network).
+- **Data leaves the machine.** The stop gate sends the last user prompt, the final reply (last 4,000 chars), and this turn's tool output (each result's last 1,500 chars, 12,000 in total) to `https://api.typesafe.ai/v1/systemone`; the cross-check sends the scenario and observation. With a key and a switch on, this happens in **every** project that has not opted out. Before sending, common secret shapes in every field are masked (private key blocks; `sk-`, `ghp_`/`gho_`/`github_pat_`, `AKIA`, `xox*-` tokens; JWTs; Bearer/Basic values; credentials in URLs; values after `password`/`secret`/`token`/`api_key`-style names). Masking is best effort: a secret in another shape still goes out. TypeSafe states it does not train on inputs; zero data retention needs an enterprise contract or a gateway that offers it.
+- `jev-latest` changes without notice. After tuning `threshold`, pin the model id that the log records. The log is `~/.claude/plugins/data/<plugin id>/jev.log`, outside every project: time, session, project path, model, scores, labels, and confidence, never prompt, reply, or evidence text. It is the only feedback loop: Jev does not learn from your requests.
+- The stop gate reads the transcript file for tool output. Its format is internal to Claude Code, so a parse failure skips the check; the file may also lag the newest messages, which can raise a note on a claim that was in fact checked.
+- Jev judges whether the evidence is about the claim, not whether it covers the claim's exact scope, and it sees only the text it is given: a fabricated observation passes. Treat a missing note as "no obvious gap", not as proof.
+- Tests: `bash hooks/jev/tests/run.sh` and `python3 mcp/tests/test_jev_server.py` (fake endpoint, no network).
 
 ### Document Storage (3 buckets)
 
@@ -399,10 +403,13 @@ junjak-ai-harness/
 │   │   ├── presets/             # default.json · light.json · toy.json
 │   │   └── tests/run.sh         # table-driven hook tests
 │   └── jev/                     # opt-in TypeSafe Jev checks
-│       ├── lib.sh               # config, key, request, log
+│       ├── lib.sh               # switches, request, masking, log
 │       ├── stop-gate.sh         # Stop: unsupported "verified/done" claims
-│       ├── qa-crosscheck.sh     # agentic-testing second opinion
+│       ├── qa-crosscheck.sh     # second opinion on one QA verdict
 │       └── tests/run.sh         # fake-endpoint tests
+├── mcp/
+│   ├── jev_server.py            # MCP tool qa_crosscheck (stdio, Python stdlib)
+│   └── tests/test_jev_server.py
 ├── reference/                   # 5 methodology documents — read, never invoked
 │   ├── coding-standards.md
 │   ├── e2e-testing.md
@@ -430,7 +437,9 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.33.1** — the Jev
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.34.0** — the Jev
+key and switches live in `/plugin` → Configure (key in the OS credential
+store), and the QA cross-check is the MCP tool `qa_crosscheck`. v1.33.1: the Jev
 checks now also need your own allowlist entry, mask common secrets before
 sending, log scores only, and find `jev.json` from a subfolder;
 `agent-browser-e2e` no longer accepts `auth login`'s own success line as a login. v1.33.0: opt-in

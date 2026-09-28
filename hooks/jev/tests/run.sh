@@ -14,9 +14,9 @@ trap 'rm -rf "$T"' EXIT
 PROJ="$T/proj"
 BIN="$T/bin"
 CFG="$PROJ/.claude/project-profile/jev.json"
-mkdir -p "$PROJ/.claude/project-profile" "$BIN" "$T/home/.config/typesafe"
-printf 'test-key\n' >"$T/home/.config/typesafe/api-key"
-printf '# projects allowed to send to Jev\n%s/\n' "$PROJ" >"$T/home/.config/typesafe/allowed-projects"
+mkdir -p "$PROJ/.claude/project-profile" "$BIN"
+# Plugin settings as Claude Code exports them to hooks; each case may override one.
+KEY=test-key SG=true QC=true
 
 # Fake curl: records the request body, argv and -K config, answers with $FAKE_RESP, or fails when FAKE_FAIL=1.
 cat >"$BIN/curl" <<'EOF'
@@ -57,39 +57,38 @@ gate() {
   rm -f "$T/calls" "$T/body.json"
   OUT=$(jq -cn --arg m "$2" --arg tr "${3:-$TR}" --argjson a "$1" \
       '{hook_event_name: "Stop", stop_hook_active: $a, last_assistant_message: $m, transcript_path: $tr}' |
-    HOME="$T/home" CLAUDE_PROJECT_DIR="$PROJ" PATH="$BIN:$PATH" FAKE_DIR="$T" \
+    CLAUDE_PLUGIN_OPTION_JEV_API_KEY="$KEY" CLAUDE_PLUGIN_OPTION_JEV_STOP_GATE="$SG" CLAUDE_PLUGIN_DATA="$T/data" \
+      CLAUDE_PROJECT_DIR="$PROJ" PATH="$BIN:$PATH" FAKE_DIR="$T" \
       FAKE_RESP="${FAKE_RESP:-}" FAKE_FAIL="${FAKE_FAIL:-0}" "$BASH_BIN" "$GATE")
   CALLS=$([ -f "$T/calls" ] && wc -l <"$T/calls" | tr -d ' ' || echo 0)
 }
 cross() {  # cross <input JSON> → OUT
   rm -f "$T/calls"
-  OUT=$(printf '%s' "$1" | HOME="$T/home" CLAUDE_PROJECT_DIR="$PROJ" PATH="$BIN:$PATH" FAKE_DIR="$T" \
-    FAKE_RESP="${FAKE_RESP:-}" FAKE_FAIL="${FAKE_FAIL:-0}" "$BASH_BIN" "$CROSS")
+  OUT=$(printf '%s' "$1" |
+    CLAUDE_PLUGIN_OPTION_JEV_API_KEY="$KEY" CLAUDE_PLUGIN_OPTION_JEV_QA_CROSSCHECK="$QC" CLAUDE_PLUGIN_DATA="$T/data" \
+      CLAUDE_PROJECT_DIR="$PROJ" PATH="$BIN:$PATH" FAKE_DIR="$T" \
+      FAKE_RESP="${FAKE_RESP:-}" FAKE_FAIL="${FAKE_FAIL:-0}" "$BASH_BIN" "$CROSS")
 }
 CLAIM="다 고쳤습니다. E2E로 확인 완료."
 
 # --- stop-gate ---
+SG=false FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
+check "jev_stop_gate off → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
+
+KEY= FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
+check "no key → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
+
+echo '{"disabled":true}' >"$CFG"
+FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
+check "project opted out in jev.json → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
+
+# A committed jev.json cannot switch a check on, supply a key, or move the endpoint.
+jq -n '{stopGate: {enabled: true}, qaCrossCheck: {enabled: true}, keyFile: "/etc/passwd", endpoint: "https://attacker.example/x"}' >"$CFG"
+SG=false FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
+check "jev.json enabled flags ignored while the plugin switch is off" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
+KEY= FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
+check "jev.json keyFile ignored without a plugin key" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
 rm -f "$CFG"
-FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
-check "no config → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
-
-echo '{"stopGate":{"enabled":false}}' >"$CFG"
-FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
-check "disabled → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
-
-echo '{"stopGate":{"enabled":true}}' >"$CFG"
-mv "$T/home/.config/typesafe/allowed-projects" "$T/allowed.bak"
-echo '{"stopGate":{"enabled":true},"qaCrossCheck":{"enabled":true}}' >"$CFG"
-FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
-check "no allowlist file → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
-printf '/some/other/project\n%s-sibling\n' "$PROJ" >"$T/home/.config/typesafe/allowed-projects"
-FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
-check "project not listed (other path, prefix sibling) → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
-FAKE_RESP=$(choice passed 0.9) cross '{"scenario":"x","observation":"y","verdict":"passed"}'
-check "crosscheck: project not listed → skipped, no call" \
-  "$(printf '%s' "$OUT" | jq -e '.status == "skipped"' >/dev/null && [ ! -f "$T/calls" ]; echo $?)"
-echo '{"stopGate":{"enabled":true}}' >"$CFG"
-mv "$T/allowed.bak" "$T/home/.config/typesafe/allowed-projects"
 
 FAKE_RESP=$(noul 0.95 0.05) gate true "$CLAIM"
 check "stop_hook_active → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
@@ -128,21 +127,13 @@ check "malformed response → fail-open" "$([ -z "$OUT" ]; echo $?)"
 FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM" "$T/missing.jsonl"
 check "missing transcript → no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
 
-OUT=$(jq -cn --arg tr "$TR" --arg m "$CLAIM" '{stop_hook_active: false, last_assistant_message: $m, transcript_path: $tr}' |
-  HOME="$T/nohome" CLAUDE_PROJECT_DIR="$PROJ" PATH="$BIN:$PATH" FAKE_DIR="$T" FAKE_RESP="$(noul 0.95 0.05)" "$BASH_BIN" "$GATE")
-check "no key file → silent" "$([ -z "$OUT" ]; echo $?)"
-
-# Neither env nor jev.json can supply the key, its location, or the endpoint.
-printf 'SECRET-OTHER-FILE\n' >"$T/other.txt"
-jq -n --arg f "$T/other.txt" '{stopGate: {enabled: true}, keyFile: $f, endpoint: "https://attacker.example/x", timeoutSeconds: "5 --url https://attacker.example"}' >"$CFG"
-OUT=$(jq -cn --arg tr "$TR" --arg m "$CLAIM" '{stop_hook_active: false, last_assistant_message: $m, transcript_path: $tr}' |
-  HOME="$T/home" TYPESAFE_API_KEY=attacker-key CLAUDE_PROJECT_DIR="$PROJ" PATH="$BIN:$PATH" FAKE_DIR="$T" FAKE_RESP="$(noul 0.95 0.05)" "$BASH_BIN" "$GATE")
-check "key only from ~/.config/typesafe/api-key (env and config keyFile ignored)" \
-  "$([ -n "$OUT" ] && grep -q 'Bearer test-key' "$T/config" && ! grep -q 'SECRET-OTHER-FILE\|attacker-key' "$T/config"; echo $?)"
+jq -n '{endpoint: "https://attacker.example/x", timeoutSeconds: "5 --url https://attacker.example"}' >"$CFG"
+FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
+check "key sent as Bearer through the curl config" "$([ -n "$OUT" ] && grep -q 'Bearer test-key' "$T/config"; echo $?)"
 check "config endpoint and non-numeric timeout ignored" \
   "$(grep -qx 'https://api.typesafe.ai/v1/systemone' "$T/args" && ! grep -q attacker "$T/args"; echo $?)"
 check "key is not on argv" "$(! grep -q test-key "$T/args"; echo $?)"
-echo '{"stopGate":{"enabled":true}}' >"$CFG"
+rm -f "$CFG"
 
 # A test run followed by long non-check output and an Edit result: the test run must survive the budget.
 TR2="$T/transcript2.jsonl"
@@ -169,23 +160,31 @@ TR3="$T/transcript3.jsonl"
   echo '{"type":"assistant","message":{"content":[{"type":"tool_use","id":"k","name":"Bash","input":{"command":"pnpm test"}}]}}'
   echo '{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"k","content":"API_KEY=sk-live-abcdefghijklmnop99 ghp_abcdefghijklmnopqrstuvwxyz0123 Tests 3 passed"}]}}'
 } >"$TR3"
-rm -f "$PROJ/.claude/session-state/jev.log"
+rm -f "$T/data/jev.log"
 FAKE_RESP=$(noul 0.95 0.05) gate false "완료했습니다 SECRET_IN_REPLY" "$TR3"
 check "secrets masked before sending, test output kept" \
   "$(jq -e '(.state.evidence | test("sk-live|ghp_") | not) and (.state.evidence | test("Tests 3 passed"))' "$T/body.json" >/dev/null; echo $?)"
-check "log has scores but no reply text" \
-  "$(grep -q 'score=' "$PROJ/.claude/session-state/jev.log" && ! grep -q SECRET_IN_REPLY "$PROJ/.claude/session-state/jev.log"; echo $?)"
+check "log in CLAUDE_PLUGIN_DATA, not the project; scores but no reply text" \
+  "$(grep -q 'score=' "$T/data/jev.log" && ! grep -q SECRET_IN_REPLY "$T/data/jev.log" && [ ! -e "$PROJ/.claude/session-state" ]; echo $?)"
 
 # --- qa-crosscheck ---
 INPUT='{"scenario":"Total persists after reload","observation":"PUT returned 200, toast Saved","verdict":"passed"}'
+QC=false FAKE_RESP=$(choice passed 0.9) cross "$INPUT"
+check "crosscheck: switch off → skipped with the plugin-settings reason, no call" \
+  "$(printf '%s' "$OUT" | jq -e '.status == "skipped" and (.reason | test("jev_qa_crosscheck is off"))' >/dev/null && [ ! -f "$T/calls" ]; echo $?)"
+KEY= FAKE_RESP=$(choice passed 0.9) cross "$INPUT"
+check "crosscheck: no key → skipped naming the key" \
+  "$(printf '%s' "$OUT" | jq -e '.status == "skipped" and (.reason | test("no Jev API key"))' >/dev/null; echo $?)"
+echo '{"disabled":true}' >"$CFG"
+FAKE_RESP=$(choice passed 0.9) cross "$INPUT"
+check "crosscheck: opted out → skipped with a valid JSON reason" \
+  "$(printf '%s' "$OUT" | jq -e '.status == "skipped" and (.reason | test("disabled"))' >/dev/null; echo $?)"
 rm -f "$CFG"
-FAKE_RESP=$(choice insufficient_evidence 0.9) cross "$INPUT"
-check "crosscheck: no config → skipped" "$(printf '%s' "$OUT" | jq -e '.status == "skipped"' >/dev/null; echo $?)"
 
-echo '{"qaCrossCheck":{"enabled":true}}' >"$CFG"
 FAKE_RESP=$(choice insufficient_evidence 0.9) cross "$INPUT"
 check "crosscheck: passed vs insufficient_evidence → contested" \
   "$(printf '%s' "$OUT" | jq -e '.status == "contested" and .jev == "insufficient_evidence" and .model == "jev-test"' >/dev/null; echo $?)"
+check "crosscheck: log keeps confidence" "$(tail -1 "$T/data/jev.log" | grep -q 'confidence=0.9'; echo $?)"
 
 FAKE_RESP=$(choice passed 0.9) cross "$INPUT"
 check "crosscheck: same label → agree" "$(printf '%s' "$OUT" | jq -e '.status == "agree"' >/dev/null; echo $?)"
@@ -199,17 +198,15 @@ check "crosscheck: missing observation → skipped" "$(printf '%s' "$OUT" | jq -
 FAKE_FAIL=1 cross "$INPUT"
 check "crosscheck: network failure → skipped" "$(printf '%s' "$OUT" | jq -e '.status == "skipped"' >/dev/null; echo $?)"
 
-# Without CLAUDE_PROJECT_DIR (the Bash tool's case) and with cwd in a subfolder, the git top level is used.
+# Without CLAUDE_PROJECT_DIR and with cwd in a subfolder, the git top level's jev.json is used.
 GPROJ="$T/gproj"
 mkdir -p "$GPROJ/server/src" "$GPROJ/.claude/project-profile"
 git -c init.defaultBranch=main init -q "$GPROJ"
-echo '{"qaCrossCheck":{"enabled":true}}' >"$GPROJ/.claude/project-profile/jev.json"
-printf '%s\n' "$GPROJ" >>"$T/home/.config/typesafe/allowed-projects"
-rm -f "$T/calls"
-OUT=$(cd "$GPROJ/server/src" && printf '%s' "$INPUT" | env -u CLAUDE_PROJECT_DIR HOME="$T/home" PATH="$BIN:$PATH" FAKE_DIR="$T" \
-  FAKE_RESP="$(choice passed 0.9)" "$BASH_BIN" "$CROSS")
-check "crosscheck: no CLAUDE_PROJECT_DIR, cwd in subfolder → git top level config used" \
-  "$(printf '%s' "$OUT" | jq -e '.status == "agree"' >/dev/null && [ -f "$GPROJ/.claude/session-state/jev.log" ]; echo $?)"
+echo '{"disabled":true}' >"$GPROJ/.claude/project-profile/jev.json"
+OUT=$(cd "$GPROJ/server/src" && printf '%s' "$INPUT" | env -u CLAUDE_PROJECT_DIR CLAUDE_PLUGIN_OPTION_JEV_API_KEY=k \
+  CLAUDE_PLUGIN_OPTION_JEV_QA_CROSSCHECK=true PATH="$BIN:$PATH" FAKE_DIR="$T" FAKE_RESP="$(choice passed 0.9)" "$BASH_BIN" "$CROSS")
+check "crosscheck: no CLAUDE_PROJECT_DIR, cwd in subfolder → git top level jev.json found" \
+  "$(printf '%s' "$OUT" | jq -e '.status == "skipped" and (.reason | test("opted out"))' >/dev/null; echo $?)"
 
 echo "jev tests: $PASS passed, $FAIL failed"
 [ "$FAIL" = 0 ]

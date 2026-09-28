@@ -37,7 +37,7 @@ Only when explicitly requested: for a **passed**, valuable, deterministic scenar
 | ID | Archive | Priority | Verdict | Evidence | Jev | Follow-up |
 |----|---------|----------|---------|----------|-----|-----------|
 
-Selected: N · Passed: N · Failed: N · Blocked: N · Jev contested: N (or "Jev: not enabled")
+Selected: N · Passed: N · Failed: N · Blocked: N · Jev contested: N (or "Jev: not available" / the skip reason)
 Crystallized (only if requested): [paths and run results, or none]
 ```
 

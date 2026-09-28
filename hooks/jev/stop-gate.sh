@@ -1,6 +1,6 @@
 #!/bin/bash
 # Stop hook — Jev check for completion claims the turn's own tool output does not support.
-# Opt-in: .claude/project-profile/jev.json → "stopGate": {"enabled": true}. Advisory and fail-open:
+# Opt-in: the plugin setting jev_stop_gate plus a Jev API key (README → "Jev checks"). Advisory and fail-open:
 # it never blocks a stop hard; above the threshold it returns additionalContext so Claude either
 # shows the check or restates the claim as unverified. One nudge per turn (stop_hook_active).
 # Sends the last user prompt, the final reply and this turn's tool output to the Jev endpoint.
@@ -11,7 +11,7 @@ HERE=${BASH_SOURCE[0]%/*}
 . "$HERE/lib.sh"
 
 INPUT=$(cat)
-jev_enabled stopGate || exit 0
+jev_enabled jev_stop_gate || exit 0
 [ "$(printf '%s' "$INPUT" | jq -r '.stop_hook_active // false')" = "true" ] && exit 0
 
 REPORT=$(printf '%s' "$INPUT" | jq -r '.last_assistant_message // empty')
