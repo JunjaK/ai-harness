@@ -80,12 +80,12 @@ THRESHOLD=$(jev_number .stopGate.threshold 0.6)
 MODEL=$(printf '%s' "$RESP" | jq -r '.model // "?"')
 
 if awk -v p="$SCORE" -v t="$THRESHOLD" 'BEGIN { exit !(p >= t) }'; then
-  jev_log stop-gate "$MODEL" "score=$SCORE claims=$CLAIMS supports=$SUPPORTS" nudge "$REPORT"
+  jev_log stop-gate "$MODEL" "score=$SCORE claims=$CLAIMS supports=$SUPPORTS" nudge
   jq -cn --arg s "$SCORE" '{hookSpecificOutput: {hookEventName: "Stop", additionalContext:
     ("[jev stop-gate] score " + $s + ": the reply states verified or working results that no tool output in this turn shows. "
      + "Run the check and show its result, or restate the claim as implemented but unverified. "
      + "If earlier turns already verified it, name that evidence. Reply in the user'"'"'s language.")}}'
 else
-  jev_log stop-gate "$MODEL" "score=$SCORE claims=$CLAIMS supports=$SUPPORTS" pass "$REPORT"
+  jev_log stop-gate "$MODEL" "score=$SCORE claims=$CLAIMS supports=$SUPPORTS" pass
 fi
 exit 0

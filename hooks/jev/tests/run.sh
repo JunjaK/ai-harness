@@ -16,6 +16,7 @@ BIN="$T/bin"
 CFG="$PROJ/.claude/project-profile/jev.json"
 mkdir -p "$PROJ/.claude/project-profile" "$BIN" "$T/home/.config/typesafe"
 printf 'test-key\n' >"$T/home/.config/typesafe/api-key"
+printf '# projects allowed to send to Jev\n%s/\n' "$PROJ" >"$T/home/.config/typesafe/allowed-projects"
 
 # Fake curl: records the request body, argv and -K config, answers with $FAKE_RESP, or fails when FAKE_FAIL=1.
 cat >"$BIN/curl" <<'EOF'
@@ -77,6 +78,19 @@ FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
 check "disabled → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
 
 echo '{"stopGate":{"enabled":true}}' >"$CFG"
+mv "$T/home/.config/typesafe/allowed-projects" "$T/allowed.bak"
+echo '{"stopGate":{"enabled":true},"qaCrossCheck":{"enabled":true}}' >"$CFG"
+FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
+check "no allowlist file → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
+printf '/some/other/project\n%s-sibling\n' "$PROJ" >"$T/home/.config/typesafe/allowed-projects"
+FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
+check "project not listed (other path, prefix sibling) → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
+FAKE_RESP=$(choice passed 0.9) cross '{"scenario":"x","observation":"y","verdict":"passed"}'
+check "crosscheck: project not listed → skipped, no call" \
+  "$(printf '%s' "$OUT" | jq -e '.status == "skipped"' >/dev/null && [ ! -f "$T/calls" ]; echo $?)"
+echo '{"stopGate":{"enabled":true}}' >"$CFG"
+mv "$T/allowed.bak" "$T/home/.config/typesafe/allowed-projects"
+
 FAKE_RESP=$(noul 0.95 0.05) gate true "$CLAIM"
 check "stop_hook_active → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
 
@@ -147,6 +161,20 @@ BIG=$(awk 'BEGIN { for (i = 0; i < 20000; i++) printf "x" }')
 FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM" "$TR2"
 check "check-like output kept over long non-check output; Edit results dropped" \
   "$(jq -e '(.state.evidence | test("TEST_RUN_OUTPUT")) and (.state.evidence | test("EDIT_RESULT") | not) and (.state.evidence | length) <= 12002' "$T/body.json" >/dev/null; echo $?)"
+
+# Secrets in tool output are masked before sending; the log keeps scores only, no reply text.
+TR3="$T/transcript3.jsonl"
+{
+  echo '{"type":"user","message":{"role":"user","content":"check env"}}'
+  echo '{"type":"assistant","message":{"content":[{"type":"tool_use","id":"k","name":"Bash","input":{"command":"pnpm test"}}]}}'
+  echo '{"type":"user","message":{"content":[{"type":"tool_result","tool_use_id":"k","content":"API_KEY=sk-live-abcdefghijklmnop99 ghp_abcdefghijklmnopqrstuvwxyz0123 Tests 3 passed"}]}}'
+} >"$TR3"
+rm -f "$PROJ/.claude/session-state/jev.log"
+FAKE_RESP=$(noul 0.95 0.05) gate false "완료했습니다 SECRET_IN_REPLY" "$TR3"
+check "secrets masked before sending, test output kept" \
+  "$(jq -e '(.state.evidence | test("sk-live|ghp_") | not) and (.state.evidence | test("Tests 3 passed"))' "$T/body.json" >/dev/null; echo $?)"
+check "log has scores but no reply text" \
+  "$(grep -q 'score=' "$PROJ/.claude/session-state/jev.log" && ! grep -q SECRET_IN_REPLY "$PROJ/.claude/session-state/jev.log"; echo $?)"
 
 # --- qa-crosscheck ---
 INPUT='{"scenario":"Total persists after reload","observation":"PUT returned 200, toast Saved","verdict":"passed"}'

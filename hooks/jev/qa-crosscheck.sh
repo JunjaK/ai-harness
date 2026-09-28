@@ -32,6 +32,5 @@ OUT=$(printf '%s' "$RESP" | jq -c --arg v "$VERDICT" '
   | { status: (if ($a.confidence // 0) < 0.5 then "uncertain" elif $a.choice == $v then "agree" else "contested" end),
       jev: $a.choice, confidence: $a.confidence, probabilities: $a.probabilities, model: .model }') \
   || skip "unexpected Jev response"
-jev_log qa-crosscheck "$(printf '%s' "$OUT" | jq -r .model)" "agent=$VERDICT" "$(printf '%s' "$OUT" | jq -r '.jev + " " + .status')" \
-  "$(printf '%s' "$INPUT" | jq -r .scenario)"
+jev_log qa-crosscheck "$(printf '%s' "$OUT" | jq -r .model)" "agent=$VERDICT" "$(printf '%s' "$OUT" | jq -r '.jev + " " + .status')"
 printf '%s\n' "$OUT"
