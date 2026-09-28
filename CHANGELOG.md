@@ -4,6 +4,16 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.33.1 — 2026-09-28
+
+Security fixes for the v1.33.0 Jev checks, from a review of that release. The Codex adapter moves to 1.33.1 with no change.
+
+### Fixed
+- **A cloned repository could switch sending on by itself.** A committed `jev.json` was enough to send that project's transcript to TypeSafe. Both checks now also require the project's primary working tree to be listed in the user's `~/.config/typesafe/allowed-projects`; without that entry they skip without a request.
+- **Secrets in tool output were sent as is.** Every string in the request is now masked for common secret shapes (private key blocks, `sk-`/`ghp_`/`gho_`/`github_pat_`/`AKIA`/`xox*-` tokens, JWTs, Bearer/Basic values, URL credentials, values after password/secret/token/api_key-style names). Masking is best effort; README says so.
+- **`jev.log` stored reply and scenario text.** It now keeps only model id, scores, labels, and decisions with the session id and time.
+- `hooks/jev/tests/run.sh` grows to 30 cases (allowlist missing or not matching, including a prefix-sibling path; masking; content-free log).
+
 ## v1.33.0 — 2026-09-28
 
 Opt-in checks backed by TypeSafe Jev, a model that answers typed questions with probabilities. Both are advisory, fail open, and do nothing until a project adds `.claude/project-profile/jev.json` (README → "Jev checks"). The Codex adapter moves to 1.33.0 with no change; it does not run Claude `Stop` hooks.
