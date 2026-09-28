@@ -105,21 +105,41 @@ with tempfile.TemporaryDirectory() as tmp:
     check("switch off → skipped", out.get("status") == "skipped" and "jev_qa_crosscheck is off" in out.get("reason", ""), str(out))
 
     # stop_gate: the mcp_tool Stop hook passes its own input (strings); stdout is the hook's output.
-    transcript = os.path.join(tmp, "t.jsonl")
+    config = os.path.join(tmp, "claude-config")
+    sid = "0f0e0d0c-1111-2222-3333-444455556666"
+    tdir = os.path.join(config, "projects", "".join(c if c.isalnum() else "-" for c in project))
+    os.makedirs(tdir)
+    transcript = os.path.join(tdir, sid + ".jsonl")
     with open(transcript, "w") as f:
         f.write(json.dumps({"type": "user", "message": {"role": "user", "content": "fix login"}}) + "\n")
     respond({"model": "jev-test", "answers": {"claims_verified": {"type": "noul", "noul": 0.95},
                                               "evidence_supports": {"type": "noul", "noul": 0.05}}})
     hook_input = {"stop_hook_active": "false", "last_assistant_message": "Fixed and verified.",
-                  "transcript_path": transcript, "session_id": "sess-1"}
-    gate_on = dict(on, CLAUDE_PLUGIN_OPTION_JEV_STOP_GATE="true")
+                  "transcript_path": transcript, "session_id": sid}
+    gate_on = dict(on, CLAUDE_PLUGIN_OPTION_JEV_STOP_GATE="true", CLAUDE_CONFIG_DIR=config)
     r = session(gate_on, [{"jsonrpc": "2.0", "id": 1, "method": "tools/call",
                            "params": {"name": "stop_gate", "arguments": hook_input}}])
     text = r[1]["result"]["content"][0]["text"]
     check("stop_gate returns the Stop hook's additionalContext", '"hookEventName":"Stop"' in text.replace(" ", ""), text)
     with open(os.path.join(tmp, "data", "jev.log")) as f:
-        check("stop_gate log carries the hook's session id", "sess-1" in f.read().splitlines()[-1])
+        check("stop_gate log carries the hook's session id", sid in f.read().splitlines()[-1])
+    # The model can call stop_gate too: any file other than this project's transcript for that session is refused.
+    secret = os.path.join(tmp, "secret.jsonl")
+    with open(secret, "w") as f:
+        f.write(json.dumps({"type": "user", "message": {"role": "user", "content": "SECRET_FILE_CONTENT"}}) + "\n")
+    other = os.path.join(config, "projects", "-other-project")
+    os.makedirs(other)
+    other_t = os.path.join(other, sid + ".jsonl")
+    with open(other_t, "w") as f:
+        f.write(open(transcript).read())
+    link_dir_t = os.path.join(tdir, "1f0e0d0c-1111-2222-3333-444455556666.jsonl")
+    os.symlink(secret, link_dir_t)
     for label, env, args in (
+        ("path outside the transcripts", gate_on, dict(hook_input, transcript_path=secret)),
+        ("another project's transcript", gate_on, dict(hook_input, transcript_path=other_t)),
+        ("session id not matching the file", gate_on, dict(hook_input, session_id="1f0e0d0c-1111-2222-3333-444455556666")),
+        ("symlink in the transcript dir to another file", gate_on,
+         dict(hook_input, transcript_path=link_dir_t, session_id="1f0e0d0c-1111-2222-3333-444455556666")),
         ("stop_hook_active \"true\"", gate_on, dict(hook_input, stop_hook_active="true")),
         ("switch unset (placeholder)", dict(on, CLAUDE_PLUGIN_OPTION_JEV_STOP_GATE="${user_config.jev_stop_gate}"), hook_input),
     ):

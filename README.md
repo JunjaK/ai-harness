@@ -291,6 +291,7 @@ Claude Code reads these values only from user or managed settings and the key on
 - `jev-latest` changes without notice. After tuning `threshold`, pin the model id that the log records. The log is `~/.claude/plugins/data/<plugin id>/jev.log`, outside every project: time, session, project path, model, scores, labels, and confidence, never prompt, reply, or evidence text. It is the only feedback loop: Jev does not learn from your requests.
 - The stop gate reads the transcript file for tool output. Its format is internal to Claude Code, so a parse failure skips the check; the file may also lag the newest messages, which can raise a note on a claim that was in fact checked.
 - Jev judges whether the evidence is about the claim, not whether it covers the claim's exact scope, and it sees only the text it is given: a fabricated observation passes. Treat a missing note as "no obvious gap", not as proof.
+- `stop_gate` is visible to the model like any MCP tool. It reads only this project's transcript for the session it is given and ignores any other path, so a call from the model cannot send an arbitrary file.
 - The key must use only `A-Z a-z 0-9 . _ ~ + / = -`; any other character skips the check, because the key is written into a curl config line.
 - Tests: `bash hooks/jev/tests/run.sh` and `python3 mcp/tests/test_jev_server.py` (fake endpoint, no network).
 

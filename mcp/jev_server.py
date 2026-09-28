@@ -17,6 +17,7 @@ Tests: python3 mcp/tests/test_jev_server.py
 
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -51,7 +52,8 @@ QA_TOOL = {
 
 STOP_TOOL = {
     "name": "stop_gate",
-    "description": "Internal: called by the plugin's Stop hook with the hook's input. Do not call it yourself.",
+    "description": ("Internal: called by the plugin's Stop hook with the hook's input. Do not call it yourself. "
+                    "It accepts only this project's transcript for the given session and returns nothing otherwise."),
     "inputSchema": {
         "type": "object",
         "properties": {
@@ -90,12 +92,33 @@ def run_script(name, payload, session_id=""):
             {"status": "skipped", "reason": "%s failed: %s" % (name, type(exc).__name__)})
 
 
+UUID_JSONL = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.jsonl")
+
+
+def transcript_allowed(path, session_id):
+    """stop_gate reads the file it is given, and the model can call the tool too. Accept only this
+    project's Claude Code transcript for the given session: <config>/projects/<project dir with every
+    non-alphanumeric character as "-">/<session_id>.jsonl, after resolving symlinks."""
+    project = os.environ.get("CLAUDE_PROJECT_DIR", "")
+    if not (path and session_id and project):
+        return False
+    real = os.path.realpath(path)
+    if not UUID_JSONL.fullmatch(os.path.basename(real)) or os.path.basename(real) != session_id + ".jsonl":
+        return False
+    config = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(os.path.expanduser("~"), ".claude")
+    projects = os.path.realpath(os.path.join(config, "projects"))
+    dirs = {os.path.join(projects, re.sub(r"[^A-Za-z0-9]", "-", p)) for p in (project, os.path.realpath(project))}
+    return os.path.dirname(real) in dirs
+
+
 def call_tool(name, args):
     if name == "qa_crosscheck":
         out = run_script(name, {k: args.get(k, "") for k in ("scenario", "observation", "verdict")})
         lines = out.splitlines()
         return lines[-1] if lines else json.dumps({"status": "skipped", "reason": "no output from qa-crosscheck.sh"})
     # stop_gate: the hook passes its own input; the script's stdout is the hook's output (often empty).
+    if not transcript_allowed(args.get("transcript_path", ""), args.get("session_id", "")):
+        return ""
     active = args.get("stop_hook_active")
     payload = {
         "hook_event_name": "Stop",
