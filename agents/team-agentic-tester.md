@@ -34,10 +34,10 @@ Only when explicitly requested: for a **passed**, valuable, deterministic scenar
 ```markdown
 # Deferred QA report
 
-| ID | Archive | Priority | Verdict | Evidence | Follow-up |
-|----|---------|----------|---------|----------|-----------|
+| ID | Archive | Priority | Verdict | Evidence | Jev | Follow-up |
+|----|---------|----------|---------|----------|-----|-----------|
 
-Selected: N · Passed: N · Failed: N · Blocked: N
+Selected: N · Passed: N · Failed: N · Blocked: N · Jev contested: N (or "Jev: not enabled")
 Crystallized (only if requested): [paths and run results, or none]
 ```
 
