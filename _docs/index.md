@@ -15,7 +15,7 @@
 | graph-orchestration | plan | complete | 2026-07-30 | [complete/graph-orchestration/2026-07-30-graph-orchestration-plan.md](complete/graph-orchestration/2026-07-30-graph-orchestration-plan.md) |
 | guardrails | intent | reference | 2026-09-23 | [intent/2026-09-23-guardrails-intent.md](intent/2026-09-23-guardrails-intent.md) |
 | guardrails | spec | complete | 2026-09-23 | [complete/guardrails/2026-09-23-guardrails-spec.md](complete/guardrails/2026-09-23-guardrails-spec.md) |
-| jev-checks | plan | planning | 2026-09-28 | [active/planning/2026-09-28-jev-checks-plan.md](active/planning/2026-09-28-jev-checks-plan.md) |
+| jev-checks | plan | complete | 2026-09-28 | [complete/jev-checks/2026-09-28-jev-checks-plan.md](complete/jev-checks/2026-09-28-jev-checks-plan.md) |
 | harness-v2 | plan | complete | 2026-04-16 | [complete/harness-v2/2026-04-16-harness-v2.md](complete/harness-v2/2026-04-16-harness-v2.md) |
 | ponytail-yagni | plan | complete | 2026-06-23 | [complete/ponytail-yagni/2026-06-23-ponytail-yagni.md](complete/ponytail-yagni/2026-06-23-ponytail-yagni.md) |
 | scenario-to-e2e | impl | complete | 2026-07-06 | [complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md](complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md) |

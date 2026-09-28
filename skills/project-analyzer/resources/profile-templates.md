@@ -67,7 +67,7 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 - Page/route organization pattern
 - Module organization (`_modules/`, `lib/`, `utils/`)
 - Config file locations
-- **Submodules** — if `.gitmodules` exists, run `git submodule status`; record each submodule path + inferred role (FE/BE/shared/…) and whether the superproject is a thin **docs + submodule-pointers shell** (real code lives in submodules). Also record, per code submodule, the **worktree carry-list** — the gitignored runtime files (`.env*`, framework-local config, secrets; detect via `git -C <sub> ls-files --others --ignored --exclude-standard`) a clean worktree checkout would lack — and the **carry-exclude** heavy regenerable dirs. This block is what the `submodule-worktree` skill consumes.
+- **Submodules** — if `.gitmodules` exists, run `git submodule status`; record each submodule path + inferred role (FE/BE/shared/…) and whether the superproject is a thin **docs + submodule-pointers shell** (real code lives in submodules). Also record, per code submodule, the **worktree carry-list** — the gitignored runtime files (`.env*`, framework-local config, secrets; detect via `git -C <sub> ls-files --others --ignored --exclude-standard`) a clean worktree checkout would lack — and the **carry-exclude** heavy regenerable dirs. **Record paths and purpose only; never open a gitignored file (no `cat`, `Read`, `head`, `grep` on its content).** Infer the purpose from the file name and from tracked code that references it. These files hold secrets, and anything opened enters the model context and the agent transcript (a live `/team-init` put a token from `secrets.json` into a subagent transcript this way). This block is what the `submodule-worktree` skill consumes.
 
 **Template:**
 ```markdown
@@ -252,6 +252,7 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 - E2E account: <how it is provisioned — seed script path, fixture, or NONE FOUND>
 - Credentials source: <env var names / seed script default / gitignored env file path> — never a literal password in this file
 - Test-data seed: `[idempotent command]` (destructive re-load flag, if any: `[--reset]`)
+- Fixture files: <paths of files a scenario needs (upload images, sample documents, device media) · how to create them | [FILL]> — a missing one makes that scenario `blocked`
 - Target env: <local only — name the local DB/port> · prd/stg = human-executed, never automated
 - Shared-resource caution: <e.g. one local DB shared by several app instances → coordinate before seeding>
 - Teardown: <idempotent re-run | explicit cleanup command | none needed>
@@ -264,7 +265,7 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 
 ## Agentic Testing Adapter
 - Surface: <web | backend | mobile>
-- Driver: <agent-browser (default when CLI+skill present) | playwright-mcp | http | maestro | patrol | mobile-mcp | UNAVAILABLE>
+- Driver: <agent-browser (default when CLI+skill present) | playwright-mcp | http | maestro | patrol | mobile-mcp | device-lifecycle | UNAVAILABLE>
 - Emitter house-style: <reference/e2e-testing.md | springboot-tdd + kotlin-testing | integration_test>
 - Concurrency: <serial-shared-browser | parallel-stateless | serial-per-device>
 - Generated spec dir: <tests/e2e/ | src/test/ | integration_test/>

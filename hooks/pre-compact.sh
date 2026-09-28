@@ -35,8 +35,8 @@ if [ -n "$SID" ] && [ -d "$STATE_ROOT/runs" ]; then
 fi
 
 echo ""
-echo "COMPACTION IMMINENT — Update $REL_DIR/current.md before context is compressed."
-echo "(In Bash: .claude/session-state/sessions/\$CLAUDE_CODE_SESSION_ID/current.md)"
+# Absolute path: an agent whose cwd is a subfolder would create a stray nested folder from a relative one.
+echo "COMPACTION IMMINENT — Update $SESSION_DIR/current.md before context is compressed."
 echo ""
 echo "Ensure the following are captured:"
 echo "1. Current task progress and remaining steps"

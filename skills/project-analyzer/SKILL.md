@@ -42,12 +42,12 @@ Follow template §4. Skip for projects without API integration and mark ⏭️ S
 Follow template §5. Skip for projects without state library and mark ⏭️ Skipped. *(Seeded Mode: do NOT skip — inject the planned state library + store patterns and mark `🌱 Seeded`. See Seeded Mode.)*
 
 ### Step 6: Analyze Testing → `testing.md`
-Follow template §6. Default framework expectation: Vitest 4.x for unit, Playwright for E2E.
+Follow template §6. Default framework expectation: the current major of Vitest for unit and Playwright for E2E; record the versions the lockfile actually pins rather than assuming one.
 
 Also derive the **Agentic Testing Adapter** (template §6 block):
 - Surface: `web` if a browser UI (React/Vue/Svelte/Angular/Next…); `backend` if API-only (Spring/Express/FastAPI…); `mobile` if Flutter/React-Native.
 - Driver / Emitter house-style / Concurrency / spec dir: fill per the Adapter table in the `agentic-testing` skill.
-- If Surface=mobile and no mobile driver (maestro/Patrol/mobile-MCP) is detectable, set `Driver: UNAVAILABLE` and note it.
+- If Surface=mobile and no mobile driver (maestro/Patrol/mobile-MCP) is detectable, use `Driver: device-lifecycle` when `adb` (Android) or `xcrun simctl` (iOS) is available: the project's `integration_test` output plus the platform's app lifecycle commands plus a data-store check (see `agentic-testing` → Adapter resolution). Set `Driver: UNAVAILABLE` only when neither exists, and note it.
 
 ### Step 7: Analyze UI Components → `ui-components.md`
 Follow template §7. Skip for backend-only projects.
@@ -56,7 +56,7 @@ Follow template §7. Skip for backend-only projects.
 Follow template §8. Skip if no CI/CD found.
 
 ### Step 9: Generate Index → `index.md`
-Follow template §9. MUST include relevance + status for every profile file. Record `Profile-Generated-At: <git rev-parse --short HEAD>` so staleness can be detected later (`/team-init --update`).
+Follow template §9. MUST include relevance + status for every profile file. Record `Profile-Generated-At: <git rev-parse --short HEAD>` so staleness can be detected later (`/team-init --update`). Whenever an agent edits a profile file by hand to match a code change, set `Profile-Generated-At` to the commit that contains both, or run `/team-init --update`; otherwise the next update judges a current profile stale.
 
 ### Step 10: Bootstrap document buckets (if absent)
 Follow template §10. Establish the other two document buckets alongside `_docs/`, and record `_docs/`'s own bucket declaration:

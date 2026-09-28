@@ -1,16 +1,15 @@
 ---
 topic: jev-checks
 kind: plan
-status: planning
+status: complete
 created: 2026-09-28
 updated: 2026-09-28
 ---
 
 # v1.35.0 backlog — Jev checks and QA feedback
 
-Collected from live QA runs on picblog (Nuxt web) and nivoca (Flutter) after v1.33–v1.34. Not started.
-Decision (2026-09-28): ship v1.34.1 first (user is testing it on other machines), then handle everything
-below in one v1.35.0. Line numbers refer to v1.34.1.
+Collected from live QA runs on picblog (Nuxt web) and nivoca (Flutter) after v1.33–v1.34, all handled in
+v1.35.0 (see `## Outcome`). Line numbers refer to v1.34.1.
 
 ## Jev
 
@@ -68,3 +67,62 @@ below in one v1.35.0. Line numbers refer to v1.34.1.
 15. Nested `.claude/project-profile/.claude/session-state/` appeared in nivoca. Hooks use absolute paths,
     but `hooks/pre-compact.sh` tells the agent a relative `.claude/session-state/...` path; an agent whose
     cwd is a subfolder creates it there. Give the agent an absolute path.
+
+## Outcome (v1.35.0)
+
+| # | Result |
+|---|---|
+| 1 | Done. `qa-crosscheck.sh` asks a second question, `on_target`; below 0.35 a passed/failed label becomes `insufficient_evidence` with a `note`, shown as `contested`. Probe (jev-1.13.0, 15 cases): C2/C2b 0.10–0.15, every on-target passed/failed 0.55–0.97; live C2b ×2 → contested. Limitation seen: a clean restart case with token rotation (C2-ok) was read as `failed` 0.4 → `uncertain`. |
+| 2 | Partly. `qa_crosscheck` returns `elapsed_ms`; one call measured inside the server takes ~250 ms, so nivoca's 5.3 s came from outside it. Suspected, not verified: the stdio server handles one request at a time, so parallel calls queue. |
+| 3 | Done. MCP tool `qa_status` (no Jev call); `agentic-testing` calls it once before the first scenario. |
+| 4 | Decided: our verdicts stay passed/failed/blocked; `insufficient_evidence` appears only in the Jev column. |
+| 5 | Still unverified; carried forward. |
+| 6–15 | Done as proposed (agent-browser-e2e, e2e-testing, agentic-testing, project-analyzer and its template, submodule-worktree, checkpoint, pre-compact.sh). |
+
+## Deferred QA
+
+### QA-2026-09-28-jev-checks-plan-01 — Off-target mobile run is contested
+- Priority: P1
+- Preconditions: plugin ≥1.35.0 with `jev_api_key` set; an Android emulator with a Flutter app
+- Actions: launch with a command that brings another app to the front (or none), record `pidof` and the screen, verdict `failed`, call `qa_crosscheck`
+- Expected: `jev: insufficient_evidence`, `status: contested`, `note` present
+- Source: backlog item 1 (nivoca C2/C2b)
+- Status: pending
+- Evidence: —
+
+### QA-2026-09-28-jev-checks-plan-02 — Missing key is reported before the first scenario
+- Priority: P2
+- Preconditions: plugin ≥1.35.0 with `jev_api_key` empty
+- Actions: run `agentic-testing` on any goal
+- Expected: one message naming `/plugin` → Configure before scenario 1; scenarios continue with `Jev: skipped`
+- Source: backlog item 3
+- Status: pending
+- Evidence: —
+
+### QA-2026-09-28-jev-checks-plan-03 — Headless upload through a JS-opened file picker
+- Priority: P1
+- Preconditions: a web app whose upload button calls `input.click()` in its handler; a fixture image
+- Actions: follow agent-browser-e2e → Driving pitfalls → File choosers
+- Expected: the upload completes and the uploaded item persists after reload
+- Source: backlog item 7 (picblog `pickPhotos`)
+- Status: pending
+- Evidence: —
+
+### QA-2026-09-28-jev-checks-plan-04 — `/team-init` never opens gitignored files
+- Priority: P0
+- Preconditions: a submodule project with gitignored `secrets.json` / `.env`
+- Actions: run `/team-init`; inspect the subagent transcript
+- Expected: the carry-list names the files and purposes; no file content appears in any transcript
+- Source: backlog item 11 (nivoca)
+- Status: pending
+- Evidence: —
+
+### QA-2026-09-28-jev-checks-plan-05 — Stop gate note reaches Claude in a live session
+- Priority: P2
+- Preconditions: `jev_stop_gate` on and a key set through `/plugin` → Configure (not `--settings`)
+- Actions: in a real session, make a completion claim with no check in the turn
+- Expected: one `[jev stop-gate]` note; Claude runs the check or restates the claim as unverified
+- Source: backlog item 5
+- Status: pending
+- Evidence: —
+

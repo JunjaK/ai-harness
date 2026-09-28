@@ -19,8 +19,9 @@ Any E2E run that executes **without a human driving it** (focused implementation
 2. **Dedicated E2E account, never a real user's.** Provision it through the project's own path (seed script, fixture, documented factory). Credentials come from env vars / a gitignored env file / the seed script's documented default — **MUST NOT invent an account, email, or password, and MUST NOT hard-code one into a spec or commit it.**
 3. **Seed the test data the scenarios assume** — using the project's idempotent seed command so a re-run is safe. If seeding is destructive, it MUST be explicit (`--reset`-style flag), never implicit.
 4. **Local target only.** Automated E2E runs against a verified-local app + DB. Against prd/stg the assistant writes the SQL/seed and stops — **a human executes** (account creation and seeding are data writes).
-5. **Coordinate shared resources.** When several app instances or people share one local DB, seeding/resetting is destructive to them too: confirm nobody is mid-entry before you run it, one at a time.
-6. **Missing information stops the run, it does not get guessed.** If the account or seed path is unknown, report the gap in one line — "E2E fixtures unresolved: `[what]`" — and ask. `[FILL: …]` in the profile is a blocker, not a default.
+5. **Isolate file-based databases.** For an app whose data is a file or directory (SQLite, a JSON store), copy the data directory into the run's scratch folder and point the app at the copy through its env path setting. This is the file-DB equivalent of a separate local schema: the run can write freely and the original stays untouched.
+6. **Coordinate shared resources.** When several app instances or people share one local DB, seeding/resetting is destructive to them too: confirm nobody is mid-entry before you run it, one at a time.
+7. **Missing information stops the run, it does not get guessed.** If the account or seed path is unknown, report the gap in one line — "E2E fixtures unresolved: `[what]`" — and ask. `[FILL: …]` in the profile is a blocker, not a default.
 
 **Report the fixture state with the result.** A green E2E run whose fixtures were unverified is `됐는데 미검증`, not `됐다`.
 
@@ -130,6 +131,11 @@ await responsePromise;
 
 // Wait for element state
 await page.locator('[data-testid="modal"]').waitFor({ state: 'visible' });
+
+// File picker opened from a button handler: wait for the chooser, then set files
+const chooserPromise = page.waitForEvent('filechooser');
+await page.getByRole('button', { name: 'Upload' }).click();
+await (await chooserPromise).setFiles('tests/e2e/fixtures/photo.jpg');
 ```
 
 ## Artifact Layout (`_workspace/` — gitignored)

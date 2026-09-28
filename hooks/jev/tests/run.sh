@@ -33,7 +33,9 @@ chmod +x "$BIN/curl"
 noul() {  # noul <P(claims verified)> <P(evidence supports)>
   printf '{"model":"jev-test","answers":{"claims_verified":{"type":"noul","noul":%s},"evidence_supports":{"type":"noul","noul":%s}}}' "$1" "$2"
 }
-choice() { printf '{"model":"jev-test","answers":{"verdict":{"type":"choice","choice":"%s","confidence":%s,"probabilities":{"%s":0.9}}}}' "$1" "$2" "$1"; }
+choice() {  # choice <label> <confidence> [P(on_target)]
+  printf '{"model":"jev-test","answers":{"verdict":{"type":"choice","choice":"%s","confidence":%s,"probabilities":{"%s":0.9}},"on_target":{"type":"noul","noul":%s}}}' "$1" "$2" "$1" "${3:-0.9}"
+}
 
 # Transcript: an earlier turn, then the current prompt, one Bash call and its result.
 TR="$T/transcript.jsonl"
@@ -189,6 +191,20 @@ FAKE_RESP=$(choice insufficient_evidence 0.9) cross "$INPUT"
 check "crosscheck: passed vs insufficient_evidence → contested" \
   "$(printf '%s' "$OUT" | jq -e '.status == "contested" and .jev == "insufficient_evidence" and .model == "jev-test"' >/dev/null; echo $?)"
 check "crosscheck: log keeps confidence" "$(tail -1 "$T/data/jev.log" | grep -q 'confidence=0.9'; echo $?)"
+
+FAKE_RESP=$(choice failed 0.9 0.1) cross '{"scenario":"x","observation":"another app in front","verdict":"failed"}'
+check "crosscheck: failed but off target (0.1) → insufficient_evidence, contested, with a note" \
+  "$(printf '%s' "$OUT" | jq -e '.jev == "insufficient_evidence" and .status == "contested" and .on_target == 0.1 and (.note | test("did not|does not"))' >/dev/null; echo $?)"
+FAKE_RESP=$(choice failed 0.41 0.1) cross '{"scenario":"x","observation":"another app in front","verdict":"failed"}'
+check "crosscheck: off target overrides even when the choice confidence is low → contested, not uncertain" \
+  "$(printf '%s' "$OUT" | jq -e '.jev == "insufficient_evidence" and .status == "contested"' >/dev/null; echo $?)"
+FAKE_RESP=$(choice failed 0.9 0.4) cross '{"scenario":"x","observation":"y","verdict":"failed"}'
+check "crosscheck: failed, on_target 0.4 (above 0.35) → label kept, agree" \
+  "$(printf '%s' "$OUT" | jq -e '.jev == "failed" and .status == "agree" and (has("note") | not)' >/dev/null; echo $?)"
+FAKE_RESP=$(choice blocked 0.9 0.05) cross '{"scenario":"x","observation":"server down","verdict":"blocked"}'
+check "crosscheck: blocked with low on_target stays blocked" "$(printf '%s' "$OUT" | jq -e '.jev == "blocked" and .status == "agree"' >/dev/null; echo $?)"
+OUT=$(CLAUDE_PLUGIN_OPTION_JEV_API_KEY=k CLAUDE_PLUGIN_OPTION_JEV_QA_CROSSCHECK=true PATH="$BIN:$PATH" FAKE_DIR="$T" "$BASH_BIN" "$CROSS" --status </dev/null)
+check "crosscheck --status: ready without reading stdin or calling Jev" "$(printf '%s' "$OUT" | jq -e '.status == "ready"' >/dev/null; echo $?)"
 
 FAKE_RESP=$(choice passed 0.9) cross "$INPUT"
 check "crosscheck: same label → agree" "$(printf '%s' "$OUT" | jq -e '.status == "agree"' >/dev/null; echo $?)"

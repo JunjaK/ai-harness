@@ -86,7 +86,18 @@ Credentials are stored AES-256-GCM encrypted under `~/.agent-browser/`. The agen
   `_workspace/e2e/<run>/screenshots/` (see `e2e-testing` **Artifact Layout**); delete when done.
 - Encrypt at rest: `export AGENT_BROWSER_ENCRYPTION_KEY=$(openssl rand -hex 32)`.
 - `--remote-debugging-port` grants full browser control on localhost — trusted machines only; close Chrome when done.
-- **Starting the app server / tunnels is the human's job** — surface a one-line "please start X" and don't script around it (harness operational discipline).
+- **App servers: the agent may start them; shared infra stays the human's.** Start the project's own dev or production server when the run needs it, on a free port (check it first) and against isolated local data (a separate schema, or a copied data directory with its path overridden by env). Stop it when the run ends. Tunnels, redis, VPNs, and cloud or shared databases are the human's to start (CLAUDE.md → Operational Discipline): surface a one-line "please start X" for those. A destructive step on shared local data (migration, seed, reset) is announced to the human first.
+
+## Driving pitfalls
+
+- **File choosers in headless mode.** When the app opens its picker by calling `input.click()` inside a button handler and waits for `change`/`cancel`, a headless browser has no dialog and the handler sees `cancel`, so `agent-browser upload` afterwards changes nothing. Neutralise the programmatic click for file inputs only, then click the button, then upload:
+  ```bash
+  agent-browser eval "const c = HTMLInputElement.prototype.click; HTMLInputElement.prototype.click = function () { if (this.type !== 'file') return c.call(this); }"
+  agent-browser click @eN                                   # the app's upload button
+  agent-browser upload 'input[type=file]' _workspace/e2e/<run>/fixtures/photo.jpg
+  ```
+  Fixture files come from the profile's `testing.md` → "E2E Fixtures" → Fixture files; a missing one makes the scenario `blocked`.
+- **Responsive pages that render the markup twice** (one copy per breakpoint): `find role … click` can resolve to the hidden copy and fail as covered. Take a `snapshot -i` and click the visible element by its ref (`@eN`).
 
 ## Verification (do not trust 200 / UI)
 

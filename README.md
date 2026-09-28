@@ -175,7 +175,7 @@ settings itself. See [OpenAI's plugin packaging and local marketplace guide](htt
 | Codex plugin `SessionStart` hook | Read-only reminder about stale `_docs/active/` documents, after Codex hook trust review. |
 | Codex plugin `PreToolUse(Bash)` hook | Opt-in project guardrails: protected branch writes and configured forbidden command prefixes are denied. Claude `ask` rules also deny in Codex. |
 
-The Codex adapter is at v1.34.1. `$harness-team` now follows Claude's
+The Codex adapter is at v1.35.0. `$harness-team` now follows Claude's
 lightweight Phase 4 verdict and Phase 5 deferred QA/document contract, but
 Codex does not have a separate `/team-qa` command; request execution of the
 archived QA scenarios later. Codex does not write Claude session-state files.
@@ -285,7 +285,7 @@ Claude Code reads these values only from user or managed settings and the key on
 | Check | When | What it does |
 |---|---|---|
 | `jev_stop_gate` | `Stop` hook → MCP tool `stop_gate`, after a reply that uses words such as 완료 / 통과 / fixed / verified / passing | Asks whether the reply states verified or working results, and whether this turn's tool output contains a check that exercises them. Score = P(claims verified) × (1 − P(evidence supports)). At or above `threshold` (default 0.6) Claude gets one `additionalContext` note per turn: run the check, restate the claim as unverified, or name the earlier evidence. It never blocks the stop by itself. |
-| `jev_qa_crosscheck` | MCP tool `mcp__plugin_junjak-ai-harness_jev__qa_crosscheck`, called by `agentic-testing` | Classifies the raw evidence as `passed` / `failed` / `blocked` / `insufficient_evidence` and returns `agree`, `contested`, `uncertain` (confidence < 0.5), or `skipped` with the reason. The verdict is never changed; a contested result is written to the archive's Evidence for the user to review. An MCP tool is used because the Bash tool never receives plugin settings. |
+| `jev_qa_crosscheck` | MCP tool `mcp__plugin_junjak-ai-harness_jev__qa_crosscheck`, called by `agentic-testing` (after one `qa_status` check) | Classifies the raw evidence as `passed` / `failed` / `blocked` / `insufficient_evidence` and returns `agree`, `contested`, `uncertain` (confidence < 0.5), or `skipped` with the reason, plus `elapsed_ms`. A second question, `on_target`, turns a passed/failed label into `insufficient_evidence` (with a `note`) when the evidence does not show the steps reached the target app or page. The verdict is never changed; a contested result is written to the archive's Evidence for the user to review. An MCP tool is used because the Bash tool never receives plugin settings. |
 
 - **Data leaves the machine.** The stop gate sends the last user prompt, the final reply (last 4,000 chars), and this turn's tool output (each result's last 1,500 chars, 12,000 in total) to `https://api.typesafe.ai/v1/systemone`; the cross-check sends the scenario and observation. With a key and a switch on, this happens in **every** project that has not opted out. Before sending, common secret shapes in every field are masked (private key blocks; `sk-`, `ghp_`/`gho_`/`github_pat_`, `AKIA`, `xox*-` tokens; JWTs; Bearer/Basic values; credentials in URLs; values after `password`/`secret`/`token`/`api_key`-style names). Masking is best effort: a secret in another shape still goes out. TypeSafe states it does not train on inputs; zero data retention needs an enterprise contract or a gateway that offers it.
 - `jev-latest` changes without notice. After tuning `threshold`, pin the model id that the log records. The log is `~/.claude/plugins/data/<plugin id>/jev.log`, outside every project: time, session, project path, model, scores, labels, and confidence, never prompt, reply, or evidence text. It is the only feedback loop: Jev does not learn from your requests.
@@ -410,7 +410,7 @@ junjak-ai-harness/
 │       ├── qa-crosscheck.sh     # second opinion on one QA verdict
 │       └── tests/run.sh         # fake-endpoint tests
 ├── mcp/
-│   ├── jev_server.py            # MCP tools qa_crosscheck + stop_gate (stdio, Python stdlib)
+│   ├── jev_server.py            # MCP tools qa_crosscheck, qa_status, stop_gate (stdio, Python stdlib)
 │   └── tests/test_jev_server.py
 ├── reference/                   # 5 methodology documents — read, never invoked
 │   ├── coding-standards.md
@@ -439,7 +439,10 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.34.1** — the Jev stop
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.35.0** — Jev flags a QA
+run that never reached the target app, `qa_status` reports a missing key up front,
+a `device-lifecycle` mobile driver, headless file-picker guidance, and `/team-init`
+no longer opens gitignored files. v1.34.1: the Jev stop
 gate runs through the MCP server too, so a project's `env` cannot switch it on;
 Jev keys with characters that could alter the curl config are refused. v1.34.0: the Jev
 key and switches live in `/plugin` → Configure (key in the OS credential

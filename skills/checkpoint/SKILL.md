@@ -58,6 +58,7 @@ Persist work state for cross-session recovery. Checkpoints capture everything ne
 └── learnings/<topic>.md               # shared across sessions (continuous-learning)
 ```
 
+- Paths in this skill and in hook messages are relative to that primary tree. Write with the absolute path (`<primary tree>/.claude/session-state/…`), never a relative one: an agent whose cwd is a subfolder (for example `.claude/project-profile/`) would otherwise create a stray nested `.claude/session-state/` there.
 - Before the first write, make sure the project's `.gitignore` carries `.claude/session-state/`; append the line if it is missing and tell the user.
 - `$CLAUDE_CODE_SESSION_ID` is set in every Bash tool and hook subprocess and equals the hook input's `session_id`. It survives `--resume`/`--continue` and changes on `/clear`, so a cleared session starts a new folder.
 - Team workflow phase checkpoints go in the orchestrator's own `checkpoints/` with a prefix: `phase1-baseline.md`, `phase3-worktree-auth.md`.

@@ -83,6 +83,7 @@ SRC="$SUPER/$SUB"; DST="$SUPER/.worktrees/$SUB-$TASK"
 - **Env/secrets/local config** (`.env`, `.env.*`, `application-local.yml`, `local.properties`, service-account JSON, …) → **copied** by the above (isolated copy, not a symlink, so parallel worktrees don't share mutable state).
 - **Dependencies / build output** (`node_modules`, `.gradle`, `build/`, `target/`, `.next/`) → **NOT** copied. Provision deps via the **fast path** (`parallelization` → "Provision worktree deps" / `/worktree-deps`): the package manager's shared store hard-links a per-worktree `node_modules` — no re-download, parallel-safe. Rebuild build output in place. Copied artifacts go stale against the new path/lockfile; symlinking `node_modules` across worktrees stays **excluded** (cache races + cross-contamination).
 - Carried files **stay gitignored** in the worktree (same repo, same `.gitignore`) — never commit them.
+- The copy moves bytes without reading them. Never open a carried file's content to decide whether to carry it (no `cat`, `Read`, `grep`): they hold secrets, and anything opened enters the model context. Decide by path and the profile's carry-list only.
 - The profile's carry-list refines this: it can pin exact paths to copy and extra paths to exclude (e.g. a large gitignored fixtures dir), making the step deterministic instead of heuristic.
 
 ## 2. `_docs/` anchor = the superproject original (single physical copy)

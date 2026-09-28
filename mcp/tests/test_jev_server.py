@@ -79,11 +79,12 @@ with tempfile.TemporaryDirectory() as tmp:
     check("notification gets no reply", set(r) == {1, 2, 3, 4, 5, 6}, str(sorted(r)))
     tools = r[2]["result"]["tools"]
     names = {t["name"]: t for t in tools}
-    check("tools/list has qa_crosscheck (required fields) and stop_gate",
-          set(names) == {"qa_crosscheck", "stop_gate"}
+    check("tools/list has qa_crosscheck (required fields), qa_status and stop_gate",
+          set(names) == {"qa_crosscheck", "qa_status", "stop_gate"}
           and names["qa_crosscheck"]["inputSchema"]["required"] == ["scenario", "observation", "verdict"])
     out = tool_json(r[3])
     check("tools/call returns the script's verdict", out.get("status") == "contested" and out.get("jev") == "insufficient_evidence", str(out))
+    check("qa_crosscheck reports elapsed_ms", isinstance(out.get("elapsed_ms"), int), str(out))
     with open(os.path.join(tmp, "config")) as f:
         check("key from the MCP env reaches curl", "Bearer test-key" in f.read())
     with open(os.path.join(tmp, "body.json")) as f:
@@ -99,6 +100,13 @@ with tempfile.TemporaryDirectory() as tmp:
         env = dict(on, CLAUDE_PLUGIN_OPTION_JEV_API_KEY=key)
         out = tool_json(session(env, [call(1, args)])[1])
         check("%s → skipped naming the key" % label, out.get("status") == "skipped" and "no Jev API key" in out.get("reason", ""), str(out))
+
+    status_call = {"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "qa_status", "arguments": {}}}
+    os.remove(os.path.join(tmp, "body.json"))
+    check("qa_status ready with key and switch, no Jev call",
+          tool_json(session(on, [status_call])[1]) == {"status": "ready"} and not os.path.exists(os.path.join(tmp, "body.json")))
+    out = tool_json(session(dict(on, CLAUDE_PLUGIN_OPTION_JEV_API_KEY=""), [status_call])[1])
+    check("qa_status without key → skipped naming the key", out.get("status") == "skipped" and "no Jev API key" in out.get("reason", ""), str(out))
 
     off = dict(on, CLAUDE_PLUGIN_OPTION_JEV_QA_CROSSCHECK="false")
     out = tool_json(session(off, [call(1, args)])[1])

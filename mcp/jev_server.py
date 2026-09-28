@@ -3,6 +3,7 @@
 
 Tools:
   qa_crosscheck — second opinion on one QA verdict (called by agentic-testing).
+  qa_status     — whether qa_crosscheck can run (switch, key, opt-out), without calling Jev.
   stop_gate     — the Stop check, called by the plugin's `mcp_tool` Stop hook, not by the model.
 
 Claude Code fills this server's MCP `env` (see .claude-plugin/plugin.json) from user or managed
@@ -20,6 +21,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SCRIPTS = {
@@ -50,6 +52,13 @@ QA_TOOL = {
     },
 }
 
+STATUS_TOOL = {
+    "name": "qa_status",
+    "description": ("Check once before the first QA scenario whether qa_crosscheck can run (plugin switch, key, "
+                    "project opt-out). Makes no Jev call. Returns {\"status\": \"ready\"} or a skipped reason to tell the user."),
+    "inputSchema": {"type": "object", "properties": {}},
+}
+
 STOP_TOOL = {
     "name": "stop_gate",
     "description": ("Internal: called by the plugin's Stop hook with the hook's input. Do not call it yourself. "
@@ -64,10 +73,10 @@ STOP_TOOL = {
         },
     },
 }
-TOOLS = {"qa_crosscheck": QA_TOOL, "stop_gate": STOP_TOOL}
+TOOLS = {"qa_crosscheck": QA_TOOL, "qa_status": STATUS_TOOL, "stop_gate": STOP_TOOL}
 
 
-def run_script(name, payload, session_id=""):
+def run_script(name, payload, session_id="", extra_args=()):
     """Run a hooks/jev script with the settings from this server's env; return its stdout."""
     env = dict(os.environ)
     # An unset option can arrive as an unsubstituted placeholder; treat it as unset.
@@ -78,7 +87,7 @@ def run_script(name, payload, session_id=""):
         env["CLAUDE_CODE_SESSION_ID"] = session_id
     try:
         proc = subprocess.run(
-            ["bash", SCRIPTS[name]],
+            ["bash", SCRIPTS[name], *extra_args],
             input=json.dumps(payload),
             capture_output=True,
             text=True,
@@ -112,10 +121,18 @@ def transcript_allowed(path, session_id):
 
 
 def call_tool(name, args):
+    if name == "qa_status":
+        out = run_script("qa_crosscheck", {}, extra_args=("--status",)).splitlines()
+        return out[-1] if out else json.dumps({"status": "skipped", "reason": "no output from qa-crosscheck.sh"})
     if name == "qa_crosscheck":
-        out = run_script(name, {k: args.get(k, "") for k in ("scenario", "observation", "verdict")})
-        lines = out.splitlines()
-        return lines[-1] if lines else json.dumps({"status": "skipped", "reason": "no output from qa-crosscheck.sh"})
+        started = time.monotonic()
+        out = run_script(name, {k: args.get(k, "") for k in ("scenario", "observation", "verdict")}).splitlines()
+        try:
+            result = json.loads(out[-1]) if out else {"status": "skipped", "reason": "no output from qa-crosscheck.sh"}
+        except ValueError:
+            result = {"status": "skipped", "reason": "unreadable output from qa-crosscheck.sh"}
+        result["elapsed_ms"] = int((time.monotonic() - started) * 1000)
+        return json.dumps(result)
     # stop_gate: the hook passes its own input; the script's stdout is the hook's output (often empty).
     if not transcript_allowed(args.get("transcript_path", ""), args.get("session_id", "")):
         return ""
