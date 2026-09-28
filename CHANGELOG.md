@@ -4,6 +4,15 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.34.1 — 2026-09-28
+
+Security fixes for v1.34.0, from a review of that release and a live check. The Codex adapter moves to 1.34.1 with no change.
+
+### Fixed
+- **A cloned repository could switch the stop gate on.** The stop gate was a command hook reading `CLAUDE_PLUGIN_OPTION_*` from its environment. When the user had left the options unset, a project's `.claude/settings.json` `env` could supply the key and the switch; a live run with no user settings made a Jev call this way. The `Stop` hook is now `type: "mcp_tool"` and calls the new MCP tool `stop_gate` on the plugin's `jev` server, whose `env` Claude Code fills from user settings and the credential store only. The same live check now makes no call, and a run with user settings still does. `qa_crosscheck` already ran there and was unaffected.
+- **A Jev key could add curl directives.** The key is written into a curl config line, so a quote or newline in it could add another `url`. A key with any character outside `A-Z a-z 0-9 . _ ~ + / = -` now skips the check.
+- Tests: `hooks/jev/tests/run.sh` 34 cases (adds the key-format case); `mcp/tests/test_jev_server.py` adds `stop_gate` (hook output, session id in the log, `stop_hook_active`, unset switch).
+
 ## v1.34.0 — 2026-09-28
 
 The Jev checks move to the plugin's own settings. Enter the TypeSafe key once in **`/plugin` → junjak-ai-harness → Configure**; it is kept in the OS credential store. The QA cross-check becomes an MCP tool, because the Bash tool never receives plugin settings. The Codex adapter moves to 1.34.0 with no change; it runs neither Claude `Stop` hooks nor plugin MCP servers.
