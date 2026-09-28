@@ -4,6 +4,27 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.35.0 — 2026-09-28
+
+Fixes from live QA on a Nuxt web app (picblog) and a Flutter app (nivoca). Plan and outcome: `_docs/complete/jev-checks/2026-09-28-jev-checks-plan.md`. The Codex adapter moves to 1.35.0 with no change.
+
+### Added
+- **Jev `on_target` check.** `qa_crosscheck` also asks whether the evidence shows the steps ran on the target app or page. Below 0.35, a `passed`/`failed` label becomes `insufficient_evidence` with a `note`, shown as `contested`. Before this, a launch that opened another app (Google Calendar in front, empty `pidof`) was read as `failed` (0.75–0.90). On 15 probe cases the two off-target runs scored 0.10–0.15 and every on-target passed/failed run 0.55–0.97.
+- MCP tool `qa_status`: whether `qa_crosscheck` can run, without a Jev call. `agentic-testing` calls it once before the first scenario and tells the user a skip reason (for example a missing key) up front.
+- `qa_crosscheck` returns `elapsed_ms`. Inside the server a call takes about 250 ms; a 5.3 s wait seen in a QA run came from outside it (parallel calls queue on the one-request-at-a-time stdio server — suspected, not verified).
+- `agentic-testing`: a `device-lifecycle` mobile driver for projects without maestro/Patrol/mobile MCP (`integration_test` output + `adb`/`xcrun simctl` launch, stop, `pidof`, screenshot + a data-store check), with its traps: `monkey -p` can open another app, and `flutter test` uninstalls the app on Android exit. `project-analyzer` records it instead of `Driver: UNAVAILABLE` when `adb` or `simctl` exists.
+- `agent-browser-e2e` → Driving pitfalls: headless file pickers opened by `input.click()` (neutralise the click, then `upload`), and responsive pages with duplicated markup (click by snapshot ref). `reference/e2e-testing.md` gains the Playwright `filechooser` pattern and a precondition for file-based databases (copy the data directory, point the app at the copy).
+- Profile template §6 E2E Fixtures: a "Fixture files" row; a missing file makes its scenario `blocked`.
+
+### Changed
+- `agent-browser-e2e`: the agent may start the project's app servers on a free port with isolated data; tunnels, redis, VPNs, and shared or cloud databases stay the human's, matching CLAUDE.md.
+- `project-analyzer`: the unit-test expectation is "the current major" rather than Vitest 4.x; a hand edit of the profile must move `Profile-Generated-At` or run `/team-init --update`.
+- `pre-compact.sh` prints the absolute session-state path, and the `checkpoint` skill says to write there by absolute path; a relative path from a subfolder had created a stray nested `.claude/session-state/`.
+
+### Fixed
+- **`/team-init` and `submodule-worktree` no longer open gitignored files.** The carry-list step listed gitignored files, and an agent read `secrets.json` to learn its purpose, putting a token into the model context and a transcript. Both now record paths and purpose only and copy without reading.
+- `agentic-testing` / `agent-browser-e2e`: a run with the server up whose login sent no auth request is `failed` with that evidence, not `blocked`.
+
 ## v1.34.1 — 2026-09-28
 
 Security fixes for v1.34.0, from a review of that release and a live check. The Codex adapter moves to 1.34.1 with no change.
