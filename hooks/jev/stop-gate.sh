@@ -1,5 +1,6 @@
 #!/bin/bash
 # Stop hook — Jev check for completion claims the turn's own tool output does not support.
+# Runs under mcp/jev_server.py (tool stop_gate), which the plugin's Stop hook calls as an mcp_tool hook.
 # Opt-in: the plugin setting jev_stop_gate plus a Jev API key (README → "Jev checks"). Advisory and fail-open:
 # it never blocks a stop hard; above the threshold it returns additionalContext so Claude either
 # shows the check or restates the claim as unverified. One nudge per turn (stop_hook_active).

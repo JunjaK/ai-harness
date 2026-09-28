@@ -20,8 +20,15 @@
             "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/session-stop.sh"
           },
           {
-            "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/jev/stop-gate.sh\"",
+            "type": "mcp_tool",
+            "server": "plugin:junjak-ai-harness:jev",
+            "tool": "stop_gate",
+            "input": {
+              "stop_hook_active": "${stop_hook_active}",
+              "last_assistant_message": "${last_assistant_message}",
+              "transcript_path": "${transcript_path}",
+              "session_id": "${session_id}"
+            },
             "timeout": 15
           }
         ]

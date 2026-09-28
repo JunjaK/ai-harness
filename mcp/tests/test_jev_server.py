@@ -51,11 +51,15 @@ with tempfile.TemporaryDirectory() as tmp:
     os.makedirs(project)
     with open(os.path.join(binary, "curl"), "w") as f:
         f.write('#!/bin/bash\nwhile [ $# -gt 0 ]; do [ "$1" = -K ] && cat "$2" >"$FAKE_DIR/config"; shift; done\n'
-                'cat >"$FAKE_DIR/body.json"\n'
-                'printf \'{"model":"jev-test","answers":{"verdict":{"type":"choice","choice":"insufficient_evidence",'
-                '"confidence":0.98,"probabilities":{"insufficient_evidence":0.98}}}}\'\n')
+                'cat >"$FAKE_DIR/body.json"\ncat "$FAKE_DIR/resp.json"\n')
     os.chmod(os.path.join(binary, "curl"), 0o755)
 
+    def respond(obj):
+        with open(os.path.join(tmp, "resp.json"), "w") as f:
+            json.dump(obj, f)
+
+    respond({"model": "jev-test", "answers": {"verdict": {"type": "choice", "choice": "insufficient_evidence",
+                                                          "confidence": 0.98, "probabilities": {"insufficient_evidence": 0.98}}}})
     base = {"PATH": binary + os.pathsep + os.environ["PATH"], "FAKE_DIR": tmp, "CLAUDE_PLUGIN_DATA": os.path.join(tmp, "data"),
             "CLAUDE_PROJECT_DIR": project}
     on = dict(base, CLAUDE_PLUGIN_OPTION_JEV_API_KEY="test-key", CLAUDE_PLUGIN_OPTION_JEV_QA_CROSSCHECK="true")
@@ -74,9 +78,10 @@ with tempfile.TemporaryDirectory() as tmp:
           r[1]["result"]["protocolVersion"] == "2025-06-18" and "tools" in r[1]["result"]["capabilities"])
     check("notification gets no reply", set(r) == {1, 2, 3, 4, 5, 6}, str(sorted(r)))
     tools = r[2]["result"]["tools"]
-    check("tools/list has qa_crosscheck with required fields",
-          len(tools) == 1 and tools[0]["name"] == "qa_crosscheck"
-          and tools[0]["inputSchema"]["required"] == ["scenario", "observation", "verdict"])
+    names = {t["name"]: t for t in tools}
+    check("tools/list has qa_crosscheck (required fields) and stop_gate",
+          set(names) == {"qa_crosscheck", "stop_gate"}
+          and names["qa_crosscheck"]["inputSchema"]["required"] == ["scenario", "observation", "verdict"])
     out = tool_json(r[3])
     check("tools/call returns the script's verdict", out.get("status") == "contested" and out.get("jev") == "insufficient_evidence", str(out))
     with open(os.path.join(tmp, "config")) as f:
@@ -98,6 +103,28 @@ with tempfile.TemporaryDirectory() as tmp:
     off = dict(on, CLAUDE_PLUGIN_OPTION_JEV_QA_CROSSCHECK="false")
     out = tool_json(session(off, [call(1, args)])[1])
     check("switch off → skipped", out.get("status") == "skipped" and "jev_qa_crosscheck is off" in out.get("reason", ""), str(out))
+
+    # stop_gate: the mcp_tool Stop hook passes its own input (strings); stdout is the hook's output.
+    transcript = os.path.join(tmp, "t.jsonl")
+    with open(transcript, "w") as f:
+        f.write(json.dumps({"type": "user", "message": {"role": "user", "content": "fix login"}}) + "\n")
+    respond({"model": "jev-test", "answers": {"claims_verified": {"type": "noul", "noul": 0.95},
+                                              "evidence_supports": {"type": "noul", "noul": 0.05}}})
+    hook_input = {"stop_hook_active": "false", "last_assistant_message": "Fixed and verified.",
+                  "transcript_path": transcript, "session_id": "sess-1"}
+    gate_on = dict(on, CLAUDE_PLUGIN_OPTION_JEV_STOP_GATE="true")
+    r = session(gate_on, [{"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                           "params": {"name": "stop_gate", "arguments": hook_input}}])
+    text = r[1]["result"]["content"][0]["text"]
+    check("stop_gate returns the Stop hook's additionalContext", '"hookEventName":"Stop"' in text.replace(" ", ""), text)
+    with open(os.path.join(tmp, "data", "jev.log")) as f:
+        check("stop_gate log carries the hook's session id", "sess-1" in f.read().splitlines()[-1])
+    for label, env, args in (
+        ("stop_hook_active \"true\"", gate_on, dict(hook_input, stop_hook_active="true")),
+        ("switch unset (placeholder)", dict(on, CLAUDE_PLUGIN_OPTION_JEV_STOP_GATE="${user_config.jev_stop_gate}"), hook_input),
+    ):
+        r = session(env, [{"jsonrpc": "2.0", "id": 1, "method": "tools/call", "params": {"name": "stop_gate", "arguments": args}}])
+        check("stop_gate: %s → empty output" % label, r[1]["result"]["content"][0]["text"] == "", str(r[1]))
 
 print("jev MCP tests: %d failed" % len(FAILS))
 sys.exit(1 if FAILS else 0)

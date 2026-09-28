@@ -1,10 +1,11 @@
 #!/bin/bash
 # Shared TypeSafe Jev client for the harness's advisory test-side checks
 # (stop-gate.sh, qa-crosscheck.sh). Source it; it defines functions only.
-# Switches and key come from the plugin's userConfig (README → "Jev checks"), which Claude Code
-# exports to hook processes as CLAUDE_PLUGIN_OPTION_<KEY>; mcp/jev_server.py passes the same names
-# to qa-crosscheck.sh. Claude Code reads userConfig only from user or managed settings and the
-# key from the OS credential store, so a cloned repository cannot switch these checks on or supply a key.
+# Switches and key come from the plugin's userConfig (README → "Jev checks"). Both checks run only
+# under mcp/jev_server.py, whose MCP `env` Claude Code fills from user or managed settings and the OS
+# credential store. That env replaces anything a project's settings.json `env` sets. Command hooks
+# are not used here: when an option is unset, a project's env can supply CLAUDE_PLUGIN_OPTION_* to
+# them (seen in a live run), which would let a cloned repository switch a check on.
 # Every failure (no key, no jq/curl, network, bad response) is fail-open: the caller skips.
 # Inputs are sent to TypeSafe (fixed endpoint below).
 # Compatible with bash 3.2 (macOS /bin/bash).
@@ -33,6 +34,13 @@ jev_enabled() {
     JEV_SKIP="no Jev API key in the plugin settings (/plugin → junjak-ai-harness → Configure)"
     return 1
   fi
+  # The key is written into a curl config line; a quote or newline could add directives (another url).
+  case "$CLAUDE_PLUGIN_OPTION_JEV_API_KEY" in
+    *[!A-Za-z0-9._~+/=-]*)
+      JEV_SKIP="the Jev API key has characters outside A-Z a-z 0-9 . _ ~ + / = -"
+      return 1
+      ;;
+  esac
   if ! command -v jq >/dev/null 2>&1 || ! command -v curl >/dev/null 2>&1; then
     JEV_SKIP="jq or curl is missing"
     return 1

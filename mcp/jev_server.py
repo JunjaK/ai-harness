@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
-"""Minimal MCP stdio server exposing the harness's Jev QA cross-check as a typed tool.
+"""Minimal MCP stdio server that runs the harness's Jev checks with the plugin settings.
 
-The Bash tool never receives plugin settings, and the Jev key is a sensitive userConfig value that
-Claude Code substitutes only into hook and MCP configuration. This server receives the settings
-through its MCP `env` (see .claude-plugin/plugin.json) and runs hooks/jev/qa-crosscheck.sh with
-them, so the check logic stays in one place and the key never enters the agent's context.
+Tools:
+  qa_crosscheck — second opinion on one QA verdict (called by agentic-testing).
+  stop_gate     — the Stop check, called by the plugin's `mcp_tool` Stop hook, not by the model.
+
+Claude Code fills this server's MCP `env` (see .claude-plugin/plugin.json) from user or managed
+settings and the OS credential store, and that env replaces anything a project's settings.json `env`
+sets. The Bash tool never receives plugin settings, and command hooks can inherit a project-supplied
+CLAUDE_PLUGIN_OPTION_* when an option is unset, so both checks run here. The scripts in hooks/jev/
+hold the check logic; the key never enters the agent's context.
 
 Protocol: newline-delimited JSON-RPC 2.0 over stdin/stdout (MCP stdio transport). Standard library only.
 Tests: python3 mcp/tests/test_jev_server.py
@@ -16,10 +21,15 @@ import subprocess
 import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-SCRIPT = os.path.join(ROOT, "hooks", "jev", "qa-crosscheck.sh")
+SCRIPTS = {
+    "qa_crosscheck": os.path.join(ROOT, "hooks", "jev", "qa-crosscheck.sh"),
+    "stop_gate": os.path.join(ROOT, "hooks", "jev", "stop-gate.sh"),
+}
+OPTIONS = ("CLAUDE_PLUGIN_OPTION_JEV_API_KEY", "CLAUDE_PLUGIN_OPTION_JEV_QA_CROSSCHECK",
+           "CLAUDE_PLUGIN_OPTION_JEV_STOP_GATE", "CLAUDE_PROJECT_DIR")
 FALLBACK_PROTOCOL = "2025-06-18"
 
-TOOL = {
+QA_TOOL = {
     "name": "qa_crosscheck",
     "description": (
         "Jev second opinion on one QA verdict. Pass the scenario's expected outcome, the RAW observed "
@@ -39,27 +49,61 @@ TOOL = {
     },
 }
 
+STOP_TOOL = {
+    "name": "stop_gate",
+    "description": "Internal: called by the plugin's Stop hook with the hook's input. Do not call it yourself.",
+    "inputSchema": {
+        "type": "object",
+        "properties": {
+            "stop_hook_active": {"type": ["string", "boolean"]},
+            "last_assistant_message": {"type": "string"},
+            "transcript_path": {"type": "string"},
+            "session_id": {"type": "string"},
+        },
+    },
+}
+TOOLS = {"qa_crosscheck": QA_TOOL, "stop_gate": STOP_TOOL}
 
-def run_crosscheck(args):
+
+def run_script(name, payload, session_id=""):
+    """Run a hooks/jev script with the settings from this server's env; return its stdout."""
     env = dict(os.environ)
-    # Empty or unsubstituted values count as unset.
-    for name in ("CLAUDE_PLUGIN_OPTION_JEV_API_KEY", "CLAUDE_PLUGIN_OPTION_JEV_QA_CROSSCHECK", "CLAUDE_PROJECT_DIR"):
-        if env.get(name, "").startswith("${"):
-            env.pop(name)
+    # An unset option can arrive as an unsubstituted placeholder; treat it as unset.
+    for option in OPTIONS:
+        if env.get(option, "").startswith("${"):
+            env.pop(option)
+    if session_id:
+        env["CLAUDE_CODE_SESSION_ID"] = session_id
     try:
         proc = subprocess.run(
-            ["bash", SCRIPT],
-            input=json.dumps(args),
+            ["bash", SCRIPTS[name]],
+            input=json.dumps(payload),
             capture_output=True,
             text=True,
             env=env,
             cwd=env.get("CLAUDE_PROJECT_DIR") or None,
             timeout=30,
         )
-        out = proc.stdout.strip().splitlines()
-        return out[-1] if out else json.dumps({"status": "skipped", "reason": "no output from qa-crosscheck.sh"})
+        return proc.stdout.strip()
     except (OSError, subprocess.SubprocessError) as exc:
-        return json.dumps({"status": "skipped", "reason": "qa-crosscheck.sh failed: %s" % type(exc).__name__})
+        return "" if name == "stop_gate" else json.dumps(
+            {"status": "skipped", "reason": "%s failed: %s" % (name, type(exc).__name__)})
+
+
+def call_tool(name, args):
+    if name == "qa_crosscheck":
+        out = run_script(name, {k: args.get(k, "") for k in ("scenario", "observation", "verdict")})
+        lines = out.splitlines()
+        return lines[-1] if lines else json.dumps({"status": "skipped", "reason": "no output from qa-crosscheck.sh"})
+    # stop_gate: the hook passes its own input; the script's stdout is the hook's output (often empty).
+    active = args.get("stop_hook_active")
+    payload = {
+        "hook_event_name": "Stop",
+        "stop_hook_active": active is True or str(active).lower() == "true",
+        "last_assistant_message": args.get("last_assistant_message", ""),
+        "transcript_path": args.get("transcript_path", ""),
+    }
+    return run_script(name, payload, args.get("session_id", ""))
 
 
 def handle(msg):
@@ -74,13 +118,12 @@ def handle(msg):
     if method == "ping":
         return {}
     if method == "tools/list":
-        return {"tools": [TOOL]}
+        return {"tools": list(TOOLS.values())}
     if method == "tools/call":
         params = msg.get("params") or {}
-        if params.get("name") != TOOL["name"]:
+        if params.get("name") not in TOOLS:
             raise LookupError("unknown tool: %s" % params.get("name"))
-        args = params.get("arguments") or {}
-        text = run_crosscheck({k: args.get(k, "") for k in ("scenario", "observation", "verdict")})
+        text = call_tool(params["name"], params.get("arguments") or {})
         return {"content": [{"type": "text", "text": text}], "isError": False}
     raise LookupError("method not found: %s" % method)
 
