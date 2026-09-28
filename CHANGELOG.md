@@ -4,6 +4,26 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.34.0 — 2026-09-28
+
+The Jev checks move to the plugin's own settings. Enter the TypeSafe key once in **`/plugin` → junjak-ai-harness → Configure**; it is kept in the OS credential store. The QA cross-check becomes an MCP tool, because the Bash tool never receives plugin settings. The Codex adapter moves to 1.34.0 with no change; it runs neither Claude `Stop` hooks nor plugin MCP servers.
+
+### Added
+- `userConfig` in the plugin manifest: `jev_api_key` (sensitive), `jev_qa_crosscheck` (default on), `jev_stop_gate` (default off). Claude Code reads these only from user or managed settings, so a cloned repository cannot switch a check on or supply a key. A live run confirmed that a project's `settings.json` `env` setting `CLAUDE_PLUGIN_OPTION_JEV_API_KEY` does not replace the key the hook receives.
+- MCP server `jev` (`mcp/jev_server.py`, Python 3 standard library) with the tool `qa_crosscheck` (`scenario`, `observation`, `verdict`). It runs `hooks/jev/qa-crosscheck.sh` with the settings from its MCP `env`, so the check logic stays in one script and the key never enters the agent's context. `python3 mcp/tests/test_jev_server.py` covers the stdio protocol, key hand-off, and unset or placeholder settings.
+
+### Changed
+- `agentic-testing` calls the MCP tool instead of running a script through Bash; the report's Jev column says `not available` when the tool is not listed, or the skip reason.
+- `jev.json` only opts a project out (`"disabled": true`) and tunes `model`, `stopGate.threshold`, and `timeoutSeconds`. It no longer switches anything on.
+- Skip reasons name their cause (switch off, no key, project opted out, jq or curl missing) instead of always pointing at `jev.json`.
+- `jev.log` moves to `~/.claude/plugins/data/<plugin id>/jev.log`, outside every project, so it no longer appears as an untracked file; each line adds the project path, and cross-check lines add `confidence`.
+- Jev's `blocked` criterion names a missing test fixture file, so a missing upload fixture reads as blocked rather than insufficient evidence.
+- `agent-browser-e2e`: with the server up, the steps run, and no auth request sent, the verdict is `failed` with that evidence, not `blocked`.
+
+### Removed
+- `~/.config/typesafe/api-key` and `~/.config/typesafe/allowed-projects`. Delete them after entering the key in the plugin settings; nothing reads them any more.
+- `stopGate.enabled` and `qaCrossCheck.enabled` in `jev.json`.
+
 ## v1.33.1 — 2026-09-28
 
 Security fixes for the v1.33.0 Jev checks, from a review of that release, plus fixes from the first live use of `qaCrossCheck`: 9 calls, 7 agree and 2 contested, where both disagreements were cases the tester's verdict was the weaker one. The Codex adapter moves to 1.33.1 with no change.
