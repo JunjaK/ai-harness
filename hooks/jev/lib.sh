@@ -6,7 +6,12 @@
 # Inputs are sent to TypeSafe (fixed endpoint below); see README → "Jev checks".
 # Compatible with bash 3.2 (macOS /bin/bash).
 
-JEV_PROJECT=${CLAUDE_PROJECT_DIR:-$PWD}
+# Hooks get CLAUDE_PROJECT_DIR; the Bash tool does not, and an agent's cwd can drift into a subfolder,
+# so fall back to the enclosing superproject, then the git top level, then the cwd.
+JEV_PROJECT=${CLAUDE_PROJECT_DIR:-}
+[ -n "$JEV_PROJECT" ] || JEV_PROJECT=$(git rev-parse --show-superproject-working-tree 2>/dev/null)
+[ -n "$JEV_PROJECT" ] || JEV_PROJECT=$(git rev-parse --show-toplevel 2>/dev/null)
+[ -n "$JEV_PROJECT" ] || JEV_PROJECT=$PWD
 JEV_CONFIG="$JEV_PROJECT/.claude/project-profile/jev.json"
 JEV_ENDPOINT="https://api.typesafe.ai/v1/systemone"
 

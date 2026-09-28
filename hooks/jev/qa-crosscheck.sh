@@ -22,7 +22,7 @@ VERDICT=$(printf '%s' "$INPUT" | jq -r '.verdict // empty')
 QUESTIONS='{"verdict":{"type":"choice","instructions":"Classify the QA result of `scenario` given `observation`.","criteria":{
   "passed":"The expected outcome was directly observed, including persistence after reload or in the data store when the scenario concerns saved data.",
   "failed":"The app was reachable and the steps ran, but the observed behavior differs from the expected outcome.",
-  "blocked":"The steps could not run because of a missing server, account, seed data, device, or access.",
+  "blocked":"The steps could not run because of a missing server, account, seed data, device, test driver or tool, or access.",
   "insufficient_evidence":"The steps ran but the observation lacks the evidence the scenario requires, for example only a 200 response or a toast with no reload or data check."}}}'
 
 RESP=$(jev_call "$STATE" "$QUESTIONS") || skip "Jev call failed (key, network, or response)"

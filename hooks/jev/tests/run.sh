@@ -199,5 +199,17 @@ check "crosscheck: missing observation → skipped" "$(printf '%s' "$OUT" | jq -
 FAKE_FAIL=1 cross "$INPUT"
 check "crosscheck: network failure → skipped" "$(printf '%s' "$OUT" | jq -e '.status == "skipped"' >/dev/null; echo $?)"
 
+# Without CLAUDE_PROJECT_DIR (the Bash tool's case) and with cwd in a subfolder, the git top level is used.
+GPROJ="$T/gproj"
+mkdir -p "$GPROJ/server/src" "$GPROJ/.claude/project-profile"
+git -c init.defaultBranch=main init -q "$GPROJ"
+echo '{"qaCrossCheck":{"enabled":true}}' >"$GPROJ/.claude/project-profile/jev.json"
+printf '%s\n' "$GPROJ" >>"$T/home/.config/typesafe/allowed-projects"
+rm -f "$T/calls"
+OUT=$(cd "$GPROJ/server/src" && printf '%s' "$INPUT" | env -u CLAUDE_PROJECT_DIR HOME="$T/home" PATH="$BIN:$PATH" FAKE_DIR="$T" \
+  FAKE_RESP="$(choice passed 0.9)" "$BASH_BIN" "$CROSS")
+check "crosscheck: no CLAUDE_PROJECT_DIR, cwd in subfolder → git top level config used" \
+  "$(printf '%s' "$OUT" | jq -e '.status == "agree"' >/dev/null && [ -f "$GPROJ/.claude/session-state/jev.log" ]; echo $?)"
+
 echo "jev tests: $PASS passed, $FAIL failed"
 [ "$FAIL" = 0 ]

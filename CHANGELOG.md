@@ -6,13 +6,16 @@ Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavio
 
 ## v1.33.1 — 2026-09-28
 
-Security fixes for the v1.33.0 Jev checks, from a review of that release. The Codex adapter moves to 1.33.1 with no change.
+Security fixes for the v1.33.0 Jev checks, from a review of that release, plus fixes from the first live use of `qaCrossCheck`: 9 calls, 7 agree and 2 contested, where both disagreements were cases the tester's verdict was the weaker one. The Codex adapter moves to 1.33.1 with no change.
 
 ### Fixed
 - **A cloned repository could switch sending on by itself.** A committed `jev.json` was enough to send that project's transcript to TypeSafe. Both checks now also require the project's primary working tree to be listed in the user's `~/.config/typesafe/allowed-projects`; without that entry they skip without a request.
 - **Secrets in tool output were sent as is.** Every string in the request is now masked for common secret shapes (private key blocks, `sk-`/`ghp_`/`gho_`/`github_pat_`/`AKIA`/`xox*-` tokens, JWTs, Bearer/Basic values, URL credentials, values after password/secret/token/api_key-style names). Masking is best effort; README says so.
 - **`jev.log` stored reply and scenario text.** It now keeps only model id, scores, labels, and decisions with the session id and time.
-- `hooks/jev/tests/run.sh` grows to 30 cases (allowlist missing or not matching, including a prefix-sibling path; masking; content-free log).
+- **`qaCrossCheck` skipped silently when the agent's cwd was a subfolder.** Hooks get `CLAUDE_PROJECT_DIR`, the Bash tool does not, so the script looked for `jev.json` under the cwd. It now falls back to the enclosing superproject, then the git top level, then the cwd. Found in a live `/team-qa`-style run on a web project.
+- **Jev's `blocked` criterion now names a missing test driver or tool**, matching `agentic-testing` ("Driver unavailable is `blocked`"). A driver that is present but gets a different result stays `failed`. On 13 probe cases (11 earlier ones, one missing driver, one present driver whose login request never left) every label matched.
+- **`agent-browser-e2e`: `auth login`'s `✓ Logged in` is not evidence.** A login counts only when an element that exists only after login is present; the URL check applies only when the login page has its own URL, because an app that serves the gate and the content at one URL passed the old URL check without logging in. With no post-login element, check whether any auth request left (a pre-hydration submit can fall back to a native form POST and send none) and record that evidence instead of retrying or reporting the session as logged in.
+- `hooks/jev/tests/run.sh` grows to 31 cases (allowlist missing or not matching, including a prefix-sibling path; masking; content-free log; project lookup from a subfolder without `CLAUDE_PROJECT_DIR`).
 
 ## v1.33.0 — 2026-09-28
 

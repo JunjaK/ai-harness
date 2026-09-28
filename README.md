@@ -432,7 +432,8 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.33.1** — the Jev
 checks now also need your own allowlist entry, mask common secrets before
-sending, and log scores only. v1.33.0: opt-in
+sending, log scores only, and find `jev.json` from a subfolder;
+`agent-browser-e2e` no longer accepts `auth login`'s own success line as a login. v1.33.0: opt-in
 TypeSafe Jev checks: a `Stop` hook note when a reply claims verified work that
 the turn's tool output does not show, and a second-opinion column for
 `/team-qa` verdicts. v1.32.0: no more `superpowers` dependency; `/debug`
