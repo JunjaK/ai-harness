@@ -53,8 +53,13 @@ cmd_check() {
   grep -q "\*\*Latest: v$want\*\*" README.md && ok "README Latest: v$want" || fail "README has no '**Latest: v$want**'"
 
   if git rev-parse -q --verify "refs/tags/v$want" >/dev/null; then
-    [ "$(git rev-parse "v$want^{commit}")" = "$(git rev-parse HEAD)" ] \
-      && ok "tag v$want already at HEAD" || fail "tag v$want exists on another commit"
+    if [ "$(git rev-parse "v$want^{commit}")" = "$(git rev-parse HEAD)" ]; then
+      ok "tag v$want already at HEAD"
+    elif [ -z "${1:-}" ]; then
+      ok "v$want is released; commits after it need a new version"  # no-arg check = status scan
+    else
+      fail "tag v$want exists on another commit"
+    fi
   else
     ok "tag v$want is free"
   fi
