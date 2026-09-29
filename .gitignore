@@ -2,6 +2,9 @@
 # but TRACK shared path-scoped rules (.claude/rules/) so they version + travel with the repo.
 .claude/*
 !.claude/rules/
+# Repo-only release tooling (/release) — tracked, never shipped as a plugin component.
+!.claude/commands/
+!.claude/scripts/
 .DS_Store
 
 # Throwaway run output (screenshots, traces, videos, reports) — see e2e-testing Artifact Layout.
