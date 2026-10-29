@@ -4,6 +4,29 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.36.0 — 2026-10-29
+
+Catch-up with Claude Code 2.1.90–2.1.312 (the harness started on 2.1.90). The changelog range was checked against the harness, and the suspected breaks were run before fixing: an isolated worktree agent's Write to the main checkout was refused, and a PostToolUse hook's warning ran (`exit 0`) but never reached Claude. The fixed hooks were re-run in a live `claude -p --plugin-dir` session. The Codex adapter moves to 1.36.0 with no change.
+
+### Added
+- `hooks/session-compact.sh` (SessionStart `compact`): after any compaction (auto, manual, idle) it puts this session's `current.md` and any team run it owns back into Claude's context. SessionStart stdout is one of the few hook outputs Claude sees; a live `/compact` + resume showed the marker in context.
+- `release.sh check` runs `claude plugin validate` and fails the release on a validation error.
+- `brain-connect` recommended settings: `worktree.baseRef: "head"`.
+
+### Changed
+- **Isolated Designers return their notes instead of writing `_docs/`.** Claude Code refuses an `isolation: "worktree"` agent's Write/Edit outside its worktree (observed: `This agent is isolated in the worktree … Edit the worktree copy of this file instead of the shared-checkout path.`). `team-workflow`, `team-designer`, `team-leader`, `docs-lifecycle`, `parallelization`, `CLAUDE.md`, and `.claude/rules/docs.md` now have the orchestrator write the reported notes. An agent in a manually created worktree (`git worktree add`) still writes its own files.
+- `team-workflow` states that Designer worktrees branch from local `HEAD` only when `worktree.baseRef` is `"head"`; the default `fresh` (2.1.133) branches from `origin/<default>`.
+- `pre-compact.sh` only snapshots `current.md`. Claude Code keeps no PreCompact output for Claude, and Claude gets no turn before compacting, so the "update current.md" prompt never reached it.
+- `/team-new` G1: the user runs `/deep-research <question>`; Claude can no longer start it (2.1.218).
+- Auto-compact guidance in `README.md` and `reference/token-optimization.md` moves from `CLAUDE_AUTOCOMPACT_PCT_OVERRIDE` to the per-model `/autocompact <window>`, and notes that idle compaction also fires PreCompact `auto`.
+
+### Fixed
+- **`post-edit-warn.sh` warnings now reach Claude.** PostToolUse plain stdout goes only to the debug log; the console/debugger and append-only collection warnings now go out as `hookSpecificOutput.additionalContext`. A live run quoted the warning back.
+- `session-stop.sh`'s stray-artifact warning is shown to the user as `systemMessage`; Stop stdout was also debug-log only.
+- `mode="bypassPermissions"` removed from `team-workflow`'s `Agent()` calls and `/team-run`: the parameter has been ignored since 2.1.212, and subagents inherit the session's permission mode.
+- `hooks.json` quotes `${CLAUDE_PLUGIN_ROOT}` (6 `claude plugin validate` warnings → 0), and SessionStart also matches `fork` (2.1.214).
+- Stale statements: `Agent()` has an `effort` parameter (2.1.292; the harness still passes it only on explicit request); greenfield no longer writes the removed `AGENT_TEAMS=1` (2.1.178); `.claude/rules/` load on write as well as read (2.1.288); `/checkpoint` names `session-end.sh`, not `session-stop.sh`, as the end-of-session snapshot.
+
 ## v1.35.0 — 2026-09-28
 
 Fixes from live QA on a Nuxt web app (picblog) and a Flutter app (nivoca). Plan and outcome: `_docs/complete/jev-checks/2026-09-28-jev-checks-plan.md`. The Codex adapter moves to 1.35.0 with no change.

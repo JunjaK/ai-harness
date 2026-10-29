@@ -439,7 +439,12 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.35.0** — Jev flags a QA
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.36.0** — catch-up with Claude Code 2.1.312: hook
+warnings now reach Claude (`additionalContext`) or the user (`systemMessage`), a
+post-compaction hook restores `current.md` and the owned team run, isolated
+Designers return notes instead of writing `_docs/`, the ignored
+`mode="bypassPermissions"` is gone, and `worktree.baseRef: "head"` is recommended.
+v1.35.0: Jev flags a QA
 run that never reached the target app, `qa_status` reports a missing key up front,
 a `device-lifecycle` mobile driver, headless file-picker guidance, and `/team-init`
 no longer opens gitignored files. v1.34.1: the Jev stop
