@@ -44,6 +44,15 @@ cmd_check() {
   fi
   want=${want:-$cur}
 
+  # Errors fail the release; warnings (root CLAUDE.md, missing icon) are known and pass.
+  if ! command -v claude >/dev/null 2>&1; then
+    fail "claude CLI not found — cannot run plugin validate"
+  elif claude plugin validate "$ROOT" >/dev/null 2>&1; then
+    ok "claude plugin validate"
+  else
+    fail "claude plugin validate failed (run: claude plugin validate $ROOT)"
+  fi
+
   first=$(grep -m1 '^## v' CHANGELOG.md)
   case "$first" in
     "## v$want — "*) ok "CHANGELOG top entry: $first" ;;

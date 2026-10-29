@@ -1,7 +1,7 @@
 #!/bin/bash
 # Session Start Hook — Nudge when _docs/active/ has docs overdue for a sweep,
 # and suggest a guardrails preset when a harness project has none
-# Triggered: At session start (SessionStart event; sources startup|resume)
+# Triggered: At session start (SessionStart event; sources startup|resume|fork — compact is session-compact.sh)
 # Non-blocking: one-line nudge on stdout (exit 0). Silent when clean OR when the
 # bucket layout isn't adopted in this repo (so it never false-alarms elsewhere).
 

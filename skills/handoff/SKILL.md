@@ -10,7 +10,7 @@ A handoff is the **state layer** over a spec/plan: not the design (that lives in
 ## When to write one
 
 - Session ending with active (`processing`) work that isn't done.
-- A compaction is about to end an active work-stream (the pre-compact hook may trigger this).
+- A compaction is about to end an active work-stream (write it before the context fills; no hook can prompt Claude right before compaction).
 - Explicitly handing a task to another agent/teammate.
 - NOT for completed work — that goes through `docs-lifecycle` merge-on-complete into `complete/<topic>/`, not a handoff.
 

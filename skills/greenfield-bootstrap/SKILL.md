@@ -25,10 +25,10 @@ Two outputs:
 
 ## G1 — Deep research (return-then-write)
 
-`deep-research` is a **CLI-bundled WORKFLOW** (not a Skill/plugin). Invoke it with the G0 question as **args** (it decomposes "question from args" into 5 search angles → searches → adversarially verifies → synthesizes). It **RETURNS a cited report as text — no file side-effect.**
+`deep-research` is a **CLI-bundled WORKFLOW** (not a Skill/plugin) that **only the user can start** — Claude Code no longer launches it on Claude's behalf. Print the G0 question as one line, `/deep-research <question>`, and ask the user to run it (it decomposes the question into 5 search angles → searches → adversarially verifies → synthesizes). It **RETURNS a cited report as text in the conversation — no file side-effect.**
 
 - **Capture**: take the returned report text and **write it yourself** to `_docs/active/planning/<today>/<today>-project-bootstrap-research.md` (topic `project-bootstrap`, kind `research`, `related:`→intent). **Never poll for a file deep-research "wrote" — it writes none.**
-- **Soft-degrade = capability probe**: if deep-research is absent from this session's roster / WorkflowTool disabled / SIMPLE-mode CLI → fall back to architects running `WebSearch` directly, and warn loudly: *"⚠ deep-research unavailable — research depth reduced, proceeding with direct WebSearch."* **MUST NOT** tell the user to install anything (it ships with the CLI; nothing to install).
+- **Soft-degrade**: if the user declines to run it, or it is unavailable (WorkflowTool disabled / SIMPLE-mode CLI) → fall back to architects running `WebSearch` directly, and warn loudly: *"⚠ deep-research unavailable — research depth reduced, proceeding with direct WebSearch."* **MUST NOT** tell the user to install anything (it ships with the CLI; nothing to install).
 
 ## G2 — Architecture & stack decision
 
@@ -37,7 +37,7 @@ Spawn `team-architect-fe` + `team-architect-be` in parallel (consume intent + re
 **stack-decision doc** `_docs/active/planning/<today>/<today>-project-bootstrap-stack-decision.md` (kind `stack-decision`) — MUST contain:
 - chosen framework + package manager (bun default)
 - the **exact non-interactive scaffold command** (per `resources/scaffold-recipes.md`; consult Context7 for current flags) OR the no-CLI manual-scaffold plan
-- harness-layer checklist (strict tsconfig additions, dirs, Vitest4+Playwright, lint, `settings.json` AGENT_TEAMS=1)
+- harness-layer checklist (strict tsconfig additions, dirs, Vitest4+Playwright, lint)
 - **forward-looking conventions** that seed the profile (the project-analyzer Seeded-Mode INPUT CONTRACT): planned API client + generated-vs-manual + generator/regen command + auth posture + base-URL env; planned state library + intended store patterns; planned UI lib; planned test stack.
 
 `backend-only` is a first-class outcome → no UI scaffolder, Phase-2 UI/UX and `ui-components.md` skipped.
@@ -53,7 +53,7 @@ Present: research summary + recommended stack + structure + **the exact scaffold
 
 1. **Run the official CLI non-interactively** (recipe-pinned flags + bounded **timeout**). The dir is already non-empty (G0–G2 wrote `_docs/`) → use the CLI's "into current/non-empty dir" flag, or scaffold into a temp subdir then move. On timeout / non-zero exit → **ABORT**, capture stderr, leave no half-scaffold (`git clean`/`reset` to the pre-G4 state).
 2. **No official CLI** for the chosen stack → the recipe's **manual-scaffold** path (dirs + package.json + tsconfig + entry, from the framework's minimal layout via Context7).
-3. **Harness layer = edit-not-overwrite**: ADD `strict` + `noUncheckedIndexedAccess` to the scaffold's tsconfig (preserve framework `jsx`/`paths`/`moduleResolution`); add dirs, Vitest 4 + Playwright, lint/format, `settings.json` (AGENT_TEAMS=1).
+3. **Harness layer = edit-not-overwrite**: ADD `strict` + `noUncheckedIndexedAccess` to the scaffold's tsconfig (preserve framework `jsx`/`paths`/`moduleResolution`); add dirs, Vitest 4 + Playwright, lint/format.
 4. **Git**: if the scaffolder ran its own `git init`/commit, do NOT double-init — add the harness layer as a **second** commit. The **final** bootstrap commit SHA is what G5 records as `Profile-Generated-At`.
 5. **Last step**: confirm the strict-tsconfig change still type-checks (absolute-zero baseline gate). Do not start a dev server.
 

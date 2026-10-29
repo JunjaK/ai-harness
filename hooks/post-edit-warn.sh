@@ -8,6 +8,16 @@
 # SILENTLY here (a warning on every Edit/Write would be spam) — session-start.sh
 # emits the one visible "jq not found" line, once per session.
 FILE="$1"
+OUT=""
+
+# PostToolUse plain stdout only reaches the debug log; Claude sees the text only as
+# hookSpecificOutput.additionalContext. Without jq the JSON can't be built — stay silent.
+emit() {
+  [ -n "$OUT" ] || exit 0
+  command -v jq >/dev/null 2>&1 || exit 0
+  jq -n --arg c "$OUT" '{hookSpecificOutput: {hookEventName: "PostToolUse", additionalContext: $c}}'
+  exit 0
+}
 
 if [ -z "$FILE" ]; then
   command -v jq >/dev/null 2>&1 || exit 0
@@ -36,7 +46,7 @@ if [ "$DOCS_REL" != "$FILE" ] || case "$FILE" in _docs/*) true ;; *) false ;; es
       # lifecycle bucket, or a bare file at _docs/ root (index.md) — no warning
       ;;
     *)
-      printf '[warn] %s is in the _docs/%s/ collection bucket (append-only). Creating a new record is fine; MUST NOT merge, restructure, rename, or delete an existing one without the human'"'"'s explicit request. Deprecate in place under %s/deprecated/. Exception: handoff/ is prune-to-latest by contract.\n\n' "$FILE" "$BUCKET" "$BUCKET"
+      OUT=$(printf '[warn] %s is in the _docs/%s/ collection bucket (append-only). Creating a new record is fine; MUST NOT merge, restructure, rename, or delete an existing one without the human'"'"'s explicit request. Deprecate in place under %s/deprecated/. Exception: handoff/ is prune-to-latest by contract.\n\n' "$FILE" "$BUCKET" "$BUCKET")
       ;;
   esac
 fi
@@ -46,7 +56,7 @@ case "$FILE" in
   *.js|*.ts|*.jsx|*.tsx|*.mjs|*.mts)
     ;;
   *)
-    exit 0
+    emit
     ;;
 esac
 
@@ -78,6 +88,7 @@ if grep -n "\(TODO\|FIXME\|HACK\|XXX\)" "$FILE" 2>/dev/null | head -3 | grep -q 
 "
 fi
 
-if [ -n "$WARNINGS" ]; then
-  printf '%s' "$WARNINGS"
-fi
+OUT="${OUT:+$OUT
+
+}$WARNINGS"
+emit

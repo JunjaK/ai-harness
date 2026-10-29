@@ -20,10 +20,10 @@ if command -v git >/dev/null 2>&1 && ROOT=$(git rev-parse --show-toplevel 2>/dev
     [ -d "$ROOT/$D" ] && STRAY="${STRAY}  $D/\n"
   done
 
-  if [ -n "$STRAY" ]; then
-    echo "[session-stop] Stray run artifacts at the repo root — these belong in _workspace/<context>/:"
-    echo -e "$STRAY"
-    echo "[session-stop] Move or delete them, and pass an explicit _workspace/ path to the next capture call"
-    echo "[session-stop] (a bare filename resolves to the repo root). See e2e-testing Artifact Layout."
+  # Stop drops plain stdout into the debug log. systemMessage shows it to the human, who
+  # decides (additionalContext would instead push Claude into another turn after every reply).
+  if [ -n "$STRAY" ] && command -v jq >/dev/null 2>&1; then
+    MSG=$(printf '[session-stop] Stray run artifacts at the repo root — these belong in _workspace/<context>/:\n%b[session-stop] Move or delete them, and pass an explicit _workspace/ path to the next capture call (a bare filename resolves to the repo root). See e2e-testing Artifact Layout.' "$STRAY")
+    jq -n --arg m "$MSG" '{systemMessage: $m}'
   fi
 fi

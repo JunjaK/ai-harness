@@ -187,7 +187,8 @@ Any move of doc `X` from `P_old` to `P_new` is **one atomic commit**:
 DOCS="$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")/_docs"
 ```
 
-- Worktree agents **read** plans/specs from `"$DOCS/…"`, and **write** their own doc **content** files there directly by absolute path — each owning **distinct** files (no-overlap, same rule as code). Such writes land in the main tree instantly, so a plan is readable from main with no cd and no merge round-trip.
+- Worktree agents **read** plans/specs from `"$DOCS/…"`. An agent in a **manually created** worktree (`git worktree add`) **writes** its own doc **content** files there directly by absolute path — each owning **distinct** files (no-overlap, same rule as code); such writes land in the main tree instantly, so a plan is readable from main with no cd and no merge round-trip.
+- A **Claude-isolated** agent (`isolation: "worktree"`, `--worktree`) cannot: Claude Code refuses its Write/Edit outside its own worktree. It returns doc content in its final report, and the orchestrator writes it to `"$DOCS/…"`.
 - **`index.md` edits and status-moves (`git mv`) are serialized through the team-leader/orchestrator** — `index.md` is the one shared mutable doc. The orchestrator performs every `git mv` + `index.md` edit + commit after worktrees finish; rows sort by `(topic, date, kind)` to shrink merge-conflict surface; `_docs/index.md` is part of the parallelization **merge-order** as a shared mutable file. Auto-`rmdir` only when the folder is empty and unlocked.
 
 ## Evidence-driven updates during a team run

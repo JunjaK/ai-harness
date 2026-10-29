@@ -27,7 +27,7 @@ Applying it:
 
 ## 2. Effort
 
-Every subagent inherits the session effort that the user set (`/effort`, or `effortLevel` / `modelSettings` in settings). A standard `Agent()` call has no per-call effort parameter, and an agent's frontmatter `effort` is fixed per definition, so the harness does not keep per-effort variant agents. Under ultracode, omit `opts.effort` so stages inherit the session effort too.
+Every subagent inherits the session effort that the user set (`/effort`, or `effortLevel` / `modelSettings` in settings). The `Agent()` tool's `effort` parameter is passed only when the user explicitly asks for a level, and an agent's frontmatter `effort` is fixed per definition, so the harness does not keep per-effort variant agents. Under ultracode, omit `opts.effort` so stages inherit the session effort too.
 
 ## 3. Context Efficiency
 
@@ -86,16 +86,7 @@ Before compacting:
 
 ### Auto-Compact Configuration
 
-```json
-{
-  "env": {
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
-  }
-}
-```
-
-Setting to `60` triggers compaction at 60% context usage instead of default 95%.
-This preserves more usable space but compacts more frequently.
+Set the window per model with `/autocompact <window>` (e.g. `/autocompact 400k`); Claude Code saves it per model. A smaller window compacts earlier and more often. Idle compaction (a 200K+ conversation idle ~54 min) also fires PreCompact `auto`; `"idleCompaction": false` in settings turns it off.
 
 ## 5. Background Processes
 
@@ -162,7 +153,7 @@ Brief like a smart colleague who just walked in: they haven't seen this conversa
 
 ```
 Model:        sonnet only if read-only/≤2 files + no contract/sensitive + deterministic; else opus
-Effort:       inherited from the session (no per-call effort)
+Effort:       inherited from the session (per-call effort only on explicit user request)
 Context:      <10 MCPs, <80 tools, slim CLAUDE.md
 Compaction:   After milestones. NEVER mid-task. Save state first.
 Background:   Builds, tests, long searches → run_in_background: true

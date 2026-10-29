@@ -113,7 +113,7 @@ A project MAY add collection buckets (`meetings/`, `inquiry/`, `proposal/`, …)
 
 **Vendor state paths win over `_workspace/`**: auth/session state is not a byproduct — use the tool's published location (Playwright → `playwright/.auth/`, gitignored). MUST NOT relocate those into `_workspace/`.
 
-**`_docs/` is primary-worktree-only**: every `_docs/` file lives in the repo's primary working tree, never in a linked worktree's checkout. Worktree agents read/write doc content by the primary tree's absolute path, each owning distinct files; only `index.md` edits and status-moves stay orchestrator-serialized. Path resolution and the concurrency protocol: `.claude/rules/docs.md` + `docs-lifecycle`.
+**`_docs/` is primary-worktree-only**: every `_docs/` file lives in the repo's primary working tree, never in a linked worktree's checkout. Worktree agents read doc content by the primary tree's absolute path. An agent in a manually created worktree writes its own distinct files there; a Claude-isolated agent (`isolation: "worktree"`) cannot write outside its worktree, so it returns doc content in its report; only `index.md` edits and status-moves stay orchestrator-serialized. Path resolution and the concurrency protocol: `.claude/rules/docs.md` + `docs-lifecycle`.
 
 ---
 

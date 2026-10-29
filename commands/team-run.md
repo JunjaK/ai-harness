@@ -37,7 +37,7 @@ Same as `/team` but with key differences:
 
 1. **Load skill**: Invoke the `team-workflow` skill
 2. Execute all 5 phases following skill orchestration logic
-3. All agents run with `mode: "bypassPermissions"`
+3. Agents inherit this session's permission mode — start `/team-run` in `auto` or `bypassPermissions` mode for an unattended run
 4. Designers use `isolation: "worktree"` for parallel work
 
 ## Escalation

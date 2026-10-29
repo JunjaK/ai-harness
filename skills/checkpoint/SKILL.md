@@ -84,8 +84,10 @@ When user runs `/checkpoint save [title]` or when explicitly asked:
 
 Hooks snapshot the session's own `current.md` at these events:
 - **SessionEnd**: `session-end.sh`, once when the session terminates
-- **Pre-Compact**: `pre-compact.sh`, before compression
+- **Pre-Compact**: `pre-compact.sh`, before compression (silent — Claude gets no turn before compacting)
 - **Phase Completion**: the team workflow saves after each phase
+
+After compaction, `session-compact.sh` (SessionStart `compact`) puts `current.md` and any team run this session owns back into Claude's context.
 
 The `Stop` hook (after every reply) does not touch session state.
 

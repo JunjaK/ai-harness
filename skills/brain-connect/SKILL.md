@@ -75,7 +75,10 @@ keys — and `apply-settings` merges it recursively (manifest wins). **Any key a
 manifest is left exactly as it is on that machine**, which is what preserves the local `hooks`.
 
 - Belongs in the manifest: `permissions.defaultMode`, `model`, `effortLevel`, `skillOverrides`,
-  `enabledPlugins`, `extraKnownMarketplaces`, and UI prefs (`theme`, `tui`).
+  `enabledPlugins`, `extraKnownMarketplaces`, `worktree.baseRef`, and UI prefs (`theme`, `tui`).
+- **`worktree.baseRef: "head"`** makes Claude-isolated worktrees (team-workflow Designers) branch
+  from local `HEAD`. The default `fresh` branches from `origin/<default>` and drops a feature
+  branch's unpushed commits.
 - **`enabledPlugins` without `extraKnownMarketplaces` is vacuous** — a plugin toggle for a
   marketplace the new machine has never registered does nothing. Ship the pair.
 - Stays out: `hooks`, `statusLine`, `permissions.allow`, and any `skip*` permission-prompt flag —

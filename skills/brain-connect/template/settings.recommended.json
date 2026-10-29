@@ -4,6 +4,9 @@
   },
   "model": "opus[1m]",
   "effortLevel": "high",
+  "worktree": {
+    "baseRef": "head"
+  },
   "skillOverrides": {
     "some-skill-you-keep-off": "off"
   },

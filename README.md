@@ -80,13 +80,10 @@ This harness is distributed as a **Claude Code plugin**.
 
 ### Required User Configuration
 
-The plugin manifest cannot set environment variables or permissions. Add to your **user** or **project** `settings.json`:
+The plugin manifest cannot set permissions. Add to your **user** or **project** `settings.json`:
 
 ```json
 {
-  "env": {
-    "CLAUDE_AUTOCOMPACT_PCT_OVERRIDE": "60"
-  },
   "permissions": {
     "allow": [
       "Edit",
@@ -104,6 +101,8 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 }
 ```
 
+> Auto-compact window: set it per model with `/autocompact <window>` (e.g. `/autocompact 400k`) — it is saved per model, so a percentage override no longer means the same thing across a 200K and a 1M window.
+>
 > No experimental flag is required. `/team`, `/team-run`, `/team-brainstorm` orchestrate entirely
 > through `Agent()` subagents; cross-review runs as two parallel objection passes, not a team dialog.
 >
@@ -111,7 +110,7 @@ The plugin manifest cannot set environment variables or permissions. Add to your
 
 ### Dependencies
 
-Alongside the env flags above, the harness uses a few external tools. Each row states what happens when it's absent — **one aborts, the rest degrade**.
+The harness uses a few external tools. Each row states what happens when it's absent — **one aborts, the rest degrade**.
 
 **Hard (a workflow step stops and asks you to install):**
 
@@ -398,8 +397,9 @@ junjak-ai-harness/
 │   ├── session-start.sh
 │   ├── session-stop.sh          # Stop: stray-artifact warning only
 │   ├── session-end.sh           # SessionEnd: snapshot this session's state, prune old sessions
-│   ├── pre-compact.sh
-│   ├── post-edit-warn.sh
+│   ├── pre-compact.sh           # PreCompact: snapshot current.md (silent)
+│   ├── session-compact.sh       # SessionStart(compact): put current.md + owned team run back in context
+│   ├── post-edit-warn.sh        # PostToolUse: warnings to Claude via additionalContext
 │   ├── guardrails.sh            # PreToolUse(Bash) branch rules (opt-in)
 │   ├── guardrails/
 │   │   ├── presets/             # default.json · light.json · toy.json

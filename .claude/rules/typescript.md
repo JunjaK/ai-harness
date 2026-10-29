@@ -7,7 +7,7 @@ paths:
 
 # TypeScript — type-check gate · code intelligence · cross-boundary contracts
 
-Loads when TS files are read. The non-TS fallback and the routing pointer live always-on in `CLAUDE.md`.
+Loads when TS files are read or written. The non-TS fallback and the routing pointer live always-on in `CLAUDE.md`.
 
 ## Type check (hard gate)
 - **Authoritative, non-vacuous command**: use project-profile `stack.md` → "Build & Verify" (the one that actually compiles app sources). A solution-style root `tsconfig.json` (`"files": []`) makes `bunx tsc --noEmit` a no-op that always exits 0; a typed-framework wrapper (`vue-tsc`, `astro check`) may catch what bare `tsc` misses. Confirm the command is not vacuous before trusting green.

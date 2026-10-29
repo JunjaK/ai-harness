@@ -5,7 +5,7 @@ paths:
 
 # Security
 
-Loads when source files are read. (The Phase 5 audit is mandatory for every team workflow regardless — kept always-on in `CLAUDE.md`.)
+Loads when source files are read or written. (The Phase 5 audit is mandatory for every team workflow regardless — kept always-on in `CLAUDE.md`.)
 
 - MUST NOT commit secrets (keys, tokens, passwords) — use env vars via the config module.
 - MUST NOT use `eval`, `new Function`, or `innerHTML` with unsanitized input.

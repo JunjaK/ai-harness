@@ -32,15 +32,16 @@ Invoke the `checkpoint` skill, which owns the checkpoint format, storage layout,
 ## Auto-Save Triggers
 
 Checkpoints are automatically saved by hooks:
-- **Session Stop** (`session-stop.sh`): Saves checkpoint from `current.md` before archiving
+- **Session End** (`session-end.sh`): Saves checkpoint from `current.md` when the session terminates
 - **Pre-Compact** (`pre-compact.sh`): Saves checkpoint before context compression
+- **After compaction** (`session-compact.sh`): Puts `current.md` back into Claude's context
 - **Team Workflow**: Each phase completion triggers checkpoint via verification-loop
 
 ## Related
 
 - Skill: `checkpoint` — Checkpoint format and management details
 - Skill: `continuous-learning` — Session state management
-- Hook: `session-stop.sh` — Auto-checkpoint on session end
+- Hook: `session-end.sh` — Auto-checkpoint on session end
 - Hook: `pre-compact.sh` — Auto-checkpoint before compaction
 
 ARGUMENTS: $ARGUMENTS

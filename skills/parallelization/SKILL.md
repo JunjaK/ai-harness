@@ -54,7 +54,7 @@ DOCS="$MAIN/_docs"   # canonical location, reachable by absolute path from every
 
 Rules:
 - **Read** the plan/spec from `"$DOCS/…"` by absolute path — never from your own worktree's `_docs/`. The orchestrator passes this absolute path into each worktree agent's briefing.
-- **Write** doc content (impl notes, findings) directly to `"$DOCS/…"` by absolute path, each worktree owning **distinct** doc files — the same no-file-overlap rule that governs code. A doc written this way lands in the main tree immediately: readable without cd, no merge round-trip.
+- **Write** doc content (impl notes, findings) directly to `"$DOCS/…"` by absolute path, each worktree owning **distinct** doc files — the same no-file-overlap rule that governs code. A doc written this way lands in the main tree immediately: readable without cd, no merge round-trip. This applies to the manual worktrees above. A Claude-isolated agent (`isolation: "worktree"`) cannot write outside its worktree, so it returns doc content in its report and the orchestrator writes it.
 - **`index.md` edits and status-moves** (`git mv` between `planning`/`processing`/`complete`/…) stay **orchestrator-serialized** — `index.md` is the one shared mutable doc, so only the orchestrator touches it after worktrees finish. See `docs-lifecycle` → "Concurrency".
 
 ### Provision worktree deps (fast path — global cache, never symlink)

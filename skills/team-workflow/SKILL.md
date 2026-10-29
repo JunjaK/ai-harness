@@ -158,16 +158,19 @@ For each Designer — pass the plan doc's **absolute primary-tree path** so the 
 ```
 Agent(
   subagent_type="team-designer",
-  prompt="Your assignment:\nFiles: [list]\nPlan doc (read in full, absolute path): {MAIN}/_docs/active/planning/<created>/<created>-<topic>-plan.md\nPlan (relevant excerpt): [inline]\n\nImplement using TDD. Write any impl notes/findings to {MAIN}/_docs/… by absolute path — NOT into your worktree's _docs/. Leave index.md and status-moves to the orchestrator.",
-  isolation="worktree",
-  mode="bypassPermissions"
+  prompt="Your assignment:\nFiles: [list]\nPlan doc (read in full, absolute path): {MAIN}/_docs/active/planning/<created>/<created>-<topic>-plan.md\nPlan (relevant excerpt): [inline]\n\nImplement using TDD. Return impl notes/findings in your final report — do NOT write any _docs/ file. The orchestrator records them.",
+  isolation="worktree"
 )
 ```
 where `MAIN=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")` (the primary working tree, resolvable from any worktree).
 
+- **Isolated Designers cannot write the primary tree.** Claude Code refuses an isolated agent's Write/Edit to a path outside its own worktree, so `{MAIN}/_docs/` is read-only to them. Their notes come back in the report; Step 4 writes them.
+- **Worktree base = `worktree.baseRef`.** Isolated worktrees branch from `origin/<default>` unless the user's settings set `worktree.baseRef: "head"` (shipped in `brain-connect`'s recommended settings). Without it, a Designer on a feature branch works without the branch's commits.
+- **Permission mode is inherited.** Subagents run under the parent session's permission mode; `Agent()` takes no per-call mode.
+
 ### Step 3: Merge Worktrees
 
-1. Create merge branch from the repo's **current HEAD** (not an arbitrary main/develop — see parallelization §"Base Selection"). Designer worktrees were branched from this same base.
+1. Create merge branch from the repo's **current HEAD** (not an arbitrary main/develop — see parallelization §"Base Selection"). Designer worktrees share this base only when `worktree.baseRef` is `"head"` (Step 2).
 2. Merge each worktree sequentially
 3. Resolve any conflicts
 4. Commit merged result
@@ -176,7 +179,7 @@ Use the run file's `baseRef` as the pre-task base ref, and record the merged HEA
 
 ### Step 4: Update _docs/
 
-Update `_docs/active/processing/<created>/<created>-<topic>-plan.md` with implementation notes, merged HEAD, and any deviations from the approved plan. Transition `planning → processing` per `docs-lifecycle` (move to `active/processing/`, bump `updated`, update `index.md`). This `git mv` + `index.md` edit is **orchestrator-serialized** — Designers write their own doc content files to the primary tree by absolute path, but only the orchestrator moves docs and touches `index.md` (see `docs-lifecycle` → Concurrency).
+Update `_docs/active/processing/<created>/<created>-<topic>-plan.md` with the Designers' reported implementation notes, merged HEAD, and any deviations from the approved plan. Transition `planning → processing` per `docs-lifecycle` (move to `active/processing/`, bump `updated`, update `index.md`). The orchestrator owns every `_docs/` write in this phase — doc content, `git mv`, and `index.md` (see `docs-lifecycle` → Concurrency).
 
 ## Phase 4: Lightweight Verification
 
@@ -187,8 +190,7 @@ Run one `team-tester` on the merged HEAD. Scope it to changed unit/integration t
 ```
 Agent(
   subagent_type="team-tester",
-  prompt="Implementation reports:\n[reports]\n\nPlan:\n[plan]\n\nBase ref: [base-ref]\nMerged HEAD: [merged-head]\n\n[User explicitly requested a FULL deterministic suite this time. Omit this line entirely for the default scoped run.]\n\nRun one lightweight integrated verification pass: affected unit/integration, type/lint/build, and at most one existing smoke E2E per affected user-facing flow. Report evidence and unavailable checks. Do not run deferred QA.",
-  mode="bypassPermissions"
+  prompt="Implementation reports:\n[reports]\n\nPlan:\n[plan]\n\nBase ref: [base-ref]\nMerged HEAD: [merged-head]\n\n[User explicitly requested a FULL deterministic suite this time. Omit this line entirely for the default scoped run.]\n\nRun one lightweight integrated verification pass: affected unit/integration, type/lint/build, and at most one existing smoke E2E per affected user-facing flow. Report evidence and unavailable checks. Do not run deferred QA."
 )
 ```
 
@@ -203,8 +205,7 @@ Always invoke Architect C:
 ```
 Agent(
   subagent_type="team-architect-infra",
-  prompt="Implemented code diff:\n[git diff]\n\nPerform final security audit.",
-  mode="bypassPermissions"
+  prompt="Implemented code diff:\n[git diff]\n\nPerform final security audit."
 )
 ```
 
