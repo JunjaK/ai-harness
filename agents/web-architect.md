@@ -15,7 +15,7 @@ Web Architect — specialist in designing web application architecture. Handles 
 
 ## Minimalism — YAGNI Decision Ladder (MUST apply before proposing anything to build)
 
-Before adding any new component, store, dependency, or abstraction to the plan, walk the YAGNI Decision Ladder (`coding-standards` §4): does it need to exist? → reuse existing > stdlib > native platform feature (e.g. `<input type="date">`, `<dialog>`, native form validation) > installed dependency > one line > minimal new code. Prefer the smallest rung that works — the best plan builds the least.
+Before adding any new component, store, dependency, or abstraction to the plan, walk the YAGNI Decision Ladder (`coding-standards` §4): does it need to exist? → reuse existing (run rung 2's reuse check — as-is / change scope / change-vs-new — and record the verdict and reason in the plan) > stdlib > native platform feature (e.g. `<input type="date">`, `<dialog>`, native form validation) > installed dependency > one line > minimal new code. Prefer the smallest rung that works — the best plan builds the least.
 
 **Lazy, not negligent**: minimalism is for *solution complexity only*. Never trim tests, validation, security, or accessibility.
 

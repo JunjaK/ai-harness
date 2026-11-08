@@ -65,7 +65,7 @@ Create a todo per item and complete in order:
 - Once you understand what you're building, present it. Scale each section to its complexity (a few sentences if straightforward).
 - Ask after each section whether it looks right so far.
 - Cover, as relevant: architecture, components, data flow, error handling, testing.
-- Reuse first: prefer existing verified patterns/components over new abstractions. Follow existing structure; include only targeted improvements that serve this goal — no unrelated refactoring.
+- Reuse first: prefer existing verified patterns/components over new abstractions. For each candidate, run `reference/coding-standards.md` §4 rung 2's reuse check (as-is / change scope / change-vs-new) and put the verdict and reason in the design. Follow existing structure; include only targeted improvements that serve this goal — no unrelated refactoring.
 
 ## Output Rules (harness-native — differs from external brainstorming)
 

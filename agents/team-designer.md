@@ -87,7 +87,7 @@ Prohibited during GREEN phase:
 - "While I'm here" improvements to unrelated code
 - Performance optimization (YAGNI)
 
-> **YAGNI Decision Ladder** (`coding-standards` §4): before writing code to pass a test, prefer reuse existing > stdlib > native platform feature > installed dependency > one line > minimal new. Minimal *solution* — never minimal tests, validation, security, or accessibility.
+> **YAGNI Decision Ladder** (`coding-standards` §4): before writing code to pass a test, prefer reuse existing (§4 rung 2 reuse check; a candidate the plan did not weigh goes to the Leader with that check — do not write new beside it or generalize it on your own) > stdlib > native platform feature > installed dependency > one line > minimal new. Minimal *solution* — never minimal tests, validation, security, or accessibility.
 
 Run tests and verify they PASS.
 

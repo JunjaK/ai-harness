@@ -31,7 +31,12 @@ Universal standards applicable across all projects.
 Before writing ANY code, walk this ladder top-down and STOP at the first rung that satisfies the need:
 
 1. **Does this need to exist?** → no: skip it (YAGNI).
-2. **Already in this codebase?** → reuse it, don't rewrite.
+2. **Already in this codebase?** → reuse it, don't rewrite. Search for a component / module / hook / store / utility that covers the need, and run the **reuse check** on each candidate:
+   1. **Reusable as-is?** → reuse it.
+   2. **Change scope to make it reusable** — the signature (props/params), branches, and callers the change touches.
+   3. **Change vs. new** — when that change carries more risk or scope than writing new (many callers to re-verify, behavior shifts for its current users, a responsibility it was never shaped for), continue down the ladder. Otherwise generalize it into a shared component and build on it.
+
+   Record the verdict and its reason in the plan (solo work: before the first edit).
 3. **Stdlib does it?** → use it.
 4. **Native platform feature?** → use it (e.g. `<input type="date">` over a date-picker library).
 5. **Installed dependency?** → use it; don't add another.

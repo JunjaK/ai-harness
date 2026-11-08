@@ -92,6 +92,7 @@ Evaluate every category below. Each section MUST have a verdict (CRITICAL / HIGH
 Run every proposed new file / module / dependency through the YAGNI Decision Ladder (`coding-standards` §4):
 - Does it need to exist at all, or is it speculative generality?
 - Could an existing codebase utility, the stdlib, a native platform feature, or an already-installed dependency do it — instead of new code?
+- For each existing component the need overlaps, does the plan record the reuse check (`coding-standards` §4 rung 2: reusable as-is / change scope / change-vs-new verdict with its reason)? New code beside a near-match without that verdict is a finding; so is generalizing a shared unit whose change touches more callers than the new code would.
 - Is a new dependency justified, or does it duplicate something already present?
 - Name the smallest equivalent solution as the recommendation.
 - Scope: flag *solution complexity* only. NEVER flag tests, validation, security, or accessibility as "too much" — those are non-negotiable (lazy, not negligent).
