@@ -102,11 +102,9 @@ With tests green, clean up code:
 
 ### 5. Verify
 
-MUST pass all four checks before reporting completion. Commands use Bun by default; translate to pnpm/npm if project's lockfile indicates otherwise.
+MUST pass all four checks before reporting completion.
 
-1. Linter — **authoritative** command from project-profile `stack.md` → "Build & Verify" (e.g., `bunx eslint .` or `bunx biome check`) — zero **net-new** errors vs baseline
-2. Type check — **authoritative** command from `stack.md` (NOT a blind `bunx tsc --noEmit`, which is a no-op against a solution-style root tsconfig) — zero **net-new** errors vs baseline. Greenfield = absolute zero. Do not silence a net-new error with `as any`/`@ts-ignore` — it may be flagging a real runtime bug.
-3. Test suite — authoritative command from project-profile. Default (Bun + Vitest 4.x): `bunx vitest run` — zero failures (zero new; pre-existing failures documented by the Tester baseline)
+1–3. Lint, type check, tests — run the `verify` skill (`scripts/verify.mjs`, steps in project-profile `verify.json`) in your worktree: `node <verify skill dir>/scripts/verify.mjs --changed <base-ref>`. Report its block. A step that is `안 됨` blocks completion; a `미검증` step is reported as such, never as passed. Do not silence a net-new type error with `as any`/`@ts-ignore` — it may be flagging a real runtime bug. Without `verify.json`, report that the gates are unconfigured (`/team-init --update`) instead of guessing commands.
 4. Manual spot-check: open one modified file and confirm the code matches the plan's intent
 
 ### 6. Commit

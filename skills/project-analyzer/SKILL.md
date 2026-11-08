@@ -12,7 +12,8 @@ Scan the codebase and generate a structured project profile. Team workflow agent
 ```
 .claude/project-profile/
 ├── index.md              # Summary — always loaded by agents
-├── stack.md              # Tech stack, dependencies, build
+├── stack.md              # Tech stack, dependencies, build; gate vacuity evidence
+├── verify.json           # Authoritative build/type-check/lint/test gates + baselines (verify skill)
 ├── structure.md          # File/directory conventions
 ├── code-style.md         # Naming, imports, formatting
 ├── api-layer.md          # API patterns, type generation
@@ -26,8 +27,8 @@ Scan the codebase and generate a structured project profile. Team workflow agent
 
 Templates for every file below live in `resources/profile-templates.md`. Read that file before filling any profile.
 
-### Step 1: Detect Tech Stack → `stack.md`
-Follow template §1. Detect package manager via lockfile priority (bun.lockb → pnpm-lock.yaml → package-lock.json → default Bun). Record the **Worktree deps fast-path** with its **family**: A·copy-based (node_modules — pnpm/bun shared-store recipe) or B·reference-cache (pub/gradle/maven/go — the native resolve command, no copy). Any manager not covered inline → resolve its family + recipe via **Context7** (`resolve-library-id` → `query-docs`) and record the resolved command (so `/worktree-deps` and Designers don't re-resolve it). For submodule-monorepos, record it **per code submodule** (e.g. `app`→Flutter, `be`→Gradle may differ).
+### Step 1: Detect Tech Stack → `stack.md` + `verify.json`
+Follow template §1, then write `verify.json` per template §1a: run each candidate gate once on the untouched tree, keep only commands that ran and exercised real code (their vacuity evidence goes in `stack.md` → Build & Verify), and record counted pre-existing errors/failures as `baseline` / `failBaseline`. A gate with no known command is left out and named in `stack.md` → Caveats — never invented. Validate the file with the `verify` skill's `scripts/verify.mjs --only <one step>` (exit 2 means the file was rejected). On `--update`, keep existing baselines unless they were re-counted on the base. Detect package manager via lockfile priority (bun.lockb → pnpm-lock.yaml → package-lock.json → default Bun). Record the **Worktree deps fast-path** with its **family**: A·copy-based (node_modules — pnpm/bun shared-store recipe) or B·reference-cache (pub/gradle/maven/go — the native resolve command, no copy). Any manager not covered inline → resolve its family + recipe via **Context7** (`resolve-library-id` → `query-docs`) and record the resolved command (so `/worktree-deps` and Designers don't re-resolve it). For submodule-monorepos, record it **per code submodule** (e.g. `app`→Flutter, `be`→Gradle may differ).
 
 ### Step 2: Analyze File Structure → `structure.md`
 Follow template §2. Capture directory layout, routing pattern, module organization, naming conventions. If `.gitmodules` exists, also fill the **Submodule Layout** block (code submodules + superproject role + per-submodule worktree carry-list of gitignored env/config) — this is the SSOT the `submodule-worktree` skill reads; omit the block for non-submodule repos.
@@ -73,7 +74,7 @@ Called by the `greenfield-bootstrap` skill (G5) on a freshly-scaffolded project.
 **Trigger**: invoked with a path to the G2 **stack-decision doc** (`_docs/.../project-bootstrap-stack-decision.md`). Precondition: G4 scaffold + git first-commit already ran, so Step 9 `Profile-Generated-At` resolves to that SHA.
 
 **Two passes:**
-- **SCAN-fill** (real source on the scaffold): `stack.md` (baseline = absolute 0 for greenfield), `structure.md`, `code-style.md` (formatter-config fallback if <5 files), `testing.md` (frameworks + agentic adapter, table-derived), `ui-components.md` (only if a UI lib was scaffolded), `index.md`. `deployment.md` → `⏭️ Skipped` (no CI/CD in a scaffold) is correct.
+- **SCAN-fill** (real source on the scaffold): `stack.md` + `verify.json` (every baseline = 0 for greenfield), `structure.md`, `code-style.md` (formatter-config fallback if <5 files), `testing.md` (frameworks + agentic adapter, table-derived), `ui-components.md` (only if a UI lib was scaffolded), `index.md`. `deployment.md` → `⏭️ Skipped` (no CI/CD in a scaffold) is correct.
 - **INJECT-fill** (no scan source → from the decision doc), marked **`🌱 Seeded`**:
   - `api-layer.md` — planned client + generated-vs-manual + generator/regen command + spec source + auth posture + base-URL env. *(The single most valuable injected doc — Architect-BE and Designers read it on the first `/team-run`.)*
   - `state-management.md` — planned library + intended store-scope patterns.

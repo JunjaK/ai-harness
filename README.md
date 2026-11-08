@@ -8,7 +8,7 @@ The following overview and slash commands describe the Claude Code workflow.
 
 Specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code. Beyond the core team workflow, the harness adds:
 
-- **Testing stack** — `/team` runs changed unit/integration tests and at most one existing smoke E2E per affected user-facing flow, then reports implementation completion. It records up to five pending scenarios in the completed plan. Later, `/team-qa` collects those items across tasks and runs a bounded batch; `--crystallize` also turns verified paths into deterministic tests. `/test-scenario-doc` remains the on-demand HTML checklist for human QA. [ego lite](https://lite.ego.app/) is the only browser driver for any browser-driving task, including smoke and deferred QA; a hook denies agent-browser, Aside, and Playwright MCP.
+- **Testing stack** — `/team` runs changed unit/integration tests and at most one existing smoke E2E per affected user-facing flow, then reports implementation completion. It records up to five pending scenarios in the completed plan. Later, `/team-qa` collects those items across tasks and runs a bounded batch; `--crystallize` also turns verified paths into deterministic tests. Gates come from `.claude/project-profile/verify.json` and are judged by the `verify` skill's script (됨 / 미검증 / 안 됨: an empty test run, an unreadable count, or a failure above baseline cannot read as a pass). `/test-scenario-doc` remains the on-demand HTML checklist for human QA. [ego lite](https://lite.ego.app/) is the only browser driver for any browser-driving task, including smoke and deferred QA; a hook denies agent-browser, Aside, and Playwright MCP.
 - **Separate QA budget** — Phase 4 is one merged-tree verification pass. A failed or blocked required quick check ends that run with evidence and a fix/unblock list; it does not start an automatic QA→implementation loop. Deferred QA verdicts live with their scenario entries and do not rewrite the implementation-complete status.
 - **Document storage (3 buckets)** — `_docs/` (project) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge) · `_workspace/` (throwaway run output, gitignored but for its layout `README.md`), classified by a portable ownership discriminator. Inside `_docs/`, **lifecycle** buckets ride `planning → processing → complete`; **collection** buckets (`intent/`, `handoff/`, plus whatever a project declares) are append-only records the agent may add to but never reorganize.
 - **Code minimalism** — a harness-owned YAGNI decision ladder (`coding-standards` §4), applied by the architect agents at design time and gated once, at the Phase 1 plan approval.
@@ -340,6 +340,7 @@ Skills that agents reference during their workflow phases:
 | `brainstorm` | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design (no auto-commit); solo counterpart to `/team-brainstorm` |
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) under the harness root-cause-first method; `/debug` carries the full method and red flags |
 | `agentic-testing` | `/team-qa` | Adapter-based deferred QA: verify goals; generate deterministic tests when `--crystallize` is requested |
+| `verify` | Before any "done" · Phase 4 · `/debug` | `scripts/verify.mjs` runs the gates in project-profile `verify.json` (`exit` / `errors` vs `baseline` / `test` vs `failBaseline`, `--changed <base>` for affected tests) and writes a 됨 / 미검증 / 안 됨 block to `_workspace/verify/<branch>.md` (exit 0 / 3 / 1). Counts at or under a non-zero baseline stay 미검증 — names and signatures are not compared. `scripts/plant.mjs` plants one violation, runs a test, always restores (sha256-checked), and reports whether the test caught it. Needs `node` |
 | `browser-e2e` | **The only driver — any browser-driving task** | ego lite for E2E/QA/smoke/exploration/selector resolution, requested or not. One-time gate (CLI present + a free `harness-qa*` profile, created when missing); a failed gate stops with the install steps — no fallback driver. The human logs in once per QA profile (no password reaches the LLM). The browser-guard hook denies agent-browser, Aside, Playwright MCP, whole-profile clears, and a named task space without `profileId`. Playwright still owns the committed `.spec.ts` suite |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
@@ -431,7 +432,7 @@ junjak-ai-harness/
 │   ├── verification-loop.md
 │   ├── plan-review.md
 │   └── token-optimization.md
-└── skills/                      # 19 workflow skills
+└── skills/                      # 20 workflow skills
     ├── team-workflow/
     ├── greenfield-bootstrap/
     ├── project-analyzer/
@@ -441,6 +442,7 @@ junjak-ai-harness/
     ├── take-over/
     ├── wiki/
     ├── agentic-testing/
+    ├── verify/                  # verify.mjs (gates from verify.json) · plant.mjs (planted violation) + tests
     ├── test-scenario-doc/
     ├── brainstorm/
     └── ... (8 more)

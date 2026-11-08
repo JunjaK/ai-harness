@@ -7,6 +7,8 @@ description: "Full verification reference with checkpoint support and reliabilit
 
 Systematic quality assurance in 6 sequential phases (plus an opt-in human comprehension gate) with checkpoint tracking and reliability gates. Stop on CRITICAL failure.
 
+**Commands:** the authoritative gates (build, type-check, lint, unit/integration tests) and their baselines live in project-profile `verify.json`; the `verify` skill's `scripts/verify.mjs` runs them and judges each step 됨 / 미검증 / 안 됨, and `scripts/plant.mjs` proves a new check catches a planted violation. The phases below are the rules those scripts implement.
+
 In the team workflow, this is a reference for authoritative commands and baseline comparison. `agents/team-tester.md` defines the bounded Phase 4 pass: affected unit/integration tests, at most one already existing smoke E2E per affected flow, and relevant build/type/lint gates. The full deterministic loop runs only when explicitly requested; `/team-qa` separately verifies deferred scenarios. Neither is an automatic team phase.
 
 **Package manager**: Commands below use Bun (default). If project has `pnpm-lock.yaml`, translate `bun run` → `pnpm run`, `bunx` → `pnpm exec`. If `package-lock.json`, translate to `npm run` / `npx`.
@@ -28,9 +30,9 @@ bun run build
 **Common failures**: Missing imports, circular dependencies, env issues
 
 ### Phase 2: Type Check
-Run the project's **authoritative** type-check command — the one that actually compiles the app sources, recorded in project-profile `stack.md` → "Build & Verify". Do NOT assume `bunx tsc --noEmit`: a root `tsconfig.json` that is solution-style (`"files": []` + `"references"`) makes `tsc --noEmit` a **no-op that always exits 0**, hiding a real error backlog. Likewise a `typecheck` npm script may point at the wrong config. Verify the command actually checks code before trusting a green result (see §"Vacuity guard").
+Run the project's **authoritative** type-check command — the one that actually compiles the app sources, recorded as an `errors` step in project-profile `verify.json` (its vacuity evidence in `stack.md` → "Build & Verify"). Do NOT assume `bunx tsc --noEmit`: a root `tsconfig.json` that is solution-style (`"files": []` + `"references"`) makes `tsc --noEmit` a **no-op that always exits 0**, hiding a real error backlog. Likewise a `typecheck` npm script may point at the wrong config. Verify the command actually checks code before trusting a green result (see §"Vacuity guard").
 ```bash
-# Use the authoritative command from project-profile. Examples:
+# Use the authoritative command from project-profile verify.json. Examples:
 #   tsc --noEmit -p tsconfig.app.json       (app-scoped, not the empty root)
 #   vue-tsc -p .nuxt/tsconfig.app.json       (Nuxt/Vue)
 #   pyright / mypy --strict / go vet ./...    (non-TS)
@@ -57,7 +59,7 @@ The commands below are examples for broader standalone deterministic verificatio
 
 **Default: scoped to this task's changes, not the full suite.** On a large repo, an unscoped run on every verification pass is the dominant CPU/time cost. Vitest and Playwright both detect affected tests via git + the import graph natively — use that instead of a custom scope calculation. Run the full suite only when the user explicitly asks for it in the current request (e.g. "run the full suite", "전체 테스트 돌려줘", "total test").
 
-Use command from project-profile `testing.md`. Default for Vitest 4.x / Playwright, scoped:
+Use the `test` steps in project-profile `verify.json` (`verify.mjs --changed <base-ref>` runs each step's `changed` command); E2E commands are in `testing.md`. Default for Vitest 4.x / Playwright, scoped:
 ```bash
 bunx vitest run --changed --coverage 2>&1
 npx playwright test --only-changed 2>&1
@@ -105,7 +107,7 @@ Generate a short quiz on the change — what was done, why, which existing paths
 Greenfield projects gate on absolute zero. **Legacy projects accumulate a baseline** of pre-existing type/lint errors that no single task can clear — demanding absolute zero there is unactionable and pressures masking. So gate on **net-new** errors instead:
 
 1. **Record the baseline** once (and refresh it deliberately): run the authoritative type-check/lint on the untouched base and store the count + a normalized snapshot. Normalize by stripping `file:line:col` so unrelated line shifts don't read as new errors — compare error *signatures* (rule + message + symbol), not raw lines.
-2. **Gate on the delta**: `net-new = current − baseline`. Net-new must be **0**. A net-new count that is negative (you fixed some) is good; positive blocks.
+2. **Gate on the delta**: `net-new = current − baseline`. Net-new must be **0**. A net-new count that is negative (you fixed some) is good; positive blocks. A count alone cannot show net-new is 0 — a fixed error and a new one cancel out — so `verify.mjs` reports counts at or under a non-zero baseline as 미검증 until the signatures are compared.
 3. **Verify per file, not in bulk**: when fixing pre-existing errors, apply and re-check file by file. Batch auto-fixing across a large baseline regresses — a fix valid in isolation can break a caller elsewhere.
 4. **Never mask a net-new error that flags a real bug.** A type error can be correctly *blocking* an incomplete or wrong code path; silencing it with `as any`/`@ts-ignore`/a cast hides a runtime defect. Investigate the error's intent before suppressing — the test for "is this safe to ignore" is "does the runtime behavior remain correct," not "does the red go away."
 
@@ -119,7 +121,7 @@ A green result is only trustworthy if the command actually exercised the code. B
 - **Lint**: zero files linted (bad glob / wrong cwd) is not a pass. Confirm files were actually scanned.
 - **Background process / server**: a start command exiting 0 — or printing `listening on :PORT` — is not proof it stayed up. At the moment you claim "running", re-confirm the process is alive and the port answers (health `curl` / `lsof -i :PORT` / `ps`). A server that crashed just after boot, or a port already released, is not a pass.
 
-Record the **authoritative** command in project-profile `stack.md` so every phase and every agent uses the verified one, never a convenience alias whose behavior is unknown.
+Record the **authoritative** command in project-profile `verify.json` (and its vacuity evidence in `stack.md`) so every phase and every agent uses the verified one, never a convenience alias whose behavior is unknown.
 
 ## Checkpoint System
 

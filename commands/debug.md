@@ -24,7 +24,7 @@ Follow the method below under the **Iron Law — no fix until the root cause is 
 5. **Fix + verify (Phase 4).** In order, no skipping:
    - **Failing test first** — write the test that reproduces the bug and watch it FAIL before touching the fix. A test written after the fix proves nothing.
    - **Single root-cause fix** — no "while I'm here". Guard at the shared function every caller routes through, not at the one path the report named.
-   - **Verify by running, not by claiming** — the failing test now passes AND the authoritative type-check/lint/test commands from project-profile `stack.md` are green. Report `됐다 / 됐는데 미검증 / 안 됨` distinctly; never log unverified as done.
+   - **Verify by running, not by claiming** — the failing test now passes AND the `verify` skill (`scripts/verify.mjs`, steps in project-profile `verify.json`) reports no `안 됨` step; cite its block. Report `됐다 / 됐는데 미검증 / 안 됨` distinctly; never log unverified as done.
    - **A network 200 / green UI is not proof** — where the change touches data, confirm DB-level persistence (the value survives a refresh).
    - **App (mobile) targets verify on a booted simulator/emulator**, never by inspection. iOS simulator is **macOS only**; Android emulator runs on macOS and Windows — so on Windows an iOS fix is **미검증**, not fixed, and MUST NOT be inferred from Android. Say which device the run used.
    - Full gate sequence + baseline-vs-net-new rules: `reference/verification-loop.md`.

@@ -190,7 +190,7 @@ Run one `team-tester` on the merged HEAD. Scope it to changed unit/integration t
 ```
 Agent(
   subagent_type="team-tester",
-  prompt="Implementation reports:\n[reports]\n\nPlan:\n[plan]\n\nBase ref: [base-ref]\nMerged HEAD: [merged-head]\n\n[User explicitly requested a FULL deterministic suite this time. Omit this line entirely for the default scoped run.]\n\nRun one lightweight integrated verification pass: affected unit/integration, type/lint/build, and at most one existing smoke E2E per affected user-facing flow. Report evidence and unavailable checks. Do not run deferred QA."
+  prompt="Implementation reports:\n[reports]\n\nPlan:\n[plan]\n\nBase ref: [base-ref]\nMerged HEAD: [merged-head]\n\n[User explicitly requested a FULL deterministic suite this time. Omit this line entirely for the default scoped run.]\n\nRun one lightweight integrated verification pass: the verify skill's verify.mjs --changed [base-ref] (affected unit/integration, type/lint/build from verify.json) and at most one existing smoke E2E per affected user-facing flow. Report the verify block, evidence and unavailable checks. Do not run deferred QA."
 )
 ```
 

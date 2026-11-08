@@ -60,7 +60,7 @@ Present: research summary + recommended stack + structure + **the exact scaffold
 ## G5 — Profile (project-analyzer Seeded Mode)
 
 Invoke `project-analyzer` in **Seeded Mode** (see its `## Seeded Mode` section), passing the stack-decision doc:
-- **SCAN-fill** from the real scaffold: stack.md, structure.md, code-style.md (formatter-config fallback if <5 files), testing.md (frameworks + agentic adapter), ui-components.md (if a UI lib was scaffolded), index.md.
+- **SCAN-fill** from the real scaffold: stack.md + verify.json (baselines 0), structure.md, code-style.md (formatter-config fallback if <5 files), testing.md (frameworks + agentic adapter), ui-components.md (if a UI lib was scaffolded), index.md.
 - **INJECT-fill** the forward-looking docs scan can't infer — **api-layer.md** and **state-management.md** — from the stack-decision doc, marked **`🌱 Seeded`** with a provenance line. (Without this they'd be wrongly `⏭️ Skipped` and the first `/team-run` would lose its API/state guidance.)
 
 ## Handoff

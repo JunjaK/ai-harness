@@ -49,7 +49,7 @@ Applies to all agents, skills, and direct use at the start of any task that chan
 
 **`reference/<name>.md` are documents, not skills** — `coding-standards`, `e2e-testing`, `verification-loop`, `plan-review`, `token-optimization`. A citation like "(`verification-loop` §Baseline & Net-New)" means **Read that file**; MUST NOT pass these names to the Skill tool. Rules that must fire unconditionally are inlined at their call sites.
 
-`.claude/rules/` is repo-local and path-scoped; it does not travel with the plugin. **Non-TS projects**: use the native checker from `stack.md` (`pyright`/`mypy`/`go vet`…); `verification-loop` Phase 2 adapts.
+`.claude/rules/` is repo-local and path-scoped; it does not travel with the plugin. **Non-TS projects**: the native checker (`pyright`/`mypy`/`go vet`…) is the `errors` step in project-profile `verify.json`; the `verify` skill runs it and `verification-loop` Phase 2 adapts.
 
 **Delegated plugin (hard dependency)** — reaches subagents via agent definitions, not this file. It ABORTs + requests install when unregistered. MUST NOT add it to `plugin.json` deps: external-marketplace manifest deps break plugin load.
 

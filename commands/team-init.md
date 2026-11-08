@@ -27,6 +27,7 @@ Analyze the current project and generate a structured profile that all team agen
 .claude/project-profile/
 ├── index.md              # Summary (always loaded by agents)
 ├── stack.md              # Tech stack, dependencies, build
+├── verify.json           # Authoritative gates + baselines (verify skill)
 ├── structure.md          # File/directory conventions
 ├── code-style.md         # Naming, imports, formatting
 ├── api-layer.md          # API patterns, type generation

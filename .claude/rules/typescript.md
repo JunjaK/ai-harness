@@ -10,7 +10,7 @@ paths:
 Loads when TS files are read or written. The non-TS fallback and the routing pointer live always-on in `CLAUDE.md`.
 
 ## Type check (hard gate)
-- **Authoritative, non-vacuous command**: use project-profile `stack.md` → "Build & Verify" (the one that actually compiles app sources). A solution-style root `tsconfig.json` (`"files": []`) makes `bunx tsc --noEmit` a no-op that always exits 0; a typed-framework wrapper (`vue-tsc`, `astro check`) may catch what bare `tsc` misses. Confirm the command is not vacuous before trusting green.
+- **Authoritative, non-vacuous command**: use the `errors` step in project-profile `verify.json`, run through the `verify` skill (the one that actually compiles app sources; its vacuity evidence is in `stack.md` → Build & Verify). A solution-style root `tsconfig.json` (`"files": []`) makes `bunx tsc --noEmit` a no-op that always exits 0; a typed-framework wrapper (`vue-tsc`, `astro check`) may catch what bare `tsc` misses. Confirm the command is not vacuous before trusting green.
 - `tsconfig.json` MUST set `"strict": true` and `"noUncheckedIndexedAccess": true`.
 - **Zero net-new type errors vs the recorded baseline** before any phase completes. Greenfield = absolute zero; legacy = net-new 0 (compare by error signature with `file:line:col` stripped, per file). See `reference/verification-loop.md`.
 - **Do not mask a type error that flags a real bug.** `as any`/`@ts-ignore` to clear red can hide a runtime defect — the test for "safe to ignore" is "runtime stays correct," not "red is gone."

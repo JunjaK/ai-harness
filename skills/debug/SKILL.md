@@ -20,7 +20,7 @@ This skill covers **LSP-accelerated debugging patterns** specific to this harnes
 3. **Inspect types** — Use `hover` to check inferred types against assumptions
 4. **Trace call paths** — Use `incomingCalls` / `outgoingCalls` to map the flow
 5. **Propose fix** — Minimal, targeted, with file:line reference
-6. **Verify** — Run the authoritative type-check (project-profile `stack.md` → "Build & Verify") + project test command; confirm no regression
+6. **Verify** — Run the `verify` skill (`scripts/verify.mjs`, steps in project-profile `verify.json`); confirm no regression
 
 ## LSP Investigation Patterns
 
@@ -40,7 +40,7 @@ When a bug looks like a **type-system or dependency-injection** failure rather t
 ## Root Cause Rules
 
 - Fix the root cause, not the symptom: state it as "X is root cause because Y", test that one hypothesis with the smallest change, and change one variable at a time
-- After any type-related fix, MUST run the authoritative type-check (project-profile `stack.md` → "Build & Verify") before declaring the fix complete
+- After any type-related fix, MUST run the type-check step through the `verify` skill (`verify.mjs --only <type-check step>`) before declaring the fix complete
 - After any refactor, MUST use `findReferences` to confirm no orphaned callers
 
 ## Escalation (when to stop debugging)
@@ -50,4 +50,4 @@ When a bug looks like a **type-system or dependency-injection** failure rather t
 - Fix requires API/backend changes not in plan → escalate to Team Leader
 - Bug is timing-dependent → add logging, do not guess
 
-For non-TypeScript targets, follow the `/debug` method with the native checker named in project-profile `stack.md`.
+For non-TypeScript targets, follow the `/debug` method with the native checker named in project-profile `verify.json`.

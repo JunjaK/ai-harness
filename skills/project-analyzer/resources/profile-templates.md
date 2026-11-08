@@ -1,6 +1,6 @@
 # Project Profile Templates
 
-Detailed templates for each of the 9 profile files. The main `SKILL.md` references this document when filling in each profile.
+Detailed templates for each of the 9 profile files plus `verify.json` (§1a). The main `SKILL.md` references this document when filling in each profile.
 
 ---
 
@@ -40,23 +40,56 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 
 ## Build (use detected package manager)
 - Dev: `[e.g., bun run dev]`
-- Build: `[build command]`
-- Test: `[test command]`
 - Install: `[install command]`
+- Build / type-check / lint / test gates: `verify.json` (§1a) — not repeated here
 - Worktree deps fast-path: `[fresh-worktree provisioning + family. A·copy-based (node_modules) — pnpm: `pnpm install --frozen-lockfile --prefer-offline`, bun: `bun install --frozen-lockfile` (store↔worktree must be same-filesystem or it copies). B·reference-cache (deps stay in a global cache, nothing copied) — Flutter: `fvm flutter pub get`, Gradle: `./gradlew <task>`. Other managers: the Context7-resolved recipe. Consumed by `/worktree-deps` + `parallelization`.]`
 - Audit: `[audit command]`
 
-## Build & Verify — AUTHORITATIVE commands (verify these are NOT vacuous)
-> Every gate and agent uses THESE, never a convenience alias. A `typecheck`/`lint` npm script
-> can check nothing (e.g. a solution-style root `tsconfig.json` with `"files": []` makes
-> `tsc --noEmit` a no-op that always exits 0). Run each once and confirm it actually exercises
-> the code (type-check compiles real sources; test run collects > 0 tests; lint scans > 0 files).
-- Type-check (authoritative): `[e.g. tsc --noEmit -p tsconfig.app.json | vue-tsc -p .nuxt/tsconfig.app.json | pyright]`
-  - Vacuity-checked: [yes — confirmed it reports errors on real sources / N/A]
-  - Pre-existing error baseline: [count, or 0 for greenfield] — gate on net-new vs this
-- Lint (authoritative): `[e.g. eslint . | biome check .]` — baseline: [count]
-- Test (authoritative): `[e.g. vitest run]` — confirmed collects [N] tests
+## Build & Verify — gates live in `verify.json`
+> The authoritative build / type-check / lint / test commands and their baselines are in
+> `.claude/project-profile/verify.json` (§1a), run by the `verify` skill. This section keeps what a JSON
+> file cannot: the evidence that each command is not vacuous. A `typecheck`/`lint` npm script can check
+> nothing (a solution-style root `tsconfig.json` with `"files": []` makes `tsc --noEmit` exit 0 on any code).
+- Vacuity evidence: [per verify.json step — type-check compiles N real sources; test run collects N tests; lint scans N files; date]
+- Baseline source: [commit the non-zero baselines were counted on, and why they are not 0 / "all 0"]
+- Caveats: [commands that must not be used as gates, CI differences, steps left out of verify.json and why]
 ```
+
+---
+
+## 1a. `verify.json` — Authoritative gates
+
+Written with `stack.md`. The `verify` skill's `scripts/verify.mjs` runs these steps in order and judges each one; agents
+never pick a convenience alias instead. Unknown keys are rejected, so a typo cannot silently drop a baseline.
+
+**Fill:** run each candidate command once on the untouched tree. Keep a step only when it ran and exercised real code
+(the vacuity evidence goes in `stack.md`). Record the counted pre-existing errors / failures as the baseline — 0 for
+greenfield. A gate whose command is unknown is left out and named under `stack.md` → Caveats; never invent a command.
+
+| Key | Required | Meaning |
+|-----|----------|---------|
+| `name` | yes | Unique label, no comma (`--only` takes a comma list) |
+| `kind` | yes | `exit` (exit 0 passes) · `errors` (type-check, lint, analyze: error count vs `baseline`) · `test` (test count; 0 tests is a failure; failures vs `failBaseline`) |
+| `run` | yes | The command, run through the shell in `cwd` |
+| `cwd` | no | Folder relative to the repo root (one step per sub-project in a monorepo) |
+| `baseline` | `errors` only | Pre-existing error count. A non-zero exit at or under it is reported 미검증 (counts only — signatures not compared) |
+| `failBaseline` | `test` only | Pre-existing failing tests. Failures at or under it are 미검증 (names not compared) |
+| `changed` | `test` only | The same tests scoped to changes, with `{base}` for the base ref (e.g. `vitest run --changed {base}`); used by `verify.mjs --changed <ref>` |
+| `timeoutMinutes` | no | Default 30, up to 120 |
+
+**Template:**
+```json
+{
+  "steps": [
+    { "name": "type-check", "kind": "errors", "run": "pnpm exec vue-tsc -p .nuxt/tsconfig.app.json --noEmit", "baseline": 0 },
+    { "name": "lint", "kind": "errors", "run": "pnpm exec eslint .", "baseline": 0 },
+    { "name": "unit", "kind": "test", "run": "pnpm exec vitest run", "changed": "pnpm exec vitest run --changed {base}" },
+    { "name": "build", "kind": "exit", "run": "pnpm build" }
+  ]
+}
+```
+A monorepo adds one step per sub-project with `cwd` (e.g. `{ "name": "app analyze", "kind": "errors", "cwd": "app", "run": "fvm flutter analyze" }`
+and `{ "name": "app test", "kind": "test", "cwd": "app", "run": "fvm flutter test --exclude-tags golden", "failBaseline": 22 }`).
 
 ---
 
@@ -234,8 +267,7 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 | E2E | [Playwright/Cypress/...] | [config path] | [test dir] |
 
 ## Test Commands
-- All: `[command]`
-- Unit: `[command]`
+- Unit / integration gates: `verify.json` (§1a) — not repeated here
 - E2E: `[command]`
 - Coverage: `[command]`
 
@@ -365,12 +397,13 @@ Status tokens: `✅` scanned-from-code · `⏭️` Skipped (not applicable) · `
 
 | File | Relevance | Status | Contents |
 |------|-----------|--------|----------|
-| [stack.md](./stack.md) | REQUIRED | ✅/⏭️ | Runtime, framework, dependencies, build |
+| [stack.md](./stack.md) | REQUIRED | ✅/⏭️ | Runtime, framework, dependencies, build; vacuity evidence for the gates |
+| [verify.json](./verify.json) | REQUIRED | ✅/🌱 | Authoritative build / type-check / lint / test gates + baselines, run by the `verify` skill |
 | [structure.md](./structure.md) | REQUIRED | ✅/⏭️ | Directory layout, routing, naming |
 | [code-style.md](./code-style.md) | HIGH | ✅/⏭️ | Formatting, imports, naming patterns |
 | [api-layer.md](./api-layer.md) | HIGH | ✅/🌱/⏭️ | API client, auth, error handling |
 | [state-management.md](./state-management.md) | MEDIUM | ✅/🌱/⏭️ | Store patterns, reactivity rules |
-| [testing.md](./testing.md) | HIGH | ✅/⏭️ | Test frameworks, commands, patterns |
+| [testing.md](./testing.md) | HIGH | ✅/⏭️ | Test frameworks, E2E commands, patterns, fixtures |
 | [ui-components.md](./ui-components.md) | MEDIUM | ✅/⏭️ | Component library, icons, tokens |
 | [deployment.md](./deployment.md) | MEDIUM | ✅/⏭️ | CI/CD, environments, build output |
 

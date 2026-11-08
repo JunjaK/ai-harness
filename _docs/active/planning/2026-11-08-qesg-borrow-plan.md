@@ -28,8 +28,15 @@ Each item states what this harness has now (checked 2026-11-08), so the gap is t
 - **Here**: the same rules exist only as `reference/verification-loop.md` (Baseline & Net-New, Vacuity guard); the
   model applies them by hand. The 2026-11-08 Jev change was verified with a manual plant/restore — the script form
   would have made that one command.
-- **Open question**: source of commands is `project-profile/stack.md` → "Build & Verify" (prose), not a JSON policy.
-  A machine-readable block would be needed first.
+- **Decided 2026-11-08 (user: A / a)**: commands move to a new `project-profile/verify.json` (same pattern as
+  `guardrails.json` / `jev.json`; `stack.md` keeps only vacuity evidence — Renewal B, consumers re-run
+  `/team-init --update`). Pre-existing failures/errors are a count baseline; a count at or under a non-zero baseline
+  is 미검증, never 됨, because a fixed and a new failure cancel out.
+- **Done 2026-11-08** (unreleased): `skills/verify/` — `scripts/verify.mjs` (12 tests) and `scripts/plant.mjs`
+  (4 tests, ported with the company harness's security-review fixes). Planting two violations in `verify.mjs` with
+  `plant.mjs` made its tests fail both times.
+- **Left for later**: name / signature comparison for baselines (per-runner JSON reporters, error-signature
+  snapshots) to turn those 미검증 into 됨 / 안 됨; `verify.json` for nivoca and picblog via `/team-init --update`.
 
 ## B2. Skill evals with/without the skill (Δ), then prune
 

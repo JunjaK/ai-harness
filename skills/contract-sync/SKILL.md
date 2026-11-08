@@ -42,7 +42,7 @@ A regen can rewrite many files with formatting noise and can **strip hand-mainta
 - Re-apply any recorded **post-regen fixups** (a deterministic post-process step is better than a manual edit that silently reverts — keep fixups idempotent and in the generation chain).
 
 ### Step 4 — Type-check against the new types (authoritative command only)
-Run the project's **authoritative** type-check (from project-profile `stack.md` → "Build & Verify", not a convenience alias — a `typecheck` script can be vacuous; see verification-loop §"Vacuity guard"). Judge results as **net-new vs the recorded baseline**, not absolute zero (see verification-loop §"Baseline & Net-New").
+Run the project's **authoritative** type-check — the `errors` step in project-profile `verify.json`, through the `verify` skill (`verify.mjs --only <type-check step>`), not a convenience alias (a `typecheck` script can be vacuous; see verification-loop §"Vacuity guard"). Judge results as **net-new vs the recorded baseline**, not absolute zero (see verification-loop §"Baseline & Net-New").
 
 New type errors here are the gate working: they are the exact places the client consumed the old contract. Fix them by updating the consumption, or — if a type error reveals the **backend** changed something it should not have — fix it at the source. Never silence with `as any`/`@ts-ignore`; a contract type error often flags a real runtime mismatch.
 

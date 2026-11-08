@@ -155,7 +155,7 @@ For projects that maintain a curated knowledge base (a wiki, a profile, an index
 | When this changes | Update this |
 |-------------------|-------------|
 | API contract / endpoint / DTO | api-layer profile + any contract doc |
-| Authoritative verify command / baseline | `stack.md` "Build & Verify" |
+| Authoritative verify command / baseline | project-profile `verify.json` (vacuity evidence: `stack.md` "Build & Verify") |
 | A new recurring gotcha is confirmed | a learning (§2), promoted per §4 (`_docs/reference/` or profile) once it has evidence |
 | Architecture / module boundary | the architecture overview/wiki page (link to the code, don't restate it) |
 | A documented file/command/flag is renamed or removed | every doc that named it (grep the knowledge base for the old name) |
