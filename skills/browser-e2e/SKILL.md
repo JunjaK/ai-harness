@@ -7,7 +7,7 @@ description: "The only browser driver (ego lite). Use it for any task that drive
 
 Every task that drives a real browser comes here first: E2E, QA, smoke, exploration of a running app, login-gated checks, resolving live selectors, focused team verification, and `/team-qa` (through `agentic-testing`). The user does not need to name this skill. ego lite is a **driver**, not a test framework.
 
-ego lite is the **only** driver. agent-browser, Aside, Playwright MCP, and `claude-in-chrome` are not used for testing; the plugin's PreToolUse hook denies `agent-browser`, `aside`, and Playwright MCP calls. Reason: one driver removes the drift of grabbing whichever browser tool is loaded, and a 54-run comparison on a real app (company harness, 2026-11-02~03, mac) had ego 27/27 with 0 hangs vs agent-browser 23/27 with 3 hangs (daemon timeouts), equal time once hangs are excluded, ego ~8% more cost.
+ego lite is the **only** driver. agent-browser, Aside, Playwright MCP, and `claude-in-chrome` are not used for testing; the plugin's PreToolUse hook denies `agent-browser`, `aside`, and Playwright MCP calls. The hook catches mistakes and tool drift, not deliberate evasion (a quoted program name, an alias, or a script file passes it), so these rules hold whether or not it fires. Reason: one driver removes the drift of grabbing whichever browser tool is loaded, and a 54-run comparison on a real app (company harness, 2026-11-02~03, mac) had ego 27/27 with 0 hangs vs agent-browser 23/27 with 3 hangs (daemon timeouts), equal time once hangs are excluded, ego ~8% more cost.
 
 ## When to use / not use
 

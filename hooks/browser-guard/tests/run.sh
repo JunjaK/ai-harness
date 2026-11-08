@@ -45,6 +45,11 @@ check "inside \$(…)" deny Bash "u=\$(agent-browser get url)"
 check "absolute path" deny Bash "/Users/x/.bun/bin/agent-browser --version"
 check "timeout wrapper" deny Bash "timeout 10 agent-browser open x"
 check "second heredoc-free line" deny Bash "ls${NL}aside guide"
+check "eval quoted" deny Bash "eval \"agent-browser open x\""
+check "eval bare" deny Bash "eval agent-browser open x"
+check "xargs" deny Bash "xargs -n 1 agent-browser open < urls.txt"
+check "bash --login -c" deny Bash "bash --login -c 'agent-browser open x'"
+check "backslash-escaped name" deny Bash "a\\gent-browser open x"
 
 # --- ego rules ---
 check "clear all profiles" deny Bash "ego-browser import --clear-existing-profiles"
@@ -52,6 +57,10 @@ check "clear browser cookies" deny Bash "ego-browser nodejs <<'EOF'${NL}await pa
 check "named space without profileId" deny Bash "ego-browser nodejs <<'EOF'${NL}const task = await taskSpace(\"inspect app\");${NL}EOF"
 check "multi-line space without profileId" deny Bash "ego-browser nodejs <<'EOF'${NL}const task = await taskSpace(${NL}  \"inspect app\"${NL});${NL}EOF"
 check "space by variable" deny Bash "ego-browser nodejs -e 'const t = await taskSpace(name);'"
+check "profileId only inside a string" deny Bash "ego-browser nodejs -e 'await taskSpace(\"profileId\");'"
+check "space before paren" deny Bash "ego-browser nodejs -e 'await taskSpace (\"x\");'"
+check "quoted ego program, clear all" deny Bash "\"ego-browser\" import --clear-existing-profiles"
+check "quoted ego program, CDP clear" deny Bash "\"ego-browser\" nodejs -e 'await page.cdp(\"Storage.clearCookies\")'"
 
 # --- Playwright MCP ---
 check "playwright mcp click" deny mcp__plugin_playwright_playwright__browser_click ""
@@ -71,12 +80,17 @@ check "taskSpace text without ego" allow Bash "grep -n 'taskSpace(' notes.md"
 check "single-site clear" allow Bash "ego-browser nodejs -e 'await page.cdp(\"Storage.clearDataForOrigin\", {});'"
 check "playwright test suite" allow Bash "bunx playwright test"
 check "qa-profile script" allow Bash "node /plugin/skills/browser-e2e/scripts/qa-profile.mjs --space-name qa"
+check "shorthand profileId" allow Bash "ego-browser nodejs -e 'const t = await taskSpace(\"qa\", { profileId });'"
+check "aside as a selector in an ego script" allow Bash "ego-browser nodejs -e 'await task.page(\"p1\").waitForSelector(\"aside\");'"
+check "grep CDP name without ego" allow Bash "grep -rn Network.clearBrowserCookies docs/"
 check "other tool" allow Read ""
 check "chrome extension tool" allow mcp__claude-in-chrome__navigate ""
 
-# --- without jq: Bash checks are skipped, the MCP check still blocks (exit 2) ---
+# --- without jq: a Bash command that mentions a browser CLI is denied (exit 2), others pass; MCP still blocks ---
 run Bash "agent-browser open x" "$NOJQ"
-if [ "$CODE" -eq 0 ] && [ -z "$OUT" ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL no-jq bash: code=$CODE out=$OUT"; fi
+if [ "$CODE" -eq 2 ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL no-jq bash browser: code=$CODE out=$OUT"; fi
+run Bash "ls -la" "$NOJQ"
+if [ "$CODE" -eq 0 ] && [ -z "$OUT" ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL no-jq bash other: code=$CODE out=$OUT"; fi
 run mcp__plugin_playwright_playwright__browser_click "" "$NOJQ"
 if [ "$CODE" -eq 2 ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL no-jq mcp: code=$CODE out=$OUT"; fi
 

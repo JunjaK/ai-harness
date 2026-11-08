@@ -4,10 +4,14 @@
 #          taskSpace(...) without profileId (the default profile may be a real account).
 #   MCP:   deny Playwright MCP tools (hooks.json matcher mcp__.*playwright.*). Committed .spec.ts runs go
 #          through Bash and are untouched.
-# Only the program position counts: `grep agent-browser`, `echo "… aside …"` and commit messages pass.
-# Quoted text is opaque except the script of `sh|bash|zsh -c '…'`. A script passed as a file
-# (`ego-browser nodejs < a.js`) is not visible here; the skill covers that case.
-# Never blocks on its own failure: no jq → only the MCP check runs; any other problem → exit 0.
+# Only the program position counts for agent-browser / aside: `grep agent-browser`, `echo "… aside …"` and
+# commit messages pass. Quoted text is opaque except the script of `sh|bash|zsh [--opt…] -c '…'` and `eval '…'`.
+# The ego checks (whole-profile clears, taskSpace without profileId) run whenever the text mentions
+# ego-browser anywhere, so quoting the program does not skip them.
+# Threat model, same as guardrails: this stops mistakes and tool drift, not deliberate evasion — a quoted or
+# escaped program name, an alias, or a script passed as a file (`ego-browser nodejs < a.js`) is not seen.
+# hooks.json sets onFailure: block. No jq → a Bash command that mentions a browser CLI is denied
+# (cannot be checked); the MCP check needs no jq. Internal parse problems exit 0.
 
 INPUT=$(cat)
 
@@ -38,10 +42,16 @@ case "$TOOL" in
   *) exit 0 ;;
 esac
 
-command -v jq >/dev/null 2>&1 || exit 0
-case "$INPUT" in *agent-browser*|*aside*|*ego-browser*) ;; *) exit 0 ;; esac
+# Backslashes are dropped before matching names, so `a\gent-browser` is still seen.
+PLAIN_INPUT=${INPUT//\\/}
+case "$PLAIN_INPUT" in *agent-browser*|*aside*|*ego-browser*) ;; *) exit 0 ;; esac
+if ! command -v jq >/dev/null 2>&1; then
+  printf '%s' "$PLAIN_INPUT" | grep -Eq 'agent-browser|ego-browser|(^|[^A-Za-z0-9_-])aside([^A-Za-z0-9_-]|$)' || exit 0
+  deny "This command mentions a browser CLI, and the browser-guard hook needs jq to check it. Install jq (brew install jq · apt install jq · winget install jqlang.jq) and run it again. $INSTALL"
+fi
 CMD=$(printf '%s' "$INPUT" | jq -r '.tool_input.command // empty' 2>/dev/null) || exit 0
 [ -n "$CMD" ] || exit 0
+PLAIN=${CMD//\\/}
 
 # Prints "PROG <name>" for every segment whose program is one of the three, and "BADSPACE" when a
 # taskSpace(...) call is neither a numeric resume nor given a profileId.
@@ -62,7 +72,7 @@ function seps(t,   r) { r = t; gsub(/&&|\|\||[;|&(){}`]/, "\n", r); return r }
         j++
       }
       body = substr(s, i + 1, j - i - 1)
-      if (out ~ /(^|[ \t\n])(ba|z|da|k)?sh[ \t]+-[A-Za-z]*c[ \t]+$/) out = out "\n" seps(body) "\n"
+      if (out ~ /(^|[ \t\n])((ba|z|da|k)?sh([ \t]+-[-A-Za-z]+)*[ \t]+-[A-Za-z]*c|eval)[ \t]+$/) out = out "\n" seps(body) "\n"
       else out = out "Q"
       i = j + 1
       continue
@@ -77,23 +87,27 @@ function seps(t,   r) { r = t; gsub(/&&|\|\||[;|&(){}`]/, "\n", r); return r }
     sub(/^[ \t]+/, "", line)
     while (line != "") {
       if (match(line, /^[A-Za-z_][A-Za-z0-9_]*=[^ \t]*[ \t]+/)) { line = substr(line, RLENGTH + 1); continue }
-      if (match(line, /^(sudo|env|command|exec|nohup|time|nice|timeout|npx|bunx|pnpx)[ \t]+/)) { line = substr(line, RLENGTH + 1); continue }
+      if (match(line, /^(sudo|env|command|builtin|exec|eval|xargs|nohup|time|nice|timeout|npx|bunx|pnpx)[ \t]+/)) { line = substr(line, RLENGTH + 1); continue }
       if (match(line, /^(pnpm[ \t]+(dlx|exec)|bun[ \t]+x|yarn[ \t]+dlx)[ \t]+/)) { line = substr(line, RLENGTH + 1); continue }
       if (match(line, /^(-[^ \t]+|[0-9.]+[smhd]?)[ \t]+/)) { line = substr(line, RLENGTH + 1); continue }
       break
     }
     split(line, w, /[ \t]+/)
     prog = w[1]
+    gsub(/\\/, "", prog)
     sub(/.*\//, "", prog)
     if (prog == "agent-browser" || prog == "aside" || prog == "ego-browser") print "PROG " prog
   }
   t = s
-  while (match(t, /taskSpace\([^)]*\)/)) {
+  while (match(t, /taskSpace[ \t]*\([^)]*\)/)) {
     pre = (RSTART > 1) ? substr(t, RSTART - 1, 1) : ""
-    call = substr(t, RSTART + 10, RLENGTH - 11)
+    whole = substr(t, RSTART, RLENGTH)
+    p = index(whole, "(")
+    call = substr(whole, p + 1, length(whole) - p - 1)
     t = substr(t, RSTART + RLENGTH)
     if (pre ~ /[A-Za-z0-9_.$]/) continue
-    if (call ~ /^[ \t\n]*[0-9]+[ \t\n]*$/ || call ~ /profileId/) continue
+    # a numeric resume, or an options object with a profileId key (`profileId:` or shorthand `{ profileId }`)
+    if (call ~ /^[ \t\n]*[0-9]+[ \t\n]*$/ || call ~ /[{,][ \t\n]*profileId[ \t\n]*[:,}]/) continue
     print "BADSPACE"
     break
   }
@@ -103,13 +117,13 @@ case "$SCAN" in
   *"PROG agent-browser"*) deny "agent-browser is not used. $INSTALL" ;;
   *"PROG aside"*) deny "aside is not used. $INSTALL" ;;
 esac
-case "$SCAN" in *"PROG ego-browser"*) ;; *) exit 0 ;; esac
+case "$PLAIN" in *ego-browser*) ;; *) exit 0 ;; esac
 
-case "$CMD" in
+case "$PLAIN" in
   *--clear-existing-profiles*)
     deny "Blocked: --clear-existing-profiles deletes every ego profile, including the user's real ones." ;;
 esac
-if printf '%s' "$CMD" | grep -Eq 'Network\.clearBrowserCookies|Network\.clearBrowserCache|Storage\.clearCookies'; then
+if printf '%s' "$PLAIN" | grep -Eq 'Network\.clearBrowserCookies|Network\.clearBrowserCache|Storage\.clearCookies'; then
   deny "Blocked: this CDP command clears cookies or cache for the whole profile. Clear one site with Storage.clearDataForOrigin (ego skill references/clearing-state.md)."
 fi
 case "$SCAN" in
