@@ -4,6 +4,32 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.37.0 — 2026-11-08
+
+Techniques borrowed from the company harness (`qesg-harness` v1.6.0–v1.8.5, 2026-10-21~11-03), reviewed against v1.36.0; the items left for later are in `_docs/active/planning/2026-11-08-qesg-borrow-plan.md`. The main change: **ego lite becomes the only browser driver**, following the company harness's 54-run comparison on a real app (ego 27/27 with 0 hangs, agent-browser 23/27 with 3 daemon hangs, equal time once hangs are excluded, ego ~8% more cost). The new hooks were run in a live `claude -p --plugin-dir` session. The Codex adapter moves to 1.37.0 with no change.
+
+**Breaking:** agent-browser, Aside, and Playwright MCP are denied in every project where the plugin is enabled, and there is no fallback driver: without ego lite (or on Linux / CI) browser QA is `blocked`. A project whose `.claude/project-profile/testing.md` names agent-browser as its driver needs `/team-init --update`.
+
+### Added
+- **`browser-e2e` skill** (ego lite only). Gate: `ego-browser --version` and a free QA profile. A failed gate stops with the install steps; it never switches to another browser tool. Measured pitfalls ported from the company harness: hidden console, network events only while the process lives, output on stderr (`| tee` gives an empty file), autosave before reload, single-match selectors, shared clipboard and downloads, file choosers, untitled pages that print a token-bearing URL.
+- `skills/browser-e2e/scripts/qa-profile.mjs` (needs `node`): picks a `harness-qa*` profile with no open task space or creates the next one (ego has no create-profile command; the script opens `--profile-directory=Profile N` and renames it), up to 10, under a lock, never touching other profiles. Optional `--space-name` opens a task space per profile. 7 tests; on macOS it created `harness-qa1`, a rerun reused it, and no window was left open.
+- `hooks/browser-guard.sh` (PreToolUse `Bash` and `mcp__.*playwright.*`): denies running `agent-browser` / `aside`, Playwright MCP tools, ego whole-profile clears (`--clear-existing-profiles`, `Network.clearBrowserCookies` / `clearBrowserCache`, `Storage.clearCookies`), and a named `taskSpace(...)` without `profileId` (the default profile may be a real account). Only the program position counts, so `grep agent-browser` and commit messages pass. 34 tests; in a live session `agent-browser --version` and Playwright `browser_navigate` were both denied.
+- **`korean_reply`** (`/plugin` → Configure, default off): a Stop hook (`hooks/reply-language.mjs`) sends a final reply back once when it has 2+ English sentences of 4+ words outnumbering the Korean ones (code, paths, URLs ignored; the second Stop always passes). 9 tests; in a live session an English answer was rewritten in Korean. That run set `CLAUDE_PLUGIN_OPTION_KOREAN_REPLY` through `--settings` env; saving it through Configure was not exercised.
+- `mcp/jev.mjs`: the Jev server launcher. It starts the first of `python3` / `python` / `py -3` that answers as Python 3, and on Windows scans PATH itself to skip the WindowsApps alias stubs (the company harness saw its server fail to start on Windows this way). 6 tests, including a real server start.
+
+### Changed
+- `agentic-testing`, `team-agentic-tester`, `reference/e2e-testing.md`: the web driver is ego lite through the `browser-e2e` gate; a failed gate marks web scenarios `blocked`. The login is done by the human once per QA profile.
+- `project-analyzer` profile template: the web `Driver` is `ego-browser`; `agent-browser` and `playwright-mcp` are gone.
+- Jev stop gate counts `ego-browser` commands as checks instead of `agent-browser`.
+- The guardrails PreToolUse hook has `"onFailure": "block"`: a timeout, a failed start, or an exit code other than 0/2 now blocks the git command instead of letting it run (the hooks reference lists those as failures). The guardrails evaluator's deliberate exits are 0 and 2 only.
+- README requirements: Jev needs `node` + Python 3; ego lite replaces the agent-browser row and install line.
+
+### Fixed
+- **Jev MCP protocol negotiation.** `initialize` echoed whatever version the client sent, claiming features the server never implemented. It now answers the requested version only when supported (`2025-11-25`, `2025-06-18`, `2024-11-05`), otherwise the latest of those. Re-planting the echo made the new test cases fail.
+
+### Removed
+- `agent-browser-e2e` skill: agent-browser driving, the Auth Vault / session / headless-login procedures, and the Playwright MCP fallback driver.
+
 ## v1.36.0 — 2026-10-29
 
 Catch-up with Claude Code 2.1.90–2.1.312 (the harness started on 2.1.90). The changelog range was checked against the harness, and the suspected breaks were run before fixing: an isolated worktree agent's Write to the main checkout was refused, and a PostToolUse hook's warning ran (`exit 0`) but never reached Claude. The fixed hooks were re-run in a live `claude -p --plugin-dir` session. The Codex adapter moves to 1.36.0 with no change.

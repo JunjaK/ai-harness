@@ -452,7 +452,13 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.36.0** — catch-up with Claude Code 2.1.312: hook
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.37.0** — ego lite is the only
+browser driver (`browser-e2e` skill, dedicated `harness-qa*` profiles; a hook denies
+agent-browser, Aside, and Playwright MCP, with no fallback driver), the guardrails hook
+blocks the command when it fails or times out, the Jev server negotiates the MCP protocol
+version and starts through a node launcher that finds a real Python 3 (Windows alias stubs
+skipped), and an opt-in `korean_reply` Stop hook sends English replies back for a Korean
+rewrite. v1.36.0: catch-up with Claude Code 2.1.312: hook
 warnings now reach Claude (`additionalContext`) or the user (`systemMessage`), a
 post-compaction hook restores `current.md` and the owned team run, isolated
 Designers return notes instead of writing `_docs/`, the ignored
