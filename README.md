@@ -452,7 +452,12 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.37.0** — ego lite is the only
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.38.0** — a reuse check before
+new code: for each existing candidate, reusable as-is → the change needed → is that change
+riskier or larger than writing new; architects record the verdict in the plan and
+`plan-review` flags a missing one. The `browser-guard` hook also closes the gaps an
+automated security review found (quoted or escaped program names, `eval` / `xargs`,
+`profileId` only as a key, `onFailure: block`, no-`jq` deny). v1.37.0: ego lite is the only
 browser driver (`browser-e2e` skill, dedicated `harness-qa*` profiles; a hook denies
 agent-browser, Aside, and Playwright MCP, with no fallback driver), the guardrails hook
 blocks the command when it fails or times out, the Jev server negotiates the MCP protocol

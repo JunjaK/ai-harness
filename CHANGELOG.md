@@ -4,6 +4,17 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.38.0 — 2026-11-08
+
+A reuse check for existing components (user request, 2026-11-08), and fixes to the v1.37.0 `browser-guard` hook from an automated security review of that release. The same reuse rule was added to the author's personal global `CLAUDE.md` so it also applies outside the harness. The Codex adapter moves to 1.38.0 with no change.
+
+### Added
+- **Reuse check** (`reference/coding-standards.md` §4 rung 2). The rung "already in this codebase → reuse it" now asks three questions for each candidate: reusable as-is? → the change needed to make it reusable (signature, branches, callers) → is that change riskier or larger than writing new (many callers to re-verify, behavior shifts for current users, a responsibility it was never shaped for)? Larger → continue down the ladder; otherwise generalize it into a shared component and build on it. The verdict and its reason go in the plan (solo work: before the first edit).
+  - `team-architect-fe` / `team-architect-be` / `web-architect` record the verdict in their plans; `team-designer` reports a candidate the plan did not weigh to the Leader instead of writing new beside it or generalizing it alone; `plan-review` flags new code beside a near-match without a verdict, and a generalization that touches more callers than the new code would; `brainstorm` designs carry the verdict.
+
+### Fixed
+- **`browser-guard` review findings.** The ego checks (whole-profile clears, a task space without `profileId`) ran only when `ego-browser` sat in the program position, so a quoted or escaped program name skipped them; they now run whenever the command mentions `ego-browser`. `eval`, `xargs`, `bash --login -c`, and backslash-split names (`a\gent-browser`) are caught. `profileId` counts only as an options key (`profileId:` or `{ profileId }`), not inside a string, and `taskSpace (` with a space is checked. Both `browser-guard` entries now have `"onFailure": "block"`, and without `jq` a Bash command that mentions a browser CLI is denied instead of passed. Quoted text is still not read as a program (so `waitForSelector("aside")` in an ego script passes); the threat model — mistakes and tool drift, not deliberate evasion — is stated in the hook and the `browser-e2e` skill. Tests 34 → 47.
+
 ## v1.37.0 — 2026-11-08
 
 Techniques borrowed from the company harness (`qesg-harness` v1.6.0–v1.8.5, 2026-10-21~11-03), reviewed against v1.36.0; the items left for later are in `_docs/active/planning/2026-11-08-qesg-borrow-plan.md`. The main change: **ego lite becomes the only browser driver**, following the company harness's 54-run comparison on a real app (ego 27/27 with 0 hangs, agent-browser 23/27 with 3 daemon hangs, equal time once hangs are excluded, ego ~8% more cost). The new hooks were run in a live `claude -p --plugin-dir` session. The Codex adapter moves to 1.37.0 with no change.
