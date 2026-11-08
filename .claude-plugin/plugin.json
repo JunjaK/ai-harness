@@ -37,13 +37,19 @@
       "title": "Jev stop gate",
       "description": "After a reply that claims verified or finished work, note it when this turn's tool output shows no check for it. Sends the last prompt, reply and this turn's tool output.",
       "default": false
+    },
+    "korean_reply": {
+      "type": "boolean",
+      "title": "Korean reply check",
+      "description": "When a final reply is written in English sentences (2+ sentences, more than the Korean ones; code, paths and URLs ignored), send it back once to be rewritten in Korean. Local check, nothing is sent.",
+      "default": false
     }
   },
   "mcpServers": {
     "jev": {
-      "command": "python3",
+      "command": "node",
       "args": [
-        "${CLAUDE_PLUGIN_ROOT}/mcp/jev_server.py"
+        "${CLAUDE_PLUGIN_ROOT}/mcp/jev.mjs"
       ],
       "env": {
         "CLAUDE_PLUGIN_OPTION_JEV_API_KEY": "${user_config.jev_api_key}",

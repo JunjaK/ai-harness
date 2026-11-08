@@ -74,8 +74,14 @@ with tempfile.TemporaryDirectory() as tmp:
         {"jsonrpc": "2.0", "id": 5, "method": "tools/call", "params": {"name": "other", "arguments": {}}},
         {"jsonrpc": "2.0", "id": 6, "method": "ping"},
     ])
-    check("initialize echoes protocol and advertises tools",
+    check("initialize answers a supported requested protocol and advertises tools",
           r[1]["result"]["protocolVersion"] == "2025-06-18" and "tools" in r[1]["result"]["capabilities"])
+    for requested, expected in (("2025-11-25", "2025-11-25"), ("2024-11-05", "2024-11-05"),
+                                ("2099-01-01", "2025-11-25"), (None, "2025-11-25"), (20250618, "2025-11-25")):
+        params = {"capabilities": {}} if requested is None else {"protocolVersion": requested, "capabilities": {}}
+        v = session(base, [{"jsonrpc": "2.0", "id": 1, "method": "initialize", "params": params}])
+        check("initialize negotiates %r -> %s (unknown or missing -> latest supported)" % (requested, expected),
+              v[1]["result"]["protocolVersion"] == expected, str(v[1]))
     check("notification gets no reply", set(r) == {1, 2, 3, 4, 5, 6}, str(sorted(r)))
     tools = r[2]["result"]["tools"]
     names = {t["name"]: t for t in tools}

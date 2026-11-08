@@ -1,6 +1,9 @@
 #!/bin/bash
 # Claude entry point for the branch evaluator shared with the Codex adapter.
-# It also leaves evidence of rare hook timeouts (a timed-out hook lets the command run):
+# hooks.json sets "onFailure": "block": a timeout, a failed start, or an exit code other than 0/2 blocks the
+# command instead of letting it run (https://code.claude.com/docs/en/hooks). Keep deliberate outcomes on
+# exit 0 (allow / JSON decision) and exit 2 (block).
+# It also leaves evidence of rare hook timeouts (now blocked rather than run):
 # - a check that takes 3 s or longer is appended to .claude/session-state/guardrails-slow.log
 #   (primary tree, gitignored runtime state) with elapsed time, exit code, index.lock, load;
 # - a check the hook timeout kills never reaches that line, so every check first writes a marker

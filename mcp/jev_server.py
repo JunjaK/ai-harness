@@ -30,7 +30,11 @@ SCRIPTS = {
 }
 OPTIONS = ("CLAUDE_PLUGIN_OPTION_JEV_API_KEY", "CLAUDE_PLUGIN_OPTION_JEV_QA_CROSSCHECK",
            "CLAUDE_PLUGIN_OPTION_JEV_STOP_GATE", "CLAUDE_PROJECT_DIR")
-FALLBACK_PROTOCOL = "2025-06-18"
+# MCP version negotiation: answer the requested version when supported, otherwise the latest supported one —
+# echoing an unknown version would claim features this server never implemented.
+# https://modelcontextprotocol.io/specification/2025-11-25/basic/lifecycle#version-negotiation
+SUPPORTED_PROTOCOLS = ("2025-11-25", "2025-06-18", "2024-11-05")
+FALLBACK_PROTOCOL = SUPPORTED_PROTOCOLS[0]
 
 QA_TOOL = {
     "name": "qa_crosscheck",
@@ -146,12 +150,17 @@ def call_tool(name, args):
     return run_script(name, payload, args.get("session_id", ""))
 
 
+def negotiate_protocol(requested):
+    """The requested version when supported; otherwise (missing, unknown, not a string) the latest supported."""
+    return requested if requested in SUPPORTED_PROTOCOLS else FALLBACK_PROTOCOL
+
+
 def handle(msg):
     method = msg.get("method")
     if method == "initialize":
-        requested = (msg.get("params") or {}).get("protocolVersion") or FALLBACK_PROTOCOL
+        params = msg.get("params") if isinstance(msg.get("params"), dict) else {}
         return {
-            "protocolVersion": requested,
+            "protocolVersion": negotiate_protocol(params.get("protocolVersion")),
             "capabilities": {"tools": {}},
             "serverInfo": {"name": "jev", "version": "1"},
         }

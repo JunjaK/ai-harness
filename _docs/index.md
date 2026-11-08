@@ -18,6 +18,7 @@
 | jev-checks | plan | complete | 2026-09-28 | [complete/jev-checks/2026-09-28-jev-checks-plan.md](complete/jev-checks/2026-09-28-jev-checks-plan.md) |
 | harness-v2 | plan | complete | 2026-04-16 | [complete/harness-v2/2026-04-16-harness-v2.md](complete/harness-v2/2026-04-16-harness-v2.md) |
 | ponytail-yagni | plan | complete | 2026-06-23 | [complete/ponytail-yagni/2026-06-23-ponytail-yagni.md](complete/ponytail-yagni/2026-06-23-ponytail-yagni.md) |
+| qesg-borrow | plan | planning | 2026-11-08 | [active/planning/2026-11-08-qesg-borrow-plan.md](active/planning/2026-11-08-qesg-borrow-plan.md) |
 | scenario-to-e2e | impl | complete | 2026-07-06 | [complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md](complete/scenario-to-e2e/2026-07-06-scenario-to-e2e.md) |
 | team-new | plan | complete | 2026-06-25 | [complete/team-new/2026-06-25-team-new.md](complete/team-new/2026-06-25-team-new.md) |
 | team-quality | plan | complete | 2026-09-23 | [complete/team-quality/2026-09-23-team-quality-plan.md](complete/team-quality/2026-09-23-team-quality-plan.md) |
@@ -57,6 +58,7 @@ The authoritative topic list. A doc's `topic` MUST be one of these; add a new en
 | `harness-v2` | Harness v2 evolution |
 | `jev-checks` | Opt-in TypeSafe Jev checks (stop gate, QA cross-check MCP tool) and the QA feedback they surfaced |
 | `ponytail-yagni` | ponytail YAGNI decision-ladder integration |
+| `qesg-borrow` | Techniques borrowed from the company harness (qesg-harness) — backlog of verify script, skill evals, contract-sync/debug gaps, db-runbook, worktree prune, relayed approvals |
 | `scenario-to-e2e` | test-scenario-doc(SCENARIOS SSOT) → Playwright e2e 생성 스킬 (grounded 실측+green-gate, scaffold 폴백) |
 | `team-new` | `/team-new` greenfield project bootstrap (research → scaffold → profile) |
 | `team-quality` | Claude team QA event routing, integration verification, and document freshness gates |

@@ -14,7 +14,7 @@ the repo root — is a defect, not a shortcut.
 
 | Folder | What goes in it |
 |--------|-----------------|
-| `e2e/` | Playwright / agent-browser run output: `<YYYY-MM-DD>-<test-name>/` containing `screenshots/`, `artifacts/` (traces, videos, failure shots), `report/` (HTML + `results.json`), `run.log` |
+| `e2e/` | Playwright / ego lite run output: `<YYYY-MM-DD>-<test-name>/` containing `screenshots/`, `artifacts/` (traces, videos, failure shots), `report/` (HTML + `results.json`), `run.log` |
 | `scratch/` | one-off scripts, intermediate JSON, command output too long to keep in context |
 
 Full E2E artifact spec: `reference/e2e-testing.md` §Artifact Layout.

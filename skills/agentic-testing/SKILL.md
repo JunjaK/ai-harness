@@ -21,7 +21,7 @@ Resolve the adapter from `testing.md`; use the existing test style only for opti
 
 | Surface | Verification driver | Optional deterministic emitter | Concurrency |
 |---|---|---|---|
-| web/TS | `agent-browser` after the `agent-browser-e2e` gate; Playwright MCP if that gate fails | existing Playwright `.spec.ts` conventions in `reference/e2e-testing.md` | sequential when a browser is shared |
+| web/TS | ego lite after the `browser-e2e` gate (the only driver; gate fails → `blocked`) | existing Playwright `.spec.ts` conventions in `reference/e2e-testing.md` | one QA profile per parallel task; downloads one at a time |
 | Spring/Kotlin API | HTTP calls against a verified local target | project's `WebTestClient`/`@SpringBootTest` + Testcontainers style | isolate data per worker |
 | Flutter/Dart UI | maestro, Patrol, or mobile MCP on a booted device; otherwise `device-lifecycle` (below) | project's integration-test or maestro style | sequential per device |
 
@@ -50,5 +50,5 @@ Only when the user explicitly requests `--crystallize`: after a goal is **passed
 
 - `commands/team-qa.md` — deferred queue selection and archive update contract
 - `agents/team-agentic-tester.md` — scenario executor/report format
-- `skills/agent-browser-e2e/SKILL.md` — web driver gate and login handling
+- `skills/browser-e2e/SKILL.md` — web driver gate and login handling
 - `reference/e2e-testing.md` — fixture, artifact, and optional test-emitter conventions

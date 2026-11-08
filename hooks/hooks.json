@@ -29,6 +29,11 @@
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/session-stop.sh\""
           },
           {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/reply-language.mjs\"",
+            "timeout": 10
+          },
+          {
             "type": "mcp_tool",
             "server": "plugin:junjak-ai-harness:jev",
             "tool": "stop_gate",
@@ -72,7 +77,23 @@
           {
             "type": "command",
             "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/guardrails.sh\"",
-            "timeout": 15
+            "timeout": 15,
+            "onFailure": "block"
+          },
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/browser-guard.sh\"",
+            "timeout": 10
+          }
+        ]
+      },
+      {
+        "matcher": "mcp__.*[Pp]laywright.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/hooks/browser-guard.sh\"",
+            "timeout": 10
           }
         ]
       }

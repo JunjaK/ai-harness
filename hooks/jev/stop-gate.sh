@@ -51,7 +51,7 @@ TURN=$(jq -cs '
 
 STATE=$(printf '%s' "$TURN" | jq -c --arg r "$REPORT" '
   .uses as $u
-  | "test|spec|vitest|jest|playwright|pytest|go +(test|vet)|gradle|mvn|cargo|tsc|lint|eslint|build|check|curl|agent-browser|smoke|e2e" as $check
+  | "test|spec|vitest|jest|playwright|pytest|go +(test|vet)|gradle|mvn|cargo|tsc|lint|eslint|build|check|curl|ego-browser|smoke|e2e" as $check
   | ["Edit", "Write", "MultiEdit", "NotebookEdit", "Read", "Glob", "Grep", "ToolSearch", "Skill",
      "TodoWrite", "TaskCreate", "TaskUpdate", "TaskList", "TaskGet"] as $skip
   | { request: (.prompt | .[-2000:]),

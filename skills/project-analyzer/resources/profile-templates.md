@@ -265,7 +265,7 @@ Detailed templates for each of the 9 profile files. The main `SKILL.md` referenc
 
 ## Agentic Testing Adapter
 - Surface: <web | backend | mobile>
-- Driver: <agent-browser (default when CLI+skill present) | playwright-mcp | http | maestro | patrol | mobile-mcp | device-lifecycle | UNAVAILABLE>
+- Driver: <ego-browser (the only web driver — `browser-e2e` skill) | http | maestro | patrol | mobile-mcp | device-lifecycle | UNAVAILABLE>
 - Emitter house-style: <reference/e2e-testing.md | springboot-tdd + kotlin-testing | integration_test>
 - Concurrency: <serial-shared-browser | parallel-stateless | serial-per-device>
 - Generated spec dir: <tests/e2e/ | src/test/ | integration_test/>

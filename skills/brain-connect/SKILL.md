@@ -49,7 +49,7 @@ brain repo makes the link **the per-environment mapping** while the synced conte
 
 ### MUST: one link per skill — never link the whole `skills/` dir
 `~/.claude/skills/` is shared ground. Third-party tools install skills there, often as relative
-symlinks into their own store (e.g. `agent-browser -> ../../.agents/skills/agent-browser`).
+symlinks into their own store (e.g. `impeccable -> ../../.agents/skills/impeccable`).
 Linking the directory itself **hides every one of them**, and moving the directory into the brain
 both breaks those relative targets and puts another tool's files under the brain's auto-commit.
 Link each brain-owned skill individually — the same reasoning as the namespaced `commands/brain`.

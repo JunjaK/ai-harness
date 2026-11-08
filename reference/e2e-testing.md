@@ -206,4 +206,4 @@ export default defineConfig({
 
 ## See also
 
-- `skills/agent-browser-e2e/SKILL.md` — **run its gate before driving anything**: when the `agent-browser` CLI + skill are installed it is the default driver for E2E/QA/smoke/exploration and headless (Auth-Vault) login. This deterministic Playwright layer is the fallback driver and the optional `--crystallize` target — whatever drove the exploration, a committed web regression suite is Playwright.
+- `skills/browser-e2e/SKILL.md` — **run its gate before driving anything**: ego lite is the only driver for E2E/QA/smoke/exploration (login happens by the human in a dedicated QA profile). This deterministic Playwright layer is the committed suite and the optional `--crystallize` target — whatever drove the exploration, a committed web regression suite is Playwright.

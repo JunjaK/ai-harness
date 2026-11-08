@@ -8,7 +8,7 @@ The following overview and slash commands describe the Claude Code workflow.
 
 Specialized AI agents collaborate through defined phases to implement features, fix bugs, or refactor code. Beyond the core team workflow, the harness adds:
 
-- **Testing stack** — `/team` runs changed unit/integration tests and at most one existing smoke E2E per affected user-facing flow, then reports implementation completion. It records up to five pending scenarios in the completed plan. Later, `/team-qa` collects those items across tasks and runs a bounded batch; `--crystallize` also turns verified paths into deterministic tests. `/test-scenario-doc` remains the on-demand HTML checklist for human QA. When [`agent-browser`](https://agent-browser.dev/) CLI + skill are installed, it is the default browser driver for any browser-driving task, including smoke and deferred QA.
+- **Testing stack** — `/team` runs changed unit/integration tests and at most one existing smoke E2E per affected user-facing flow, then reports implementation completion. It records up to five pending scenarios in the completed plan. Later, `/team-qa` collects those items across tasks and runs a bounded batch; `--crystallize` also turns verified paths into deterministic tests. `/test-scenario-doc` remains the on-demand HTML checklist for human QA. [ego lite](https://lite.ego.app/) is the only browser driver for any browser-driving task, including smoke and deferred QA; a hook denies agent-browser, Aside, and Playwright MCP.
 - **Separate QA budget** — Phase 4 is one merged-tree verification pass. A failed or blocked required quick check ends that run with evidence and a fix/unblock list; it does not start an automatic QA→implementation loop. Deferred QA verdicts live with their scenario entries and do not rewrite the implementation-complete status.
 - **Document storage (3 buckets)** — `_docs/` (project) · `.claude/wiki/` (an agent-maintained **LLM wiki** that compounds knowledge) · `_workspace/` (throwaway run output, gitignored but for its layout `README.md`), classified by a portable ownership discriminator. Inside `_docs/`, **lifecycle** buckets ride `planning → processing → complete`; **collection** buckets (`intent/`, `handoff/`, plus whatever a project declares) are append-only records the agent may add to but never reorganize.
 - **Code minimalism** — a harness-owned YAGNI decision ladder (`coding-standards` §4), applied by the architect agents at design time and gated once, at the Phase 1 plan approval.
@@ -122,16 +122,18 @@ The harness uses a few external tools. Each row states what happens when it's ab
 
 | Tool | Used for | Without it |
 |------|----------|-----------|
-| **agent-browser** CLI + skill · [agent-browser.dev](https://agent-browser.dev/) | **default** browser driver for E2E / QA / smoke / exploration (requested or not) + headless Auth-Vault login (the password never reaches the LLM) | falls back to the Playwright `reference/e2e-testing.md` / `agentic-testing` path — never to `claude-in-chrome` |
-| **Playwright** (`@playwright/test`, or the Playwright MCP) | the committed `.spec.ts` E2E suite, and the fallback driver when `agent-browser` is absent | with neither Playwright nor `agent-browser`, an optional Phase 4 smoke is recorded as unverified and queued for later QA; `/team-qa` marks browser-dependent scenarios blocked |
+| **ego lite** (`ego-browser` CLI + skill) · [lite.ego.app](https://lite.ego.app/) · macOS / Windows | the **only** browser driver for E2E / QA / smoke / exploration (requested or not), in dedicated `harness-qa*` profiles that `skills/browser-e2e/scripts/qa-profile.mjs` (needs `node`) picks or creates; the human logs in once per profile, so no password reaches the LLM | the `browser-e2e` gate stops with the install steps; an optional Phase 4 smoke is recorded as unverified and queued for later QA, and `/team-qa` marks browser-dependent scenarios blocked. There is no fallback driver (no Linux / CI support) |
+| **Playwright** (`@playwright/test`) | the committed `.spec.ts` E2E suite and the `--crystallize` target (Playwright MCP is denied by the browser-guard hook) | no committed web E2E suite; nothing else is affected |
 | **`jq`** | the `PostToolUse` hook reads its file path from the hook's stdin JSON; the guardrails hook parses its config | the post-edit warning hook (`console.*` / `debugger` / collection-bucket write checks) silently no-ops. `session-start.sh` prints one "jq not found" line per session so it fails loudly once instead of quietly forever. In a project with `guardrails.json`, git/gh commands are blocked (exit 2) until jq is installed |
 | **`gh` CLI** | GitHub releases per version bump, and the `git-handler` agent's PR/issue work | do those steps by hand; nothing else is affected |
-| **`python3`** + a TypeSafe key | the Jev MCP server (standard library only) behind both Jev checks, configured in `/plugin` → Configure; the checks also use `bash`, `jq`, and `curl` | the server does not start or its tools return `skipped`; QA reports say `Jev: not available` and the stop gate stays silent |
+| **`node`** + **Python 3** + a TypeSafe key | the Jev MCP server (Python standard library only) behind both Jev checks, configured in `/plugin` → Configure. `node` runs `mcp/jev.mjs`, which starts the first of `python3` / `python` / `py -3` that is really Python 3 (on Windows it skips the WindowsApps alias stubs); the checks also use `bash`, `jq`, and `curl` | the server does not start (the launcher names what it tried) or its tools return `skipped`; QA reports say `Jev: not available` and the stop gate stays silent |
+| **`node`** | the opt-in `korean_reply` Stop hook (`hooks/reply-language.mjs`) | that hook does not run; nothing else is affected |
 
 ```bash
 /plugin marketplace add pbakaus/impeccable && /plugin install impeccable@impeccable
-npm i -g agent-browser && agent-browser install   # skill ships with the CLI
 brew install jq                                   # apt install jq · winget install jqlang.jq
+# ego lite: install the app from https://lite.ego.app/, finish onboarding WITHOUT importing browser data
+# (onboarding registers `ego-browser` and its skill), then open a new terminal: `ego-browser --version`
 ```
 
 impeccable is expected to be installed before running the workflow. `jq` is worth installing on any machine that edits code — it is the only soft dependency whose absence has no in-session symptom other than the session-start line.
@@ -265,6 +267,8 @@ changes command behavior. Run `python3 codex/hooks/tests/run.py` and
 
 Limits: the hook targets mistakes, not deliberate evasion (a script file or alias that runs `git push` is not seen). Codex tool hooks are not a complete enforcement boundary, and most subagent tool calls do not run this hook; keep server-side branch protection. Windows Git Bash and Codex Windows hook invocation are not yet verified. A generator command is still planned.
 
+The Claude hook is registered with `"onFailure": "block"`: when it times out (15 s), cannot start, or exits with a code other than 0 or 2, the command is blocked instead of run ([hooks reference](https://code.claude.com/docs/en/hooks)). Before this, a crashed or stalled check let the git command through.
+
 ### Jev checks (optional)
 
 Two advisory checks use [TypeSafe Jev](https://docs.typesafe.ai/models), a model that answers typed questions with probabilities instead of writing text. Turn them on in **`/plugin` → junjak-ai-harness → Configure**:
@@ -292,7 +296,12 @@ Claude Code reads these values only from user or managed settings and the key on
 - Jev judges whether the evidence is about the claim, not whether it covers the claim's exact scope, and it sees only the text it is given: a fabricated observation passes. Treat a missing note as "no obvious gap", not as proof.
 - `stop_gate` is visible to the model like any MCP tool. It reads only this project's transcript for the session it is given and ignores any other path, so a call from the model cannot send an arbitrary file.
 - The key must use only `A-Z a-z 0-9 . _ ~ + / = -`; any other character skips the check, because the key is written into a curl config line.
-- Tests: `bash hooks/jev/tests/run.sh` and `python3 mcp/tests/test_jev_server.py` (fake endpoint, no network).
+- The MCP server answers the protocol version the client requests when it supports it (`2025-11-25`, `2025-06-18`, `2024-11-05`), otherwise the latest of those — it no longer echoes an unknown version back.
+- Tests: `bash hooks/jev/tests/run.sh`, `python3 mcp/tests/test_jev_server.py` (fake endpoint, no network), and `node --test mcp/tests/jev-launcher.test.mjs`.
+
+### Korean reply check (optional)
+
+Set `korean_reply` in **`/plugin` → junjak-ai-harness → Configure** (default off). A `Stop` hook (`hooks/reply-language.mjs`, local, nothing is sent) then reads the final reply: when it has two or more English sentences of four or more words and they outnumber the Korean ones, the turn is sent back once with "rewrite the same content in Korean". Code blocks, inline code, URLs, and paths are not counted, developer terms inside a Korean sentence do not count as English, and the second `Stop` of the same turn always passes, so an explicit request for English still ends the turn. Only the final reply is checked; progress text between tool calls is not. Like any plain command hook it reads `CLAUDE_PLUGIN_OPTION_KOREAN_REPLY`, which a project's `env` could also set — the worst case is a rewrite into Korean. Tests: `node --test hooks/reply-language/tests/reply-language.test.mjs`.
 
 ### Document Storage (3 buckets)
 
@@ -331,7 +340,7 @@ Skills that agents reference during their workflow phases:
 | `brainstorm` | Pre-Phase 1 (solo) | Lightweight solo design dialogue → `_docs/` design (no auto-commit); solo counterpart to `/team-brainstorm` |
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) under the harness root-cause-first method; `/debug` carries the full method and red flags |
 | `agentic-testing` | `/team-qa` | Adapter-based deferred QA: verify goals; generate deterministic tests when `--crystallize` is requested |
-| `agent-browser-e2e` | **Default driver — any browser-driving task** | `agent-browser` is the first choice for E2E/QA/smoke/exploration/selector resolution, requested or not, plus headless login via its encrypted Auth Vault (no password reaches the LLM). One-time gate (CLI present + skill available), else fall back to Playwright — never silently, and never to `claude-in-chrome`. Playwright still owns the committed `.spec.ts` suite |
+| `browser-e2e` | **The only driver — any browser-driving task** | ego lite for E2E/QA/smoke/exploration/selector resolution, requested or not. One-time gate (CLI present + a free `harness-qa*` profile, created when missing); a failed gate stops with the install steps — no fallback driver. The human logs in once per QA profile (no password reaches the LLM). The browser-guard hook denies agent-browser, Aside, Playwright MCP, whole-profile clears, and a named task space without `profileId`. Playwright still owns the committed `.spec.ts` suite |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `plan-visualizer` | **On-demand only** (`/plan-visualizer`) | HTML diagram of a plan (team, phases, files, deps) — fills the self-contained skeleton in `skills/plan-visualizer/resources/template.html`. No workflow phase generates one |
@@ -396,11 +405,14 @@ junjak-ai-harness/
 │   ├── hooks.json               # Plugin hook registration
 │   ├── session-start.sh
 │   ├── session-stop.sh          # Stop: stray-artifact warning only
+│   ├── reply-language.mjs       # Stop: opt-in korean_reply rewrite (tests in reply-language/tests/)
+│   ├── browser-guard.sh         # PreToolUse(Bash, Playwright MCP): ego lite is the only browser driver
+│   ├── browser-guard/tests/run.sh
 │   ├── session-end.sh           # SessionEnd: snapshot this session's state, prune old sessions
 │   ├── pre-compact.sh           # PreCompact: snapshot current.md (silent)
 │   ├── session-compact.sh       # SessionStart(compact): put current.md + owned team run back in context
 │   ├── post-edit-warn.sh        # PostToolUse: warnings to Claude via additionalContext
-│   ├── guardrails.sh            # PreToolUse(Bash) branch rules (opt-in)
+│   ├── guardrails.sh            # PreToolUse(Bash) branch rules (opt-in; onFailure: block)
 │   ├── guardrails/
 │   │   ├── presets/             # default.json · light.json · toy.json
 │   │   └── tests/run.sh         # table-driven hook tests
@@ -410,8 +422,9 @@ junjak-ai-harness/
 │       ├── qa-crosscheck.sh     # second opinion on one QA verdict
 │       └── tests/run.sh         # fake-endpoint tests
 ├── mcp/
+│   ├── jev.mjs                  # launcher: starts jev_server.py with the first real Python 3
 │   ├── jev_server.py            # MCP tools qa_crosscheck, qa_status, stop_gate (stdio, Python stdlib)
-│   └── tests/test_jev_server.py
+│   └── tests/                   # test_jev_server.py · jev-launcher.test.mjs
 ├── reference/                   # 5 methodology documents — read, never invoked
 │   ├── coding-standards.md
 │   ├── e2e-testing.md

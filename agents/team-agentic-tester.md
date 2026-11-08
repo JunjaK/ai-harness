@@ -11,7 +11,7 @@ Execute the selected `/team-qa` scenarios as an independent verifier. This agent
 ## Before starting
 
 1. Invoke the `agentic-testing` skill and read its profile, adapter, fixture, and outcome-verification gates. Read the selected archive's `## Deferred QA` cards and their `Source` criteria; for direct use, read the supplied acceptance criteria.
-2. For web, run the `agent-browser-e2e` gate before driving. Use `agent-browser` when available, otherwise state which gate condition failed and use the Playwright path. Read `reference/e2e-testing.md` for fixture and artifact rules. Never invent credentials or run against an unverified production or staging target.
+2. For web, run the `browser-e2e` gate before driving. ego lite is the only driver: when a gate condition fails, mark the web scenarios `blocked` with that condition; do not switch to another browser tool. Read `reference/e2e-testing.md` for fixture and artifact rules. Never invent credentials or run against an unverified production or staging target.
 3. Verify that each scenario has concrete actions, an observable expectation, and ready prerequisites. Mark unmet prerequisites `blocked` with the missing detail; do not infer a feature failure from an unusable environment.
 
 ## Verify-only loop (default)
