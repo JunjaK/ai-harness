@@ -454,7 +454,11 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.38.0** — a reuse check before
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.39.0** — a `verify` skill: the
+authoritative gates move to `.claude/project-profile/verify.json` (run `/team-init --update`),
+and `verify.mjs` judges each step 됨 / 미검증 / 안 됨 (an empty test run, an unreadable count, or
+a failure above baseline cannot pass; counts at a non-zero baseline stay 미검증), while
+`plant.mjs` proves a new check catches a planted violation. v1.38.0: a reuse check before
 new code: for each existing candidate, reusable as-is → the change needed → is that change
 riskier or larger than writing new; architects record the verdict in the plan and
 `plan-review` flags a missing one. The `browser-guard` hook also closes the gaps an

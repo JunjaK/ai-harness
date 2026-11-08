@@ -4,6 +4,22 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.39.0 — 2026-11-08
+
+Verification as a command: item B1 of `_docs/active/planning/2026-11-08-qesg-borrow-plan.md`, ported from the company harness (`qesg verify` v1.5.0 and `verify:plant` v1.7.0). The gate rules already in `reference/verification-loop.md` (baseline & net-new, vacuity guard) are now applied by a script instead of by reading output. The command source and the baseline semantics were decided by the user (A / a). The Codex adapter moves to 1.39.0 with no change.
+
+**Breaking:** the authoritative gate commands move from `stack.md` / `testing.md` prose to `.claude/project-profile/verify.json`. A project without that file gets "gates unconfigured" (unverified) from the Phase 4 tester, Designers, and `/debug` until `/team-init --update` writes it.
+
+### Added
+- **`verify` skill.** `scripts/verify.mjs` runs the steps in `verify.json` and judges each one 됨 / 미검증 / 안 됨, writes the evidence block to `_workspace/verify/<branch>.md`, and exits 0 / 3 / 1 (2 for a configuration or usage error). Step kinds: `exit` (exit code), `errors` (type-check / lint / analyze count vs `baseline`), `test` (test count vs `failBaseline`; 0 tests ran is a failure). `--changed <base-ref>` runs a step's `changed` command (`{base}` filled) for affected tests, `--only` re-checks single steps. Test counts are read from node --test, Vitest, Jest, Flutter/Dart, pytest, cargo, and Gradle; another runner's pass is 미검증. A count at or under a non-zero baseline is 미검증, never 됨: a fixed and a new failure cancel out, and names or signatures are not compared. 12 tests; on this repo with a temporary `verify.json` it read 16 and 22 tests from real node --test output.
+- `scripts/plant.mjs`: plants one violation (only when `--find` occurs exactly once), runs a test, always restores (also on interrupt) and checks sha256; `됨` when the test caught it. Keeps the company harness's security-review fixes: files outside the repo, under `_workspace/` or `.git` in any case, through a symlink, or ignored by git are refused, and a forged backup is not restored. 4 tests. Planting two violations into `verify.mjs`'s verdict logic made its tests fail both times.
+- `verify.json` profile template (`project-analyzer` → `resources/profile-templates.md` §1a). Unknown keys are rejected so a typo cannot drop a baseline; `cwd` keeps one step per sub-project inside the repo.
+
+### Changed
+- `stack.md` → Build & Verify keeps only the vacuity evidence, baseline source, and caveats; its Build list and `testing.md`'s Test Commands no longer repeat gate commands (E2E and coverage stay in `testing.md`).
+- `project-analyzer` / `/team-init` write `verify.json` with `stack.md` (each command run once on the untouched tree; unknown gates are left out and named, never invented); Seeded Mode writes it with every baseline 0.
+- `team-tester` (Phase 4) runs `verify.mjs --changed <base-ref>` on the merged tree and attaches the block; Designers run it in their worktree; `/debug` step 5, the `debug` skill, and `contract-sync` Step 4 use it; `reference/verification-loop.md`, `CLAUDE.md`, and `.claude/rules/typescript.md` point at `verify.json`.
+
 ## v1.38.0 — 2026-11-08
 
 A reuse check for existing components (user request, 2026-11-08), and fixes to the v1.37.0 `browser-guard` hook from an automated security review of that release. The same reuse rule was added to the author's personal global `CLAUDE.md` so it also applies outside the harness. The Codex adapter moves to 1.38.0 with no change.
