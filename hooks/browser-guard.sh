@@ -2,8 +2,10 @@
 # PreToolUse guard — ego lite is the only browser driver (skills/browser-e2e).
 #   Bash:  deny running agent-browser or aside; for ego-browser, deny whole-profile clears and a named
 #          taskSpace(...) without profileId (the default profile may be a real account).
-#   MCP:   deny Playwright MCP tools (hooks.json matcher mcp__.*playwright.*). Committed .spec.ts runs go
-#          through Bash and are untouched.
+#   MCP:   deny Playwright MCP, Claude in Chrome (mcp__claude-in-chrome__*) and the Claude desktop browser
+#          pane (mcp__Claude_Browser__*, mcp__remote-devices__Claude_Browser__*) — hooks.json matcher
+#          mcp__.*(playwright|claude-in-chrome|Claude_Browser).*. Skills such as impeccable reach for these
+#          when they need a page or a screenshot. Committed .spec.ts runs go through Bash and are untouched.
 # Only the program position counts for agent-browser / aside: `grep agent-browser`, `echo "… aside …"` and
 # commit messages pass. Quoted text is opaque except the script of `sh|bash|zsh [--opt…] -c '…'` and `eval '…'`.
 # The ego checks (whole-profile clears, taskSpace without profileId) run whenever the text mentions
@@ -37,6 +39,9 @@ fi
 case "$TOOL" in
   mcp__*[Pp]laywright*)
     deny "Playwright MCP is not used. $INSTALL Committed Playwright .spec.ts suites still run through Bash."
+    ;;
+  mcp__claude-in-chrome__*|mcp__Claude_Browser__*|mcp__remote-devices__Claude_Browser__*)
+    deny "Claude in Chrome and the browser pane are not used to open, drive, or screenshot pages — including when a skill such as impeccable asks for a browser. $INSTALL"
     ;;
   Bash) ;;
   *) exit 0 ;;

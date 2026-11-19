@@ -27,6 +27,8 @@ Call the `Skill` tool with `skill=<impeccable>` and `args="<sub-command> [target
 
 Example: `Skill(skill="impeccable:impeccable", args="shape login form")` on a plugin install, `Skill(skill="impeccable", args="shape login form")` on a personal-skill install.
 
+**Browser steps go through `browser-e2e` (ego lite).** When an impeccable sub-command asks you to open a page, take a screenshot, or show variants in a browser, do that step with the `browser-e2e` skill. Do not use Claude in Chrome, the browser pane, or a Playwright/Puppeteer script; the plugin hook denies the first two. No ego-browser installed → report the browser step as blocked with the install steps from `browser-e2e`, and finish the parts that need no browser.
+
 ### Sub-command map
 
 | Step | Sub-command (pass as `args`) | Purpose |

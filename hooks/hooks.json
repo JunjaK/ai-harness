@@ -89,7 +89,7 @@
         ]
       },
       {
-        "matcher": "mcp__.*[Pp]laywright.*",
+        "matcher": "mcp__.*([Pp]laywright|claude-in-chrome|Claude_Browser).*",
         "hooks": [
           {
             "type": "command",

@@ -30,6 +30,8 @@ Delegate audit + critique to impeccable; use our checklists for the remaining ca
 
 `impeccable` exposes one skill with sub-commands as arguments; call `Skill(skill=<impeccable>, args="<sub-command> [target]")`. **Resolve the skill name once, before the first call** — from your available-skills list, which needs no tool call: use `impeccable:impeccable` (the `pbakaus/impeccable` plugin) if it is listed, otherwise `impeccable` (a personal-skill install) if it is listed. Written `<impeccable>` below; call only that name for the rest of the task and never probe with an unlisted one. If neither is listed, ABORT and tell the user: *"impeccable is required but not installed. Install the `pbakaus/impeccable` plugin before continuing."*
 
+**Browser steps go through `browser-e2e` (ego lite).** When `audit` or `critique` asks you to open a page or take a screenshot, do that step with the `browser-e2e` skill. Do not use Claude in Chrome, the browser pane, or a Playwright/Puppeteer script; the plugin hook denies the first two. No ego-browser installed → mark the items that need a rendered page as blocked with the install steps from `browser-e2e`, and score the rest.
+
 | Step | Invoke | Covers (of our 5 categories) |
 |------|--------|-----------------------------|
 | Technical quality | `Skill(<impeccable>, args="audit ...")` | A11y (25%) + Performance (25%) + parts of Design Quality (20%) |

@@ -84,7 +84,13 @@ check "shorthand profileId" allow Bash "ego-browser nodejs -e 'const t = await t
 check "aside as a selector in an ego script" allow Bash "ego-browser nodejs -e 'await task.page(\"p1\").waitForSelector(\"aside\");'"
 check "grep CDP name without ego" allow Bash "grep -rn Network.clearBrowserCookies docs/"
 check "other tool" allow Read ""
-check "chrome extension tool" allow mcp__claude-in-chrome__navigate ""
+check "other mcp tool" allow mcp__mdn__search ""
+
+# --- Claude in Chrome and the desktop browser pane ---
+check "chrome extension navigate" deny mcp__claude-in-chrome__navigate ""
+check "chrome extension screenshot" deny mcp__claude-in-chrome__computer ""
+check "desktop browser pane" deny mcp__Claude_Browser__navigate ""
+check "remote browser pane" deny mcp__remote-devices__Claude_Browser__navigate ""
 
 # --- without jq: a Bash command that mentions a browser CLI is denied (exit 2), others pass; MCP still blocks ---
 run Bash "agent-browser open x" "$NOJQ"
@@ -93,6 +99,8 @@ run Bash "ls -la" "$NOJQ"
 if [ "$CODE" -eq 0 ] && [ -z "$OUT" ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL no-jq bash other: code=$CODE out=$OUT"; fi
 run mcp__plugin_playwright_playwright__browser_click "" "$NOJQ"
 if [ "$CODE" -eq 2 ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL no-jq mcp: code=$CODE out=$OUT"; fi
+run mcp__claude-in-chrome__navigate "" "$NOJQ"
+if [ "$CODE" -eq 2 ]; then PASS=$((PASS + 1)); else FAIL=$((FAIL + 1)); echo "FAIL no-jq chrome mcp: code=$CODE out=$OUT"; fi
 
 echo "browser-guard: $PASS passed, $FAIL failed"
 [ "$FAIL" -eq 0 ]
