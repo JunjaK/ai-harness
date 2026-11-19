@@ -5,8 +5,8 @@ This repository contains two separate adapters. Keep the Claude Code files in
 changing the Codex adapter.
 
 For Codex work on this repository, use the repository skills in
-`.agents/skills/`. The three supported entry points are `$harness-init`,
-`$harness-team`, and `$harness-debug`. Their instructions are self-contained;
+`.agents/skills/`. The four supported entry points are `$harness-init`,
+`$harness-team`, `$harness-debug`, and `$harness-relay`. Their instructions are self-contained;
 do not execute Claude's `Agent()`, `Skill()`, `Workflow`, or slash-command syntax.
 
 Check `git status` before editing. Preserve other sessions' changes. Edit only

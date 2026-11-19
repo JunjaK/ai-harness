@@ -1,7 +1,7 @@
 {
   "name": "junjak-ai-harness",
   "version": "1.39.0",
-  "description": "Codex workflows for project analysis, implementation, and systematic debugging",
+  "description": "Codex workflows for project analysis, implementation, systematic debugging, and session relay",
   "author": {
     "name": "Junjak",
     "email": "haring157@gmail.com",
@@ -14,7 +14,7 @@
   "interface": {
     "displayName": "AI Harness for Codex",
     "shortDescription": "Project analysis, implementation, and debugging workflows",
-    "longDescription": "Use three focused Codex skills to profile a repository, implement a cross-cutting change, or investigate a bug.",
+    "longDescription": "Use four focused Codex skills to profile a repository, implement a cross-cutting change, investigate a bug, or message another Claude or Codex session through Orca.",
     "developerName": "Junjak",
     "category": "Productivity",
     "capabilities": ["Read", "Write"],
