@@ -58,7 +58,7 @@ Phase 4 records `VERIFY_PASS`, `VERIFY_FAIL`, or `VERIFY_BLOCKED` with the exact
 | `/team-brainstorm` | Planning only — Leader + Architects discuss, no implementation |
 | `/debug` | Solo systematic debug of a bug / test failure (Iron Law: root cause before fix); layers the TS/LSP `debug` skill, escalates to `/team` when Fundamental |
 | `/checkpoint` | Save / restore work state across sessions, branches, and compactions |
-| `/meta-prompt` | Compile a raw context dump into an optimized, self-contained prompt to inject into a fresh session, `/team-run` string, subagent, or another tool |
+| `/meta-prompt` | Compile a raw context dump into a self-contained prompt for a fresh session, `/team-run` string, subagent, another tool, or a running agent session (brief file in the target repo + one-line send through `session-relay`, with a boundaries check). Measures environment facts before stating them; rework prompts carry the rejection evidence; agentic prompts get fixed / default / open layers and gated stages with a 됨 · 미검증 · 안 됨 report |
 | `/worktree-deps` | Provision a worktree's deps via the package manager's shared store (hard-link, no re-download, parallel-safe); pnpm/bun inline, other managers via Context7 — never symlinks `node_modules` |
 | `/take-over` | Resume a handed-off work-stream from `_docs/handoff/` — hydrate the spec, verify state, graduate the handoff into its durable `_docs` home |
 | `/docs-sweep` | Reap stale `_docs/` and re-verify orphan-document invariants |
@@ -123,7 +123,7 @@ The harness uses a few external tools. Each row states what happens when it's ab
 | Tool | Used for | Without it |
 |------|----------|-----------|
 | **ego lite** (`ego-browser` CLI + skill) · [lite.ego.app](https://lite.ego.app/) · macOS / Windows | the **only** browser driver for E2E / QA / smoke / exploration (requested or not), in dedicated `harness-qa*` profiles that `skills/browser-e2e/scripts/qa-profile.mjs` (needs `node`) picks or creates; the human logs in once per profile, so no password reaches the LLM | the `browser-e2e` gate stops with the install steps; an optional Phase 4 smoke is recorded as unverified and queued for later QA, and `/team-qa` marks browser-dependent scenarios blocked. There is no fallback driver (no Linux / CI support) |
-| **Playwright** (`@playwright/test`) | the committed `.spec.ts` E2E suite and the `--crystallize` target (Playwright MCP is denied by the browser-guard hook) | no committed web E2E suite; nothing else is affected |
+| **Playwright** (`@playwright/test`) | the committed `.spec.ts` E2E suite and the `--crystallize` target (Playwright MCP is denied by the browser-guard hook, as are Claude in Chrome and the desktop browser pane) | no committed web E2E suite; nothing else is affected |
 | **`jq`** | the `PostToolUse` hook reads its file path from the hook's stdin JSON; the guardrails hook parses its config | the post-edit warning hook (`console.*` / `debugger` / collection-bucket write checks) silently no-ops. `session-start.sh` prints one "jq not found" line per session so it fails loudly once instead of quietly forever. In a project with `guardrails.json`, git/gh commands are blocked (exit 2) until jq is installed |
 | **`gh` CLI** | GitHub releases per version bump, and the `git-handler` agent's PR/issue work | do those steps by hand; nothing else is affected |
 | **`node`** + **Python 3** + a TypeSafe key | the Jev MCP server (Python standard library only) behind both Jev checks, configured in `/plugin` → Configure. `node` runs `mcp/jev.mjs`, which starts the first of `python3` / `python` / `py -3` that is really Python 3 (on Windows it skips the WindowsApps alias stubs); the checks also use `bash`, `jq`, and `curl` | the server does not start (the launcher names what it tried) or its tools return `skipped`; QA reports say `Jev: not available` and the stop gate stays silent |
@@ -149,10 +149,11 @@ impeccable is expected to be installed before running the workflow. `jq` is wort
 
 ## Codex support
 
-Codex automatically discovers this repository's three `.agents/skills/` links
+Codex automatically discovers this repository's four `.agents/skills/` links
 to the self-contained skills in `codex/skills/` when opened here. Invoke
 `$harness-init` to profile an existing project, `$harness-team` for a
-cross-cutting implementation, or `$harness-debug` for a bounded bug. Give the
+cross-cutting implementation, `$harness-debug` for a bounded bug, or
+`$harness-relay` to message another Claude or Codex session in Orca. Give the
 target repository path in the request when it differs from the current working
 directory. These are Codex skill names, not Claude slash commands. `AGENTS.md`
 governs Codex work **on this repository**; a different project uses its own
@@ -173,6 +174,7 @@ settings itself. See [OpenAI's plugin packaging and local marketplace guide](htt
 | `$harness-init` | Scans an existing project and writes `.codex/project-profile/index.md` from observed files. |
 | `$harness-team` | Implements a cross-cutting change, runs one lightweight verification pass (`VERIFY_PASS` / `VERIFY_FAIL` / `VERIFY_BLOCKED`), records up to five Deferred QA scenarios, and sweeps only the run's changed documents. It routes independent subagents by task complexity when available. |
 | `$harness-debug` | Reproduces, traces, fixes, and verifies a bounded bug; escalates broad contract changes to the team skill. |
+| `$harness-relay` | Sends a message or brief to another running Claude or Codex session by Orca mail (`orca orchestration send`), answers received mail with `orchestration reply`, and reports stored / started / answered separately. |
 | Codex plugin `SessionStart` hook | Read-only reminder about stale `_docs/active/` documents, after Codex hook trust review. |
 | Codex plugin `PreToolUse(Bash)` hook | Opt-in project guardrails: protected branch writes and configured forbidden command prefixes are denied. Claude `ask` rules also deny in Codex. |
 
@@ -193,7 +195,7 @@ Claude `skills/` are intentionally not exposed to Codex as a set: several call
 the runtime's own delegation tools rather than the Claude agent definitions.
 Codex does not run Claude's `Stop`, `PreCompact`, or `PostToolUse` handlers,
 which use Claude session state and tool input, so the Jev checks are Claude-only. Codex requires the user to
-review and trust a plugin hook before it runs; the three skills work without
+review and trust a plugin hook before it runs; the four skills work without
 hook trust, but the guardrail is active only after hook trust. The branch
 evaluator uses `bash` and `jq`; the Codex wrapper uses Python 3 standard
 library. No package dependency is added.
@@ -214,7 +216,7 @@ The agents are framework-agnostic by default. To specialize for your project:
 
 ### Guardrails (optional)
 
-A `PreToolUse(Bash)` hook blocks or confirms git writes on protected branches, including in `/team-run` subagents. It does nothing until the project has `.claude/project-profile/guardrails.json`; while a harness project has none, each session starts with a one-line suggestion.
+A `PreToolUse(Bash)` hook blocks or confirms git writes on protected branches, including in `/team-run` subagents. It does nothing until the project has `.claude/project-profile/guardrails.json`. `/team-init` (and `--update`) asks once which preset to use when the file is absent; while a harness project still has none, each session starts with a one-line notice pointing there.
 
 ```bash
 cp "<plugin>/hooks/guardrails/presets/default.json" .claude/project-profile/guardrails.json
@@ -341,14 +343,15 @@ Skills that agents reference during their workflow phases:
 | `debug` | Phase 3-4 | LSP-driven debugging patterns (TS) under the harness root-cause-first method; `/debug` carries the full method and red flags |
 | `agentic-testing` | `/team-qa` | Adapter-based deferred QA: verify goals; generate deterministic tests when `--crystallize` is requested |
 | `verify` | Before any "done" · Phase 4 · `/debug` | `scripts/verify.mjs` runs the gates in project-profile `verify.json` (`exit` / `errors` vs `baseline` / `test` vs `failBaseline`, `--changed <base>` for affected tests) and writes a 됨 / 미검증 / 안 됨 block to `_workspace/verify/<branch>.md` (exit 0 / 3 / 1). Counts at or under a non-zero baseline stay 미검증 — names and signatures are not compared. `scripts/plant.mjs` plants one violation, runs a test, always restores (sha256-checked), and reports whether the test caught it. Needs `node` |
-| `browser-e2e` | **The only driver — any browser-driving task** | ego lite for E2E/QA/smoke/exploration/selector resolution, requested or not. One-time gate (CLI present + a free `harness-qa*` profile, created when missing); a failed gate stops with the install steps — no fallback driver. The human logs in once per QA profile (no password reaches the LLM). The browser-guard hook denies agent-browser, Aside, Playwright MCP, whole-profile clears, and a named task space without `profileId`. Playwright still owns the committed `.spec.ts` suite |
+| `browser-e2e` | **The only driver — any browser-driving task** | ego lite for E2E/QA/smoke/exploration/selector resolution, requested or not. One-time gate (CLI present + a free `harness-qa*` profile, created when missing); a failed gate stops with the install steps — no fallback driver. The human logs in once per QA profile (no password reaches the LLM). The browser-guard hook denies agent-browser, Aside, Playwright MCP, Claude in Chrome, the desktop browser pane, whole-profile clears, and a named task space without `profileId`; a skill that asks for a browser (e.g. `impeccable` `critique`/`live`) is routed here. Playwright still owns the committed `.spec.ts` suite |
 | `test-scenario-doc` | Human acceptance | Interactive human QA checklist HTML — on-demand via `/test-scenario-doc` |
 | `contract-sync` | Phase 0 / BE→FE handoff | Regenerate a generated API client after a backend contract change, then type-check + cross-check consumption sites against it |
 | `plan-visualizer` | **On-demand only** (`/plan-visualizer`) | HTML diagram of a plan (team, phases, files, deps) — fills the self-contained skeleton in `skills/plan-visualizer/resources/template.html`. No workflow phase generates one |
 | `project-analyzer` | Setup | Project structure analysis → profile generation |
-| `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT with the harness — links global `CLAUDE.md`, `persona.md`, per-skill global skills, commands and auto-memory, plus a merged recommended-settings manifest and opt-in sync hooks; dependency-free, ships a generic connector template for both shells |
+| `session-relay` | Any phase | Send a message or brief to another live agent session and answer one: Claude → Claude by `SendMessage`, any leg with Codex by Orca mail (`orca orchestration send` / `reply`; never typed into the agent's terminal). Relay header with the user's words, scope, and what still needs the user directly; delivery reported as stored / started / answered. `/meta-prompt` step 6 sends through it; the Codex mirror is `$harness-relay` |
+| `brain-connect` | Setup (per-machine) | Pair an optional personal **brain** SSOT with the harness — links global `CLAUDE.md`, `persona.md`, per-skill global skills, commands and auto-memory, plus a recommended-settings manifest merged into every config dir (`~/.claude`, `$CLAUDE_CONFIG_DIR`, launcher profile homes such as Orca's) with a per-key divergence check, and opt-in sync hooks; dependency-free, ships a generic connector template for both shells |
 
-Cross-cutting skills (any phase): `continuous-learning`, `parallelization`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`. Plus `submodule-worktree`, which fires only where the project profile records a Submodule Layout (`/team-init` writes it; a bare `.gitmodules` is not enough).
+Cross-cutting skills (any phase): `continuous-learning`, `parallelization`, `checkpoint`, `docs-lifecycle`, `handoff`, `take-over`, `wiki`, `session-relay`. Plus `submodule-worktree`, which fires only where the project profile records a Submodule Layout (`/team-init` writes it; a bare `.gitmodules` is not enough).
 
 ### Reference documents (`reference/*.md`) — read, don't invoke
 
@@ -407,7 +410,7 @@ junjak-ai-harness/
 │   ├── session-start.sh
 │   ├── session-stop.sh          # Stop: stray-artifact warning only
 │   ├── reply-language.mjs       # Stop: opt-in korean_reply rewrite (tests in reply-language/tests/)
-│   ├── browser-guard.sh         # PreToolUse(Bash, Playwright MCP): ego lite is the only browser driver
+│   ├── browser-guard.sh         # PreToolUse(Bash, Playwright / Chrome / browser-pane MCP): ego lite only
 │   ├── browser-guard/tests/run.sh
 │   ├── session-end.sh           # SessionEnd: snapshot this session's state, prune old sessions
 │   ├── pre-compact.sh           # PreCompact: snapshot current.md (silent)
@@ -432,7 +435,7 @@ junjak-ai-harness/
 │   ├── verification-loop.md
 │   ├── plan-review.md
 │   └── token-optimization.md
-└── skills/                      # 20 workflow skills
+└── skills/                      # 21 workflow skills
     ├── team-workflow/
     ├── greenfield-bootstrap/
     ├── project-analyzer/
@@ -445,7 +448,7 @@ junjak-ai-harness/
     ├── verify/                  # verify.mjs (gates from verify.json) · plant.mjs (planted violation) + tests
     ├── test-scenario-doc/
     ├── brainstorm/
-    └── ... (8 more)
+    └── ... (9 more)
 ```
 
 ### CLAUDE.md Note
