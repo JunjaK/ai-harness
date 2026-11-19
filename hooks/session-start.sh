@@ -20,7 +20,7 @@ command -v jq >/dev/null 2>&1 || \
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-.}"
 PLUGIN_DIR="${CLAUDE_PLUGIN_ROOT:-$(cd "$(dirname "$0")/.." && pwd)}"
 if [ -d "$PROJECT_DIR/.claude/project-profile" ] && [ ! -f "$PROJECT_DIR/.claude/project-profile/guardrails.json" ]; then
-  echo "[guardrails] No branch rules for this project. Recommended: cp \"$PLUGIN_DIR/hooks/guardrails/presets/default.json\" .claude/project-profile/guardrails.json (production branches deny, stage/dev ask). To opt out, copy toy.json instead and this notice stops."
+  echo "[guardrails] No branch rules for this project, so nothing blocks push/merge on production branches. Run /team-init --update to pick a preset (default · light · toy), or: cp \"$PLUGIN_DIR/hooks/guardrails/presets/default.json\" .claude/project-profile/guardrails.json. Copying toy.json is an explicit opt-out and stops this notice."
 fi
 
 # Silent no-op if this repo hasn't adopted the docs-lifecycle v2 bucket layout.

@@ -19,7 +19,8 @@ Analyze the current project and generate a structured profile that all team agen
 2. **Scan project** following the 10-step analysis process
 3. **Generate profile** files in `.claude/project-profile/`
 4. **Bootstrap document buckets** (if absent): `_workspace/README.md` (throwaway-layout SSOT) and `.claude/wiki/{index.md, log.md, schema.md}` (agent wiki), plus the profile's **Document buckets** table declaring this project's `_docs/` collections. Never overwrites existing files.
-5. **Report** what was found and any notable conventions
+5. **Guardrails preset** (both modes, only when `.claude/project-profile/guardrails.json` is absent): ask once with `AskUserQuestion` — **default** (production branches deny commit/push/merge; stage/dev ask), **light** (production branches ask), **toy** (no rules; an explicit opt-out). Recommend `default` when the repo has a `main`/`master`/`prod*` branch, `toy` for a throwaway repo. State in the question that under `bypassPermissions` or `dontAsk` every `ask` becomes `deny`, because no prompt can be shown. Copy the chosen file from `${CLAUDE_PLUGIN_ROOT}/hooks/guardrails/presets/<name>.json` to `.claude/project-profile/guardrails.json`. Any existing `guardrails.json` is left untouched and nothing is asked.
+6. **Report** what was found, any notable conventions, and the guardrails preset in effect
 
 ## Output
 
@@ -34,7 +35,8 @@ Analyze the current project and generate a structured profile that all team agen
 ├── state-management.md   # Store patterns, reactivity
 ├── testing.md            # Test framework, patterns
 ├── ui-components.md      # Component library, design system
-└── deployment.md         # Build, CI/CD, env management
+├── deployment.md         # Build, CI/CD, env management
+└── guardrails.json       # Branch rules preset chosen in step 5 (only when it was absent)
 ```
 
 Plus the document buckets (created only when absent):
@@ -101,6 +103,8 @@ Key conventions detected:
 1. [convention]
 2. [convention]
 3. [convention]
+
+Guardrails: [default | light | toy | existing file kept]
 
 Team agents will now follow these conventions.
 Run /team or /team-run to start a team workflow.
