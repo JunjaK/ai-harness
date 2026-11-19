@@ -1,6 +1,6 @@
 {
   "name": "junjak-ai-harness",
-  "version": "1.39.0",
+  "version": "1.40.0",
   "description": "Codex workflows for project analysis, implementation, systematic debugging, and session relay",
   "author": {
     "name": "Junjak",

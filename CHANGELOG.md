@@ -4,6 +4,22 @@ All notable changes to the **AI Harness** plugin. Distributed via the `JunjaK/ai
 
 Versions follow `MAJOR.MINOR.PATCH`: **minor** = new skill/agent/command/behavior, **patch** = fix. Pure docs/chore changes (this file, `CLAUDE.md`, `.claude/rules/`) ship without a bump.
 
+## v1.40.0 — 2026-11-20
+
+Candidates from a nivoca session's `/doctor` check and one-prompt brief work (A1–A7, B1–B7), triaged against the existing skills, agents, and hooks, plus three requests made during the triage: route every browser step to ego lite, and pass messages between Claude and Codex sessions the way the company harness does. Adopted: A3 → `brain-connect`, A4 → `/team-init`, A6 → description trims, B1–B6 → `/meta-prompt`. Held: A1 (subagent model frontmatter; team dispatches already pass `model`), A5 (73 of 110 dead project paths are Orca workspaces with no prune CLI), A7, B7 (no observed failure or no place in the harness). The Codex adapter moves to 1.40.0 with one new skill, `$harness-relay`.
+
+**Breaking:** Claude in Chrome (`mcp__claude-in-chrome__*`) and the Claude desktop browser pane (`mcp__Claude_Browser__*`) are now denied wherever the plugin is enabled, like Playwright MCP since v1.37.0.
+
+### Added
+- **`session-relay` skill** (Claude) and **`$harness-relay`** (Codex). Claude → Claude goes by `SendMessage`, picked from `ListAgents` by the Orca tab title (no unique match → Orca). Any leg with Codex goes by Orca mail (`orca orchestration send`, answered with `orchestration reply`); typing into another agent's terminal is never used, following Orca's current CLI guide. Messages open with a relay line and carry the user's words, scope, and what still needs the user directly; delivery is reported as stored / started / answered. Run live on 2026-11-19: Claude → Codex (`codex-harness` read the mail and started a turn) and Codex → Claude (its reply arrived in this session's inbox). Claude → Claude was not sent in that run.
+- **`/team-init` guardrails step.** When `guardrails.json` is absent, one question picks `default` / `light` / `toy` (noting that `ask` becomes `deny` under `bypassPermissions`) and copies the preset. The SessionStart notice now points to `/team-init --update`.
+- **`/meta-prompt` for running sessions and reworks.** Environment facts in a prompt are measured in this session or left as `[FILL]` (B2). A redo of rejected work carries the user's words, evidence paths, and numbered symptoms (B1). Agentic prompts get Fixed / Defaults / Receiver-designs layers (B3), gated stages with a done / done-unverified / not-done report (B4), and a progress-file resume rule (B5). A running session gets the brief as a file in its repo plus a one-line send through `session-relay`, after a check of its working directory, permission mode, and writable scope; a session that skips approvals or runs outside the target repo gets a Boundaries section (B6).
+
+### Changed
+- **`brain-connect` merges into every config dir.** `apply-settings.sh` / `.ps1` merge the manifest into `~/.claude`, `$CLAUDE_CONFIG_DIR`, and each profile home passed as an argument, deduplicated by real path; a file whose merge fails is left untouched and the run exits 1. A new Verify step counts distinct values per key across config dirs. Observed 2026-11-18: one Orca profile had 15 plugins enabled while `~/.claude` and the other profiles had 6.
+- **Browser steps from other skills go to ego lite.** `browser-e2e`, `team-uiux-master`, and `web-reviewer` route a browser step that `impeccable` (`critique` / `live` / `generate`) asks for through `browser-e2e`; without ego lite the step is reported blocked with the install steps. `browser-guard` tests 47 → 52.
+- **Shorter skill descriptions.** `submodule-worktree`, `docs-lifecycle`, `contract-sync`, `take-over`, `handoff`, and `brain-connect` keep their triggers and move the rationale to the body. Skill and command descriptions together: 10,560 → 8,572 characters, under Claude Code's listing budget.
+
 ## v1.39.0 — 2026-11-08
 
 Verification as a command: item B1 of `_docs/active/planning/2026-11-08-qesg-borrow-plan.md`, ported from the company harness (`qesg verify` v1.5.0 and `verify:plant` v1.7.0). The gate rules already in `reference/verification-loop.md` (baseline & net-new, vacuity guard) are now applied by a script instead of by reading output. The command source and the baseline semantics were decided by the user (A / a). The Codex adapter moves to 1.39.0 with no change.

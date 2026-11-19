@@ -457,7 +457,15 @@ Plugins cannot inject `CLAUDE.md` into user projects. The `CLAUDE.md` at this re
 
 ## Changelog
 
-Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.39.0** — a `verify` skill: the
+Full history: [CHANGELOG.md](./CHANGELOG.md). **Latest: v1.40.0** — a `session-relay` skill
+(Codex: `$harness-relay`) passes messages between live sessions: Claude → Claude by
+`SendMessage`, any leg with Codex by Orca mail, with delivery reported as stored / started /
+answered. `/meta-prompt` measures environment facts, carries rejection evidence, and gives
+agentic prompts fixed / default / open layers, gated stages, and a resume rule; a running
+session gets a brief file plus a one-line send. `/team-init` asks for a guardrails preset,
+`brain-connect` merges settings into every config dir (Orca profiles included), and the
+`browser-guard` hook now also denies Claude in Chrome and the desktop browser pane, so
+`impeccable`'s browser steps run on ego lite. v1.39.0: a `verify` skill: the
 authoritative gates move to `.claude/project-profile/verify.json` (run `/team-init --update`),
 and `verify.mjs` judges each step 됨 / 미검증 / 안 됨 (an empty test run, an unreadable count, or
 a failure above baseline cannot pass; counts at a non-zero baseline stay 미검증), while
