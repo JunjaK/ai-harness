@@ -1,6 +1,6 @@
 ---
 name: docs-lifecycle
-description: "Manage the lifecycle of project documents (intent, plans, specs, findings) in `_docs/` — the lifecycle-vs-collection bucket split, status↔folder lockstep, date/topic foldering, reference-safe moves, and merging a task's scattered sidecar docs into ONE archive on completion. Use whenever an intent/plan/spec is created, moves between stages, a topic is renamed, a project declares a collection bucket, or a task finishes; and whenever `_docs/` is accumulating multiple files for the same task. Trigger at every team-workflow phase transition and before marking any work complete — scattered, status-stale, or orphaned docs, and reorganized append-only records, are the failures this prevents."
+description: "Manage `_docs/` documents (intent, plans, specs, findings): lifecycle vs collection buckets, status↔folder lockstep, reference-safe moves, merge-on-complete. Use when an intent/plan/spec is created, changes stage, or is renamed, when a project declares a collection bucket, when a task finishes, when `_docs/` piles up several files for one task, and at every team-workflow phase transition."
 ---
 
 # Docs Lifecycle

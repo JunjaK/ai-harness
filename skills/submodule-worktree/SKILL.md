@@ -1,6 +1,6 @@
 ---
 name: submodule-worktree
-description: "Worktree strategy for a submodule-monorepo where the superproject is a thin shell (doc storage + submodule pointers) and the real code lives in submodules (illustratively `fe`/`be`). TRIGGER on ONE condition: a worktree / parallel-implementation request lands in a project whose profile (`.claude/project-profile/`, written by `/team-init`) records a **Submodule Layout** section with `Submodule-monorepo: yes`. A bare `.gitmodules` file is NOT a trigger — run `/team-init` first so the layout, worktree targets, and carry-list are recorded. Rules: worktree ONLY the code submodules, keep the superproject as the single original checkout (the `_docs/` anchor), CARRY gitignored runtime files (`.env`/secrets/local config) into each new worktree, and defer submodule-pointer bumps. The submodule-specialized companion to `parallelization`."
+description: "Worktree strategy for a submodule-monorepo (a thin superproject holding docs + submodule pointers; code in submodules). Trigger only when a worktree or parallel-implementation request lands in a project whose profile records `Submodule-monorepo: yes`; a bare `.gitmodules` is not a trigger (run `/team-init` first). Companion to `parallelization`."
 ---
 
 # Submodule Worktree

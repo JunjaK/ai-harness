@@ -1,6 +1,6 @@
 ---
 name: handoff
-description: "Write a handoff document — a state layer over a spec/plan capturing what's done, what's left, and how to resume — when work passes to another agent or a future session. Use at session end with unfinished work, before a compaction that ends active work, or when explicitly handing a task off. Writes into `_docs/handoff/` per the docs-lifecycle convention and links (never duplicates) the spec it hands off."
+description: "Write a handoff doc — what's done, what's left, how to resume — when work passes to another agent or a future session: session end with unfinished work, a compaction that ends active work, or an explicit hand-off. Writes to `_docs/handoff/` and links (never duplicates) the spec it hands off."
 ---
 
 # Handoff

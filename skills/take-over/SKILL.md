@@ -1,6 +1,6 @@
 ---
 name: take-over
-description: "Take over a handed-off work-stream — the read/resume counterpart to the `handoff` skill. A handoff is a temp carrier: locate the `_docs/handoff/` doc, hydrate its linked spec (follow `related:`), verify its state claims against the actual repo (commits, branch, tests), then GRADUATE it into its durable `_docs` home — implement-now → `complete/`, needs-planning → a `plan` in `active/`, etc. — renamed to `_docs` grammar, never a bare delete. Use when picking up handed-off work, resuming a session where a handoff exists, or when told to take over / 인계받아. Distinct from `/checkpoint` (agent session-state restore)."
+description: "Take over a handed-off work-stream (the read side of `handoff`): find the `_docs/handoff/` doc, hydrate its spec, verify its claims against the repo, then graduate it into its durable `_docs` home. Use when picking up handed-off work, resuming where a handoff exists, or when told to take over / 인계받아. Not `/checkpoint` (session-state restore)."
 ---
 
 # Take-Over

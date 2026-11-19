@@ -1,6 +1,6 @@
 ---
 name: contract-sync
-description: "Regenerate and re-verify a code-generated API client after any backend/server contract change, BEFORE writing or verifying client code against it. Use whenever a task changes a backend DB schema, request/response DTO, enum, or endpoint shape in a project where the frontend consumes a generated client/types (OpenAPI, GraphQL codegen, gRPC, tRPC, etc.). Trigger this even if the user only says 'I changed the API' or 'update the frontend to match' — the regenerate→typecheck gate is what prevents silent type/runtime desync. Run it at the BE→FE handoff in team workflows, before verification-loop Phase 2, and any time someone reports 'I changed the backend but the frontend doesn't match.'"
+description: "Regenerate and re-verify a generated API client (OpenAPI, GraphQL codegen, gRPC, tRPC) after a backend contract change — DB schema, DTO, enum, endpoint — before writing or verifying client code against it. Use even when the user only says 'I changed the API' or 'update the frontend to match', at the BE→FE handoff, and before verification-loop Phase 2."
 ---
 
 # Contract Sync
