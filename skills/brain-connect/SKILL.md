@@ -1,6 +1,6 @@
 ---
 name: brain-connect
-description: "Wire an optional personal 'brain' SSOT (a separate repo holding your cross-machine persona, global CLAUDE.md, personal global skills, harness auto-memory, and a recommended-settings manifest) into the Claude Code environment on a machine. Use when setting up the harness on a new machine (work/home), when a user provides a path to their brain repo and wants it connected/referenced, when relocating an existing brain to a new folder/remote, or when something is identical on one machine but missing on another (a skill, a global rule, a plugin toggle). Dependency-free: the harness ships the generic connector scripts as a copyable template and defines the brain contract; it does NOT import or depend on any specific brain repo. The reference conforming brain is the private claude-brain SSOT."
+description: "Wire a personal 'brain' repo (persona, global CLAUDE.md, personal skills, auto-memory, settings manifest) into Claude Code on a machine. Use when setting up a new machine, connecting or relocating a brain repo, when a skill, rule, or plugin toggle differs between machines or launcher profiles, or when applying user settings across config dirs."
 ---
 
 # Brain Connect — pair a personal brain SSOT with the harness
@@ -21,6 +21,8 @@ Applies when ANY hold:
 - **An asymmetry surfaces**: something fixed on one machine never reached the other (a skill edit,
   a global rule, a plugin toggle). That asymmetry means the artifact lives outside the brain — the
   fix is to move it in and link back, not to re-apply the edit by hand.
+- **Launcher profiles diverge**: the skill list or a setting changes when a session moves to another
+  launcher profile on the same machine (§ apply to every config dir).
 
 Does NOT apply: there is no brain, or the user only wants harness features without a personal SSOT.
 The harness works fully standalone — a brain is purely optional, never required.
@@ -34,7 +36,7 @@ The harness works fully standalone — a brain is purely optional, never require
 | `skills/<name>/` | link at `~/.claude/skills/<name>` — **one per skill** | personal global skills identical on every machine |
 | `commands/` | link at `~/.claude/commands/brain` (namespaced) | personal global commands |
 | `memory/<ProjectName>/` | link at `~/.claude/projects/<project-key>/memory` | that project's harness auto-memory **is** the synced brain memory |
-| `settings.recommended.json` | **merged** into `~/.claude/settings.json` by `apply-settings` | machine-neutral settings keys, machine-specific keys untouched |
+| `settings.recommended.json` | **merged** into the `settings.json` of every config dir by `apply-settings` | machine-neutral settings keys, machine-specific keys untouched |
 | `sync.ps1` / `sync.sh` | `SessionStart`→pull, `SessionEnd`→push hooks | brain auto-pulls before / auto-pushes after each session |
 
 A brain MAY provide any subset; the connector skips what is absent. The minimal useful brain is
@@ -86,6 +88,23 @@ manifest is left exactly as it is on that machine**, which is what preserves the
 - **Never** put `~/.claude.json` in a brain: per-project state, MCP disable lists, `numStartups` —
   machine-specific startup bookkeeping that conflicts endlessly when shared.
 
+### MUST: apply the manifest to every config dir on the machine
+`CLAUDE_CONFIG_DIR` moves the whole user config — `settings.json`, `.claude.json`, plugins, skills,
+projects — to another directory (code.claude.com/docs/en/claude-directory). Launchers that keep one
+config dir per profile (Orca: `~/Library/Application Support/orca/claude-profiles/<id>/home`) often
+link `skills/`, `plugins/`, `projects/` back to `~/.claude` but keep a separate `settings.json` and
+`.claude.json` per profile. A setting written to one file is then invisible to sessions under another,
+and the skill list changes when a session switches profile (2026-11-18: one Orca profile had 15
+plugins enabled, the other three and `~/.claude` had 6).
+
+- `apply-settings` merges into `~/.claude`, `$CLAUDE_CONFIG_DIR` when set, and every config dir passed
+  as an argument. Pass every profile home, so one run covers the machine.
+- A user-settings change made by hand follows the same rule: every profile's `settings.json` plus
+  `~/.claude/settings.json`, in the same step.
+- The merge never deletes a key, so a plugin enabled in only one config dir stays enabled after the
+  run. The Verify step reports the divergence; the user decides whether it goes into the manifest or
+  is turned off in that config dir.
+
 ## Connect procedure (per machine, idempotent)
 
 1. Install the harness (marketplace) — already done if you are reading this.
@@ -97,12 +116,13 @@ manifest is left exactly as it is on that machine**, which is what preserves the
    pwsh -NoProfile -File C:/Users/<you>/dev/personal/<brain>/setup.ps1 `
        -ProjectPath "<absolute path of the project to attach memory to>" `
        -ProjectName "<that project's name>" -RegisterHooks
-   pwsh -NoProfile -File C:/Users/<you>/dev/personal/<brain>/apply-settings.ps1
+   pwsh -NoProfile -File C:/Users/<you>/dev/personal/<brain>/apply-settings.ps1 `
+       -ConfigDirs "<profile home 1>","<profile home 2>"   # ~/.claude and $env:CLAUDE_CONFIG_DIR are always included
    ```
    ```bash
    # macOS / Linux
    /Users/<you>/dev/personal/<brain>/setup.sh "<absolute project path>" "<project name>"
-   /Users/<you>/dev/personal/<brain>/apply-settings.sh      # needs jq
+   /Users/<you>/dev/personal/<brain>/apply-settings.sh "<profile home 1>" "<profile home 2>"   # needs jq; ~/.claude and $CLAUDE_CONFIG_DIR are always included
    ```
    Both setup scripts are **idempotent** — they skip links already correct, re-point moved ones,
    and move any pre-existing real file/dir aside as `*.pre-brain-<stamp>` instead of deleting it.
@@ -159,7 +179,14 @@ grep -Rn '<pattern>' ~/.claude/skills/ ; grep -Rl '' ~/.claude/skills/ | wc -l  
 # 4. the merge left machine-specific keys alone
 jq '.hooks' ~/.claude/settings.json      # before and after apply-settings -> identical
 
-# 5. round-trip: edit one SKILL.md on machine A -> end session -> start session on machine B
+# 5. every config dir on this machine agrees (launcher profiles keep separate settings.json files)
+DIRS=("$HOME/.claude" "<profile home 1>" "<profile home 2>")
+for k in enabledPlugins skillOverrides permissions model effortLevel; do
+  n=$(for d in "${DIRS[@]}"; do jq -cS ".$k" "$d/settings.json"; done | sort -u | wc -l | tr -d ' ')
+  echo "$k: $n distinct"              # every key must be 1; for a key above 1, diff that key's
+done                                  # jq output between two dirs and report it to the user
+
+# 6. round-trip: edit one SKILL.md on machine A -> end session -> start session on machine B
 #    -> diff that exact file. A clean `git status --porcelain` proves the push, not the content.
 ```
 
